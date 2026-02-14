@@ -48,7 +48,7 @@ kotlinx-collections-immutable = "0.4.0"
 room = "2.7.0"
 
 # Compottie
-compottie = "1.1.1"
+compottie = "2.0.2"
 
 # Navigation3
 navigation3 = "1.0.0"
