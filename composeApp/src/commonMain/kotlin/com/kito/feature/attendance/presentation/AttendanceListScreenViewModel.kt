@@ -9,6 +9,7 @@ import com.kito.core.platform.ConnectivityObserver
 import com.kito.core.platform.SecureStorage
 import com.kito.core.presentation.components.AppSyncUseCase
 import com.kito.core.presentation.components.state.SyncUiState
+import io.ktor.util.logging.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,7 +97,6 @@ class AttendanceListScreenViewModel(
     ){
         viewModelScope.launch {
             _loginState.value = SyncUiState.Loading
-            delay(1000)
             val roll = prefs.userRollFlow.first()
             val year = prefs.academicYearFlow.first()
             val term = prefs.termCodeFlow.first()

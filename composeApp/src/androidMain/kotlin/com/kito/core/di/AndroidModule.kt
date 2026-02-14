@@ -10,6 +10,7 @@ import com.kito.core.datastore.ProtoDatastoreRepository
 import com.kito.core.network.supabase.createSupabaseClient
 import com.kito.core.platform.AppSyncTrigger
 import com.kito.core.platform.ConnectivityObserver
+import com.kito.core.platform.ESP
 import com.kito.core.platform.SecureStorage
 import com.kito.feature.schedule.notification.NotificationController
 import com.kito.feature.schedule.notification.NotificationPipelineController
@@ -51,6 +52,7 @@ val androidModule = module {
     // Platform services that need Android Context
     single { ConnectivityObserver(androidContext(), get(named("ApplicationScope"))) }
     single { SecureStorage(androidContext()) }
+    single { ESP(androidContext()) }
     single { AppSyncTrigger(androidContext()) }
     singleOf(::ProtoDatastoreRepository)
     

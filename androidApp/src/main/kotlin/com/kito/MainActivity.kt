@@ -32,6 +32,8 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.kito.core.datastore.PrefsRepository
 import com.kito.core.platform.AppConfig
+import com.kito.core.platform.ESP
+import com.kito.core.platform.SecureStorage
 import com.kito.core.presentation.theme.KitoTheme
 import com.kito.feature.app.presentation.MainUI
 import com.kito.feature.schedule.notification.NotificationPipelineController
@@ -39,10 +41,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import com.kito.core.presentation.navigation3.Routes
+import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
 
     private val prefs: PrefsRepository by inject()
+
+    private val eSP: ESP by inject()
+
+    private val secureStorage: SecureStorage by inject()
+
     private val notificationPipelineController by lazy {
         NotificationPipelineController.get(applicationContext)
     }
@@ -94,7 +102,13 @@ class MainActivity : ComponentActivity() {
                     this@MainActivity.intent =
                         Intent(this@MainActivity, MainActivity::class.java)
                 }
-
+                val espPass = eSP.getSapPassword()
+                if (espPass.isNotEmpty()){
+                    secureStorage.saveSapPassword(espPass)
+                    eSP.clearSapPassword()
+                }
+                val encryptedPassword = secureStorage.getSapPassword()
+                val isLoggedIn = secureStorage.isLoggedInFlow.first()
                 notificationPipelineController.sync()
                 val onboardingDone = prefs.onBoardingFlow.first()
                 val isUserSetupDone = prefs.userSetupDoneFlow.first()

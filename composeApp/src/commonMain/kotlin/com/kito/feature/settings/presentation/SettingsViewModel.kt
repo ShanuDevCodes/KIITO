@@ -122,7 +122,11 @@ class SettingsViewModel(
                 _syncState.value = SyncUiState.Loading
                 delay(1000)
                 prefs.setUserRollNumber(roll)
-                secureStorage.clearSapPassword()
+                try {
+                    secureStorage.clearSapPassword()
+                }catch (_: Exception){
+
+                }
                 attendanceRepository.deleteAllAttendance()
                 val result = appSyncUseCase.syncAll(
                     roll = prefs.userRollFlow.first(),

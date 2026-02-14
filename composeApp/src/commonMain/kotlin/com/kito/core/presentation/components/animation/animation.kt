@@ -6,65 +6,105 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import io.github.alexzhirkevich.compottie.LottieAnimation
+import androidx.compose.foundation.Image
 import io.github.alexzhirkevich.compottie.LottieClipSpec
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.LottieConstants
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
+import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kito.composeapp.generated.resources.Res
 
 @Composable
 fun PageNotFoundAnimation() {
     val json = rememberLottieJson("files/page_not_found.json")
-    val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
-    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
-    LottieAnimation(
+    val composition by rememberLottieComposition (
+        LottieCompositionSpec.JsonString(json)
+    )
+
+    val progress by animateLottieCompositionAsState(
         composition = composition,
-        progress = { progress },
+        iterations = Int.MAX_VALUE
+    )
+
+    val painter = rememberLottiePainter(
+        composition = composition,
+        progress = { progress }
+    )
+
+    Image(
+        painter = painter,
+        contentDescription = "Page Not Found"
     )
 }
 
 @Composable
 fun PandaSleepingAnimation() {
     val json = rememberLottieJson("files/panda_sleeping.json")
-    val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
-    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
-    LottieAnimation(
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.JsonString(json)
+    )
+    val progress by animateLottieCompositionAsState(
         composition = composition,
-        progress = { progress },
+        iterations = Int.MAX_VALUE
+    )
+    val painter = rememberLottiePainter(
+        composition = composition,
+        progress = { progress }
+    )
+
+    Image(
+        painter = painter,
+        contentDescription = "Panda Sleeping"
     )
 }
 
 @Composable
 fun LockAnimation() {
     val json = rememberLottieJson("files/lock.json")
-    val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.JsonString(json)
+    )
+
     val progress by animateLottieCompositionAsState(
-        composition,
+        composition = composition,
         iterations = 1,
         clipSpec = LottieClipSpec.Progress(
             min = 0.30f,
             max = 1f
         )
     )
-    LottieAnimation(
+
+    val painter = rememberLottiePainter(
         composition = composition,
-        progress = { progress },
+        progress = { progress }
+    )
+
+    Image(
+        painter = painter,
+        contentDescription = "Lock Animation"
     )
 }
 
 @Composable
 fun NoInternetAnimation() {
     val json = rememberLottieJson("files/no_internet_connection.json")
-    val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.JsonString(json)
+    )
+
     val progress by animateLottieCompositionAsState(
-        composition,
+        composition = composition,
         iterations = 1,
     )
-    LottieAnimation(
+
+    val painter = rememberLottiePainter(
         composition = composition,
-        progress = { progress },
+        progress = { progress }
+    )
+
+    Image(
+        painter = painter,
+        contentDescription = "No Internet Connection"
     )
 }
 
