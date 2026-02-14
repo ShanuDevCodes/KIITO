@@ -73,7 +73,7 @@ class SapPortalClient {
             val salt = SapPortalHtmlParser.extractSaltFromLoginPage(loginPageHtml)
 
             if (salt.isNullOrEmpty()) {
-                println("DEBUG: Failed to extract salt. HTML preview: ${loginPageHtml.take(500)}")
+
                 return AttendanceResult.Error("Could not extract j_salt from login page")
             }
 
@@ -157,7 +157,7 @@ class SapPortalClient {
 
             // Step 4: Extract Web Dynpro form action
             val wdFormAction = SapPortalHtmlParser.extractWebDynproFormAction(nav3Html)
-            println("DEBUG: wdFormAction: $wdFormAction")
+
             
             if (wdFormAction.isNullOrEmpty()) {
                 return AttendanceResult.Error("Failed to extract Web Dynpro form action")
@@ -171,8 +171,7 @@ class SapPortalClient {
 
             // Step 5: Submit Web Dynpro form
             val formData = SapPortalHtmlParser.extractFormFields(nav3Html)
-            println("DEBUG: formData keys: ${formData.keys}")
-            println("DEBUG: formData['sap-contextid']: ${formData["sap-contextid"]}")
+
             
             val wdInitialResponse = client.submitForm(
                 url = wdFormAction,
@@ -197,7 +196,7 @@ class SapPortalClient {
             // Step 6: Extract tokens
             val wdContextId = SapPortalTokenExtractor.extractContextId(wdResponseHtml, responseUrl)
             val secureId = SapPortalTokenExtractor.extractSecureId(wdResponseHtml)
-            println("DEBUG: secureId: $secureId")
+
 
             val sapClientForm = Ksoup.parse(wdResponseHtml).selectFirst(SapPortalHeaders.sapClientFormSelector)
             val formAction = sapClientForm?.attr("action")
@@ -223,9 +222,7 @@ class SapPortalClient {
 
             // Step 7: Initial attendance load
             val initialUrl = SapPortalUrls.getInitialAttendanceUrl(finalExtSid, finalContextId)
-            println("DEBUG: finalExtSid: $finalExtSid")
-            println("DEBUG: finalContextId: $finalContextId")
-            println("DEBUG: initialUrl: $initialUrl")
+
             
             val initialBody = SapPortalParams.getInitialAttendanceBody(secureId, finalContextId)
 
@@ -334,17 +331,17 @@ class SapPortalClient {
             }
 
             if (logoutResponse.status.isSuccess()) {
-                println("✅ Logout completed successfully.")
+
             } else {
-                println("⚠️ Logout completed with status: ${logoutResponse.status.value}")
+
             }
         } catch (e: Exception) {
             // Don't print error if it's a host resolution issue during logout
             // since the main fetch operation might have already failed due to network issues
             if (!e.message.toString().contains("Unable to resolve host")) {
-                println("⚠️ Error during logout: ${e.message}")
+
             } else {
-                println("⚠️ Could not complete logout (portal server unreachable)")
+
             }
         }
     }

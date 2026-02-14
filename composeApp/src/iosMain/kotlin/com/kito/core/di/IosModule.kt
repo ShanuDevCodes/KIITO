@@ -1,6 +1,8 @@
 
 package com.kito.core.di
 
+import com.kito.core.datastore.IosPrefsRepository
+
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.kito.core.database.AppDB
@@ -71,6 +73,7 @@ val iosModule = module {
     singleOf(::ConnectivityObserver)
     singleOf(::AppSyncTrigger)
     singleOf(::SecureStorage)
+    singleOf(::IosPrefsRepository)
 
     // Notification Controller
     singleOf(::IosNotificationController) bind NotificationController::class

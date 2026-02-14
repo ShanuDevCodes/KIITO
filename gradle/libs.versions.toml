@@ -56,6 +56,9 @@ cmpNavigation3 = "1.0.0-alpha05"
 sqlite = "2.5.0-alpha01"
 navigation3Runtime = "1.0.0"
 
+# Google Tink (Encryption)
+tink = "1.15.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -113,6 +116,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 # DataStore KMP
 datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
+datastore-preferences-android = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
 # kotlinx-collections-immutable
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
@@ -141,6 +145,9 @@ jetbrains-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lif
 # SQLite
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3Runtime" }
+
+# Google Tink (Encryption)
+tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

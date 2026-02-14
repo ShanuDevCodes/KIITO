@@ -54,7 +54,10 @@ kotlin {
             implementation("androidx.activity:activity-compose:1.8.0")
 
             // DataStore (proto - Android only)
-            implementation("androidx.datastore:datastore:1.2.0")
+            implementation("androidx.datastore:datastore:1.1.2")
+            
+            // DataStore Preferences (Android) - needed for Context.preferencesDataStore delegate
+            implementation(libs.datastore.preferences.android)
 
             implementation(libs.androidx.work.runtime.ktx)
 
@@ -65,6 +68,9 @@ kotlin {
 
             //EncryptedSharedPreferences
             implementation("androidx.security:security-crypto:1.1.0-alpha06")
+            
+            // Google Tink (Encryption)
+            implementation(libs.tink.android)
 
             //koin
             implementation(libs.koin.android)

@@ -1,31 +1,32 @@
 package com.kito.core.platform
 
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.IosPrefsRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 actual class SecureStorage : KoinComponent {
     
-    private val prefsRepository: PrefsRepository by inject()
+    private val iosPrefsRepository: IosPrefsRepository by inject()
+    
+    private val service = "com.kito.app.secure"
+    private val account = "sap_password"
 
-    actual val isLoggedInFlow: Flow<Boolean> = prefsRepository.sapPasswordFlow
-        .map { it.isNotEmpty() }
+    actual val isLoggedInFlow: Flow<Boolean> = iosPrefsRepository.isLoggedInFlow
 
     actual suspend fun saveSapPassword(password: String): Boolean {
-        prefsRepository.saveSapPassword(password)
+        KeychainHelper.save(service, account, password)
+        iosPrefsRepository.setLoggedIn(true)
         return true
     }
 
     actual suspend fun getSapPassword(): String {
-        return prefsRepository.getSapPassword()
+        return KeychainHelper.read(service, account) ?: ""
     }
 
     actual suspend fun clearSapPassword(): Boolean {
-        prefsRepository.clearSapPassword()
+        KeychainHelper.delete(service, account)
+        iosPrefsRepository.setLoggedIn(false)
         return true
     }
 }
-
-

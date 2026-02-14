@@ -12,5 +12,5 @@ data class MidsemScheduleModel(
     val semester: Int,
     val start_time: String,
     val subject: String,
-    val subject_code: String
+    val subject_code: String?
 )
