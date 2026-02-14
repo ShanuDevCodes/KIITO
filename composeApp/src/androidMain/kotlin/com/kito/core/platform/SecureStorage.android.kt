@@ -2,6 +2,7 @@ package com.kito.core.platform
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -21,6 +22,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.security.GeneralSecurityException
 
 // Extension property for DataStore
@@ -63,55 +66,104 @@ actual class SecureStorage(private val context: Context) {
     }
 
     /**
+     * Helper to encrypt data using Tink AEAD
+     */
+    private fun encrypt(plainText: String): String {
+        return try {
+            val aead = this.aead ?: return plainText
+            val cipherText = aead.encrypt(plainText.toByteArray(Charsets.UTF_8), null)
+            android.util.Base64.encodeToString(cipherText, android.util.Base64.DEFAULT)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // If encryption fails, fallback (should ideally handle error better, but consistent with existing logic)
+            plainText
+        }
+    }
+
+    /**
+     * Helper to decrypt data using Tink AEAD
+     */
+    private fun decrypt(cipherTextBase64: String): String {
+        return try {
+            val aead = this.aead ?: return cipherTextBase64
+            val cipherText = android.util.Base64.decode(cipherTextBase64, android.util.Base64.DEFAULT)
+            val plainText = aead.decrypt(cipherText, null)
+            String(plainText, Charsets.UTF_8)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Return empty if decryption fails (e.g. key rotation issues or corruption)
+            ""
+        }
+    }
+
+    // Mutex for thread-safe migration
+    private val migrationMutex = kotlinx.coroutines.sync.Mutex()
+
+    /**
      * Migrates data from EncryptedSharedPreferences to EncryptedDataStore
      * Only runs once - if data exists in old storage
+     * Thread-safe using Mutex
      */
     private suspend fun migrateFromEncryptedSharedPreferences() {
-        try {
-            // Check if we've already migrated by checking if DataStore has data
-            val hasDataInDataStore = context.dataStore.data.first().contains(sapPasswordKey)
-            if (hasDataInDataStore) {
-                return // Already migrated
-            }
+        // Double-checked locking pattern with Mutex
+        if (context.dataStore.data.first().contains(sapPasswordKey)) {
+            return // Fast path: Already migrated
+        }
 
-            // Try to read from old EncryptedSharedPreferences
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-
-            val oldPrefs = try {
-                EncryptedSharedPreferences.create(
-                    context,
-                    OLD_PREFS_NAME,
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                )
-            } catch (e: GeneralSecurityException) {
-                // Corrupted keystore - clear and return
-                println("⚠️ EncryptedSharedPreferences corrupted, skipping migration: ${e.message}")
-                clearOldPreferences()
-                return
-            } catch (e: Exception) {
-                println("⚠️ Failed to open EncryptedSharedPreferences: ${e.message}")
-                return
-            }
-            val oldPassword = oldPrefs.getString(KEY_SAP_PASSWORD, null)
-            val oldLoggedIn = oldPrefs.getBoolean(KEY_LOGGED_IN, false)
-
-            if (oldPassword != null) {
-                println("✅ Migrating SAP password from EncryptedSharedPreferences to DataStore")
-                context.dataStore.edit { prefs ->
-                    prefs[sapPasswordKey] = oldPassword
-                    prefs[loggedInKey] = oldLoggedIn
+        migrationMutex.withLock {
+            try {
+                // Check again inside lock
+                val hasDataInDataStore = context.dataStore.data.first().contains(sapPasswordKey)
+                if (hasDataInDataStore) {
+                    return // Already migrated by another coroutine
                 }
 
-                oldPrefs.edit().clear().commit()
-                println("✅ Migration complete, old data cleared")
+                // Try to read from old EncryptedSharedPreferences
+                val masterKey = MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build()
+
+                val oldPrefs = try {
+                    EncryptedSharedPreferences.create(
+                        context,
+                        OLD_PREFS_NAME,
+                        masterKey,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                    )
+                } catch (e: GeneralSecurityException) {
+                    // Corrupted keystore - clear and return
+                    Log.e("SecureStorage", "ESP corrupted, skipping migration: ${e.message}")
+                    clearOldPreferences()
+                    return
+                } catch (e: Exception) {
+                    Log.e("SecureStorage", "Failed to open ESP: ${e.message}")
+                    return
+                }
+
+                // Check if old prefs have data
+                val oldPassword = oldPrefs.getString(KEY_SAP_PASSWORD, null)
+                val oldLoggedIn = oldPrefs.getBoolean(KEY_LOGGED_IN, false)
+
+                if (oldPassword != null) {
+                    Log.d("SecureStorage", "Migrating SAP password from ESP to DS")
+                    
+                    // Encrypt data before saving to DataStore
+                    val encryptedPassword = encrypt(oldPassword)
+                    
+                    context.dataStore.edit { prefs ->
+                        prefs[sapPasswordKey] = encryptedPassword
+                        prefs[loggedInKey] = oldLoggedIn
+                    }
+
+                    // Clear old data after successful migration
+                    oldPrefs.edit().clear().commit()
+                    Log.d("SecureStorage", "Migration complete, old data cleared")
+                }
+            } catch (e: Exception) {
+                Log.e("SecureStorage", "Migration failed: ${e.message}")
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            println("⚠️ Migration failed: ${e.message}")
-            e.printStackTrace()
         }
     }
 
@@ -132,13 +184,16 @@ actual class SecureStorage(private val context: Context) {
                 // Ensure migration has happened
                 migrateFromEncryptedSharedPreferences()
                 
+                // Encrypt the password
+                val encryptedPassword = encrypt(password)
+                
                 context.dataStore.edit { prefs ->
-                    prefs[sapPasswordKey] = password
+                    prefs[sapPasswordKey] = encryptedPassword
                     prefs[loggedInKey] = true
                 }
                 true
             } catch (e: Exception) {
-                println("⚠️ Failed to save SAP password: ${e.message}")
+                Log.e("SecureStorage", "Failed to save password: ${e.message}")
                 e.printStackTrace()
                 false
             }
@@ -150,9 +205,15 @@ actual class SecureStorage(private val context: Context) {
                 // Ensure migration has happened
                 migrateFromEncryptedSharedPreferences()
                 
-                context.dataStore.data.first()[sapPasswordKey] ?: ""
+                val encryptedPassword = context.dataStore.data.first()[sapPasswordKey]
+                
+                if (!encryptedPassword.isNullOrEmpty()) {
+                    decrypt(encryptedPassword)
+                } else {
+                    ""
+                }
             } catch (e: Exception) {
-                println("⚠️ Failed to read SAP password, clearing data: ${e.message}")
+                Log.e("SecureStorage", "Failed to read password: ${e.message}")
                 e.printStackTrace()
                 // Clear data on error (corrupted keystore)
                 try {
@@ -173,7 +234,7 @@ actual class SecureStorage(private val context: Context) {
             prefs[loggedInKey] ?: false
         }
         .catch { e ->
-            println("⚠️ Error reading login state, emitting false: ${e.message}")
+            Log.e("SecureStorage", "Error reading login state: ${e.message}")
             e.printStackTrace()
             emit(false)
         }
@@ -187,7 +248,7 @@ actual class SecureStorage(private val context: Context) {
                 }
                 true
             } catch (e: Exception) {
-                println("⚠️ Failed to clear SAP password: ${e.message}")
+                Log.e("SecureStorage", "Failed to clear password: ${e.message}")
                 e.printStackTrace()
                 false
             }

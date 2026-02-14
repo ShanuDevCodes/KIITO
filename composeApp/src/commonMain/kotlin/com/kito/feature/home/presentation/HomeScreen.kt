@@ -567,23 +567,23 @@ fun JoinELabsBanner(
                 drawContent()
 
                 // Animated shimmer overlay
-                val shimmerBrush = Brush.linearGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        colors.accentOrangeStart.copy(alpha = 0.3f),
-                        colors.accentOrangeEnd.copy(alpha = 0.5f),
-                        colors.accentOrangeStart.copy(alpha = 0.3f),
-                        Color.Transparent
-                    ),
-                    start = Offset(shimmerOffset - 200f, 0f),
-                    end = Offset(shimmerOffset + 200f, size.height),
-                    tileMode = TileMode.Clamp
-                )
-
-                drawRect(
-                    brush = shimmerBrush,
-                    size = size
-                )
+//                val shimmerBrush = Brush.linearGradient(
+//                    colors = listOf(
+//                        Color.Transparent,
+//                        colors.accentOrangeStart.copy(alpha = 0.3f),
+//                        colors.accentOrangeEnd.copy(alpha = 0.5f),
+//                        colors.accentOrangeStart.copy(alpha = 0.3f),
+//                        Color.Transparent
+//                    ),
+//                    start = Offset(shimmerOffset - 200f, 0f),
+//                    end = Offset(shimmerOffset + 200f, size.height),
+//                    tileMode = TileMode.Clamp
+//                )
+//
+//                drawRect(
+//                    brush = shimmerBrush,
+//                    size = size
+//                )
             }
             .clickable(
                 onClick = onClick,
