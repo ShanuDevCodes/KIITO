@@ -692,7 +692,7 @@ fun JoinELabsBanner(
                         contentDescription = "E-Labs Header",
                         modifier = Modifier
                             .fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.FillWidth
                     )
                 }
                 1 -> {

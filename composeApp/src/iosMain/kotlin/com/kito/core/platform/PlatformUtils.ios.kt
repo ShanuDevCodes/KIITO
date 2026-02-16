@@ -25,6 +25,16 @@ import platform.darwin.dispatch_get_main_queue
 import platform.darwin.dispatch_time
 import kotlin.coroutines.resume
 
+import kotlinx.cinterop.useContents
+import platform.CoreGraphics.CGRectMake
+import platform.UIKit.UIColor
+import platform.UIKit.UILabel
+import platform.UIKit.NSTextAlignmentCenter
+import platform.UIKit.UIView
+import platform.UIKit.UIBlurEffect
+import platform.UIKit.UIBlurEffectStyle
+import platform.UIKit.UIVisualEffectView
+
 actual fun openUrl(url: String) {
     val finalUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) {
         "http://$url"
@@ -47,54 +57,76 @@ actual fun openUrl(url: String) {
 
 actual fun createHttpEngine(): HttpClientEngine = Darwin.create()
 
-@OptIn(ExperimentalForeignApi::class)
+
 @OptIn(ExperimentalForeignApi::class)
 actual fun toast(message: String) {
     val window = UIApplication.sharedApplication.keyWindow ?: return
     
-    val toastLabel = platform.UIKit.UILabel()
-    toastLabel.backgroundColor = platform.UIKit.UIColor.blackColor.colorWithAlphaComponent(0.8)
-    toastLabel.textColor = platform.UIKit.UIColor.whiteColor
-    toastLabel.textAlignment = platform.UIKit.NSTextAlignmentCenter
-    toastLabel.text = message
-    toastLabel.alpha = 0.0
-    toastLabel.layer.cornerRadius = 10.0
-    toastLabel.clipsToBounds = true
-    toastLabel.numberOfLines = 0
+    // Create Blur Effect - Adaptive "Liquid Glass"
+    // Use UIBlurEffectStyle.UIBlurEffectStyleSystemUltraThinMaterial for a modern, glass-like look
+    // that adapts to light/dark mode.
+    val blurEffect = UIBlurEffect.effectWithStyle(UIBlurEffectStyle.UIBlurEffectStyleSystemThickMaterial)
+    val visualEffectView = UIVisualEffectView(effect = blurEffect)
     
+    // Liquid Glass Styling
+    visualEffectView.layer.cornerRadius = 25.0 // Pill shape
+    visualEffectView.clipsToBounds = true
+    visualEffectView.alpha = 0.0
+    
+    // Add subtle shadow for depth
+    visualEffectView.layer.shadowColor = UIColor.blackColor.CGColor
+    visualEffectView.layer.shadowOpacity = 0.2f
+    visualEffectView.layer.shadowRadius = 10.0
+    visualEffectView.layer.shadowOffset = platform.CoreGraphics.CGSizeMake(0.0, 5.0)
+
+    // Configure Label
+    val toastLabel = UILabel()
+    toastLabel.text = message
+    // Use label color so it adapts (black on light mode, white on dark mode) 
+    toastLabel.textColor = UIColor.whiteColor // Fallback to white for now as it works well with thick material dark/light
+    toastLabel.textAlignment = NSTextAlignmentCenter
+    toastLabel.numberOfLines = 0
+    toastLabel.backgroundColor = UIColor.clearColor
+    
+    // Add Label to Visual Effect View
+    visualEffectView.contentView.addSubview(toastLabel)
+
     val windowFrame = window.frame
     val width = windowFrame.useContents { size.width }
     val height = windowFrame.useContents { size.height }
     
     // Calculate size
     val toastWidth = width - 60.0
-    val toastHeight = 50.0 // Minimum height
+    val toastHeight = 50.0 // You might want dynamic height calculation here
     
-    // Position at bottom
-    toastLabel.frame = platform.CoreGraphics.CGRectMake(
+    // Position the Visual Effect View
+    visualEffectView.setFrame(CGRectMake(
         x = 30.0,
         y = height - 100.0,
         width = toastWidth,
         height = toastHeight
-    )
+    ))
     
-    window.addSubview(toastLabel)
+    // Position the Label inside the Visual Effect View (fill entire view)
+    toastLabel.setFrame(visualEffectView.bounds)
+    
+    window.addSubview(visualEffectView)
     
     // Animate In
-    platform.UIKit.UIView.animateWithDuration(0.5) {
-        toastLabel.alpha = 1.0
+    UIView.animateWithDuration(0.5) {
+        visualEffectView.alpha = 1.0
     }
     
     // Animate Out
     val delay = dispatch_time(DISPATCH_TIME_NOW, 2_000_000_000)
     dispatch_after(delay, dispatch_get_main_queue()) {
-        platform.UIKit.UIView.animateWithDuration(
+        UIView.animateWithDuration(
             duration = 0.5,
             animations = {
-                toastLabel.alpha = 0.0
+                visualEffectView.alpha = 0.0
             },
             completion = { _ ->
-                toastLabel.removeFromSuperview()
+                visualEffectView.removeFromSuperview()
             }
         )
     }
