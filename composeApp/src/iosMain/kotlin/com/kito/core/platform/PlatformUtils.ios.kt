@@ -58,8 +58,22 @@ actual fun openUrl(url: String) {
 actual fun createHttpEngine(): HttpClientEngine = Darwin.create()
 
 
+// Internal hook for Swift to provide its own Toast implementation
+var swiftToastHandler: ((String) -> Unit)? = null
+
 @OptIn(ExperimentalForeignApi::class)
 actual fun toast(message: String) {
+    // If Swift has registered a handler, use it (Generic Native SwiftUI implementation)
+    val handler = swiftToastHandler
+    if (handler != null) {
+        // Ensure we dispatch to main thread, as Kotlin might be calling this from background
+        platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+            handler(message)
+        }
+        return
+    }
+
+    // Fallback to UIKit implementation (e.g. for simple usage or if handler not set)
     val window = UIApplication.sharedApplication.keyWindow ?: return
     
     // Create Blur Effect - Adaptive "Liquid Glass"
