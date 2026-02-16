@@ -1,5 +1,6 @@
 package com.kito.feature.home.presentation
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -8,11 +9,15 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +32,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Report
@@ -55,6 +62,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -86,33 +94,14 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import kito.composeapp.generated.resources.Res
 import kito.composeapp.generated.resources.e_labs_logo
+import kito.composeapp.generated.resources.header
 import kotlinx.coroutines.delay
 import kotlinx.datetime.DayOfWeek
-import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.koinInject
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.unit.sp
-import com.kito.core.platform.openUrl
-import kito.composeapp.generated.resources.header
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeApi::class,
     ExperimentalHazeMaterialsApi::class
@@ -138,6 +127,8 @@ fun HomeScreen(
     val loginState by viewmodel.loginState.collectAsState()
     val isOnline by viewmodel.isOnline.collectAsState()
     val examModel by viewmodel.examModel.collectAsState()
+    val currentDate = currentLocalDateTime().date
+    val recruitmentEndDate = LocalDate(2026, 2, 22)
 
     LaunchedEffect(loginState) {
         if (loginState is SyncUiState.Success) {
@@ -307,22 +298,55 @@ fun HomeScreen(
                             Spacer(Modifier.height(8.dp))
                         }
 
-                        item {
-                            Spacer(Modifier.height(12.dp))
-                        }
-
-                        item {
-                            JoinELabsBanner(
-                                colors = uiColors,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                    openUrl("https://recruit-teal-ten.vercel.app/")
+                        if (currentDate <= recruitmentEndDate) {
+                            item {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                ) {
+                                    Text(
+                                        text = "Recruitment",
+                                        color = uiColors.textPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                            openUrl("https://recruit-teal-ten.vercel.app/")
+                                        },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
+                                            contentDescription = "Navigation",
+                                            tint = uiColors.textPrimary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 }
-                            )
-                        }
+                            }
 
-                        item {
-                            Spacer(Modifier.height(8.dp))
+                            item {
+                                Spacer(Modifier.height(8.dp))
+                            }
+
+                            item {
+                                JoinELabsBanner(
+                                    colors = uiColors,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                        openUrl("https://recruit-teal-ten.vercel.app/")
+                                    }
+                                )
+                            }
+
+                            item {
+                                Spacer(Modifier.height(8.dp))
+                            }
                         }
 
                         if(examModel != null) {
