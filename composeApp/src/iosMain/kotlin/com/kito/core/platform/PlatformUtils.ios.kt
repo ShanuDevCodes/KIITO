@@ -25,6 +25,16 @@ import platform.darwin.dispatch_get_main_queue
 import platform.darwin.dispatch_time
 import kotlin.coroutines.resume
 
+import kotlinx.cinterop.useContents
+import platform.CoreGraphics.CGRectMake
+import platform.UIKit.UIColor
+import platform.UIKit.UILabel
+import platform.UIKit.NSTextAlignmentCenter
+import platform.UIKit.UIView
+import platform.UIKit.UIBlurEffect
+import platform.UIKit.UIBlurEffectStyle
+import platform.UIKit.UIVisualEffectView
+
 actual fun openUrl(url: String) {
     val finalUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) {
         "http://$url"
@@ -47,26 +57,93 @@ actual fun openUrl(url: String) {
 
 actual fun createHttpEngine(): HttpClientEngine = Darwin.create()
 
+
+// Internal hook for Swift to provide its own Toast implementation
+var swiftToastHandler: ((String) -> Unit)? = null
+
 @OptIn(ExperimentalForeignApi::class)
 actual fun toast(message: String) {
-    val alert = UIAlertController.alertControllerWithTitle(
-        title = null,
-        message = message,
-        preferredStyle = UIAlertControllerStyleAlert
-    )
-    
-    val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController
-    rootViewController?.presentViewController(
-        alert,
-        animated = true,
-        completion = {
-            // Auto-dismiss after 2 seconds
-            val delay = dispatch_time(DISPATCH_TIME_NOW, 2_000_000_000) // 2 seconds in nanoseconds
-            dispatch_after(delay, dispatch_get_main_queue()) {
-                alert.dismissViewControllerAnimated(true, completion = null)
-            }
+    // If Swift has registered a handler, use it (Generic Native SwiftUI implementation)
+    val handler = swiftToastHandler
+    if (handler != null) {
+        // Ensure we dispatch to main thread, as Kotlin might be calling this from background
+        platform.darwin.dispatch_async(platform.darwin.dispatch_get_main_queue()) {
+            handler(message)
         }
-    )
+        return
+    }
+
+    // Fallback to UIKit implementation (e.g. for simple usage or if handler not set)
+    val window = UIApplication.sharedApplication.keyWindow ?: return
+    
+    // Create Blur Effect - Adaptive "Liquid Glass"
+    // Use UIBlurEffectStyle.UIBlurEffectStyleSystemUltraThinMaterial for a modern, glass-like look
+    // that adapts to light/dark mode.
+    val blurEffect = UIBlurEffect.effectWithStyle(UIBlurEffectStyle.UIBlurEffectStyleSystemThickMaterial)
+    val visualEffectView = UIVisualEffectView(effect = blurEffect)
+    
+    // Liquid Glass Styling
+    visualEffectView.layer.cornerRadius = 25.0 // Pill shape
+    visualEffectView.clipsToBounds = true
+    visualEffectView.alpha = 0.0
+    
+    // Add subtle shadow for depth
+    visualEffectView.layer.shadowColor = UIColor.blackColor.CGColor
+    visualEffectView.layer.shadowOpacity = 0.2f
+    visualEffectView.layer.shadowRadius = 10.0
+    visualEffectView.layer.shadowOffset = platform.CoreGraphics.CGSizeMake(0.0, 5.0)
+
+    // Configure Label
+    val toastLabel = UILabel()
+    toastLabel.text = message
+    // Use label color so it adapts (black on light mode, white on dark mode) 
+    toastLabel.textColor = UIColor.whiteColor // Fallback to white for now as it works well with thick material dark/light
+    toastLabel.textAlignment = NSTextAlignmentCenter
+    toastLabel.numberOfLines = 0
+    toastLabel.backgroundColor = UIColor.clearColor
+    
+    // Add Label to Visual Effect View
+    visualEffectView.contentView.addSubview(toastLabel)
+
+    val windowFrame = window.frame
+    val width = windowFrame.useContents { size.width }
+    val height = windowFrame.useContents { size.height }
+    
+    // Calculate size
+    val toastWidth = width - 60.0
+    val toastHeight = 50.0 // You might want dynamic height calculation here
+    
+    // Position the Visual Effect View
+    visualEffectView.setFrame(CGRectMake(
+        x = 30.0,
+        y = height - 100.0,
+        width = toastWidth,
+        height = toastHeight
+    ))
+    
+    // Position the Label inside the Visual Effect View (fill entire view)
+    toastLabel.setFrame(visualEffectView.bounds)
+    
+    window.addSubview(visualEffectView)
+    
+    // Animate In
+    UIView.animateWithDuration(0.5) {
+        visualEffectView.alpha = 1.0
+    }
+    
+    // Animate Out
+    val delay = dispatch_time(DISPATCH_TIME_NOW, 2_000_000_000)
+    dispatch_after(delay, dispatch_get_main_queue()) {
+        UIView.animateWithDuration(
+            duration = 0.5,
+            animations = {
+                visualEffectView.alpha = 0.0
+            },
+            completion = { _ ->
+                visualEffectView.removeFromSuperview()
+            }
+        )
+    }
 }
 
 actual fun sendEmail(to: String, subject: String, body: String) {

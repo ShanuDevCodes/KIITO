@@ -1,7 +1,8 @@
 package com.kito.sap
 
-class SapRepository {
-    private val sapClient = SapPortalClient()
+class SapRepository(
+    private val sapClient: SapPortalClient
+) {
 
     suspend fun login(
         username: String,
