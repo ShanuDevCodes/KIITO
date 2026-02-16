@@ -57,6 +57,10 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -101,6 +105,7 @@ fun SettingsScreen(
     val uiColors = UIColors()
     val haptic = LocalHapticFeedback.current
     val hazeState = rememberHazeState()
+    val scope = rememberCoroutineScope()
     val name by viewModel.name.collectAsState()
     val roll by viewModel.rollNumber.collectAsState()
     val year by viewModel.year.collectAsState()
@@ -122,11 +127,7 @@ fun SettingsScreen(
     if (askPermission) {
         NotificationPermissionEffect { granted ->
             askPermission = false
-            if (granted) {
-                viewModel.setNotificationState(true)
-            } else {
-                viewModel.requestEnableNotifications()
-            }
+            viewModel.requestEnableNotifications()
         }
     }
 
@@ -270,6 +271,17 @@ fun SettingsScreen(
             viewModel.setNotificationState(true)
         }
         viewModel.clearPendingNotificationEnable()
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (pendingEnable) {
+            scope.launch {
+                if (canScheduleExactAlarms() && areNotificationsEnabled()) {
+                    viewModel.setNotificationState(true)
+                    viewModel.clearPendingNotificationEnable()
+                }
+            }
+        }
     }
 
     LaunchedEffect(syncState) {

@@ -72,6 +72,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.kito.core.common.util.currentLocalDateTime
+import com.kito.core.network.supabase.model.MidsemScheduleModel
 import com.kito.core.platform.openUrl
 import com.kito.core.platform.sendEmail
 import com.kito.core.platform.toast
