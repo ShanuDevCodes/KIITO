@@ -61,6 +61,9 @@ class MainActivity : ComponentActivity() {
     }
     private lateinit var appUpdateManager: AppUpdateManager
 
+    private var lastCheckedTime = 0L
+    private val CHECK_INTERVAL = 5 * 60 * 1000 // 5 minutes
+
     private val updateLauncher =
         registerForActivityResult(
             ActivityResultContracts.StartIntentSenderForResult()
@@ -170,28 +173,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-        }
+
         appUpdateManager.registerListener(installStateListener)
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-            if (
-                info.updateAvailability() ==
-                UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
-            ) {
-                appUpdateManager.startUpdateFlowForResult(
-                    info,
-                    updateLauncher,
-                    AppUpdateOptions.newBuilder(currentUpdateType).build()
-                )
-                return@addOnSuccessListener
-            }
+
+        val now = System.currentTimeMillis()
+
+        if (now - lastCheckedTime > CHECK_INTERVAL) {
+            lastCheckedTime = now
             checkForSupabaseVersion()
         }
-        lifecycleScope.launch {
-            notificationPipelineController.sync()
-        }
     }
+
 
 
     override fun onPause() {
@@ -214,25 +206,12 @@ class MainActivity : ComponentActivity() {
             try {
                 val result = supabaseRepo
                     .getLatestAppVersion(PlatformClass.ANDROID)
-                    .firstOrNull()
+                    .firstOrNull() ?: return@launch
 
-                Log.d("UPDATE_FLOW", "Supabase result: $result")
+                val currentCode = BuildConfig.VERSION_CODE
+                val latestCode = result.latest_version.toIntOrNull() ?: return@launch
 
-                if (result == null) {
-                    Log.d("UPDATE_FLOW", "Result is null")
-                    return@launch
-                }
-
-                val currentVersion = BuildConfig.VERSION_CODE
-                Log.d("UPDATE_FLOW", "Current: $currentVersion")
-                Log.d("UPDATE_FLOW", "Latest: ${result.latest_version}")
-
-                if (!isUpdateRequired(currentVersion, result.latest_version.toInt())) {
-                    Log.d("UPDATE_FLOW", "Update NOT required")
-                    return@launch
-                }
-
-                Log.d("UPDATE_FLOW", "Update required")
+                if (latestCode <= currentCode) return@launch
 
                 currentUpdateType =
                     if (result.force_update)
@@ -240,38 +219,64 @@ class MainActivity : ComponentActivity() {
                     else
                         AppUpdateType.FLEXIBLE
 
-                triggerPlayCoreUpdate(currentUpdateType)
+                checkPlayCoreUpdate()
 
-            } catch (e: Exception) {
-                Log.d("UPDATE_FLOW", "Exception: ${e.message}")
+            } catch (_: Exception) {
+                // Never block app if network fails
+            }
+        }
+    }
+    private fun checkPlayCoreUpdate() {
+
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+
+            when {
+
+                // 🔴 Resume ongoing immediate update
+                info.updateAvailability() ==
+                        UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> {
+
+                    appUpdateManager.startUpdateFlowForResult(
+                        info,
+                        updateLauncher,
+                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                    )
+                }
+
+                // 🔴 Force Immediate every resume
+                currentUpdateType == AppUpdateType.IMMEDIATE &&
+                        info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                        info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) -> {
+
+                    appUpdateManager.startUpdateFlowForResult(
+                        info,
+                        updateLauncher,
+                        AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+                    )
+                }
+
+                // 🟢 Flexible logic
+                currentUpdateType == AppUpdateType.FLEXIBLE -> {
+
+                    // Already downloaded → show snackbar
+                    if (info.installStatus() == InstallStatus.DOWNLOADED) {
+                        showCompleteUpdateSnackbar()
+                    }
+
+                    // Show flexible dialog
+                    else if (
+                        info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                        info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+                    ) {
+                        appUpdateManager.startUpdateFlowForResult(
+                            info,
+                            updateLauncher,
+                            AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
+                        )
+                    }
+                }
             }
         }
     }
 
-
-    private fun isUpdateRequired(currentCode: Int, latestCode: Int): Boolean {
-        return latestCode > currentCode
-    }
-
-
-    private fun triggerPlayCoreUpdate(updateType: Int) {
-
-        Log.d("UPDATE_FLOW", "Trigger called with type: $updateType")
-
-        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-
-            Log.d("UPDATE_FLOW", "Availability: ${info.updateAvailability()}")
-            Log.d("UPDATE_FLOW", "InstallStatus: ${info.installStatus()}")
-            Log.d("UPDATE_FLOW", "Immediate allowed: ${info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)}")
-            Log.d("UPDATE_FLOW", "Flexible allowed: ${info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)}")
-
-            val started = appUpdateManager.startUpdateFlowForResult(
-                info,
-                updateLauncher,
-                AppUpdateOptions.newBuilder(updateType).build()
-            )
-
-            Log.d("UPDATE_FLOW", "startUpdateFlowForResult called")
-        }
-    }
 }
