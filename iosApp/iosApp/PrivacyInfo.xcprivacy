@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<!-- Add specific API reasons here if you use UserDefaults, File Timestamp, System Boot, or Disk Space APIs. 
+             Since our scan found none in your code, this array is left empty, which is valid if you truly don't use them. -->
+	</array>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+		<!-- If you collect data (e.g. Analytics), you must declare it here. 
+             Since you are not using 3rd party analytics in the scanned code, this is empty. -->
+	</array>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+</dict>
+</plist>
