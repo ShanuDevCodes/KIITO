@@ -106,7 +106,7 @@ fun ScheduleScreen(
         "THU" -> 3
         "FRI" -> 4
         "SAT" -> 5
-        else -> 5
+        else -> 0
     }
     val uiColors = UIColors()
     val coroutineScope = rememberCoroutineScope()
@@ -220,7 +220,7 @@ fun ScheduleScreen(
                                 .fillMaxWidth()
                                 .height(100.dp)
                                 .then(
-                                    if(page == currentPage && isClassUpcoming(startTime = item.startTime,now = now)) {
+                                    if(page == currentPage && isClassUpcoming(startTime = item.startTime,now = now) && today != "SUN") {
                                         Modifier
                                             .border(
                                                 width = 2.dp,
@@ -254,7 +254,7 @@ fun ScheduleScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .then(
-                                        if (page == currentPage && isClassOngoing(startTime = item.startTime, endTime = item.endTime, now = now)){
+                                        if (page == currentPage && isClassOngoing(startTime = item.startTime, endTime = item.endTime, now = now) && today != "SUN"){
                                             Modifier.meshGradient(
                                                     points = listOf(
 

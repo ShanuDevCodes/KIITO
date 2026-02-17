@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class SecureStorage : KoinComponent {
     
     private val iosPrefsRepository: IosPrefsRepository by inject()
