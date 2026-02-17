@@ -316,6 +316,7 @@ fun HomeScreen(
                                     )
                                     IconButton(
                                         onClick = {
+                                            viewmodel.postRecruitmentClick()
                                             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                                             openUrl("https://recruit-teal-ten.vercel.app/")
                                         },
