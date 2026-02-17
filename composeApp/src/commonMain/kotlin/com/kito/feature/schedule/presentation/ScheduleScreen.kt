@@ -100,12 +100,12 @@ fun ScheduleScreen(
 ) {
     val today = todayKey()
     val currentPage = when (today) {
-//        "MON" -> 0
-//        "TUE" -> 1
-//        "WED" -> 2
-//        "THU" -> 3
-//        "FRI" -> 4
-//        "SAT" -> 5
+        "MON" -> 0
+        "TUE" -> 1
+        "WED" -> 2
+        "THU" -> 3
+        "FRI" -> 4
+        "SAT" -> 5
         else -> 5
     }
     val uiColors = UIColors()
