@@ -80,6 +80,7 @@ import com.kito.core.platform.openUrl
 import com.kito.core.platform.sendEmail
 import com.kito.core.platform.toast
 import com.kito.core.presentation.components.AboutELabsDialog
+import com.kito.core.presentation.components.AttendanceBarCard
 import com.kito.core.presentation.components.OverallAttendanceCard
 import com.kito.core.presentation.components.ScheduleCard
 import com.kito.core.presentation.components.UIColors
@@ -122,9 +123,7 @@ fun HomeScreen(
     val uiColors = UIColors()
     val name by viewmodel.name.collectAsState()
     val sapLoggedIn by viewmodel.sapLoggedIn.collectAsState()
-    val averageAttendancePercentage by viewmodel.averageAttendancePercentage.collectAsState()
-    val highestAttendancePercentage by viewmodel.highestAttendancePercentage.collectAsState()
-    val lowestAttendancePercentage by viewmodel.lowestAttendancePercentage.collectAsState()
+    val attendance by viewmodel.attendance.collectAsState()
     val schedule by viewmodel.schedule.collectAsState()
     val syncState by viewmodel.syncState.collectAsState()
     val hazeState = rememberHazeState()
@@ -498,22 +497,19 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .fillMaxHeight()
+                                    .height(260.dp)
                             ) {
-                                OverallAttendanceCard(
-                                    colors = uiColors,
-                                    sapLoggedIn = sapLoggedIn,
-                                    percentageOverall = averageAttendancePercentage,
-                                    percentageHighest = highestAttendancePercentage,
-                                    percentageLowest = lowestAttendancePercentage,
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        isLoginDialogOpen = true
-                                    },
+                                AttendanceBarCard(
+                                    attendance = attendance,
                                     onNavigate = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                                         tabNavBackStack.navigateTab(TabRoutes.Attendance)
                                     },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                        isLoginDialogOpen = true
+                                    },
+                                    sapLoggedIn = sapLoggedIn
                                 )
                             }
                         }
@@ -619,14 +615,13 @@ fun JoinELabsBanner(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Check if we should show the banner (before or on Feb 22, 2026)
     val currentDate = currentLocalDateTime().date
     val recruitmentStartDate = LocalDate(2026, 2, 21)
     val recruitmentEndDate = LocalDate(2026, 2, 22)
     val shouldShowBanner = currentDate <= recruitmentEndDate
 
     if (!shouldShowBanner) {
-        return // Don't render anything after Feb 22
+        return
     }
 
     // Calculate countdown

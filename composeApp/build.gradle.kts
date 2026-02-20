@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.material)
             implementation(libs.androidx.activity)
             implementation(libs.androidx.constraintlayout)
+            implementation(libs.composeUiTooling)
 
             // Ktor engine for Android
             implementation(libs.ktor.client.okhttp)
