@@ -69,6 +69,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.kito.core.common.util.currentLocalDateTime
@@ -77,13 +80,16 @@ import com.kito.core.platform.openUrl
 import com.kito.core.platform.sendEmail
 import com.kito.core.platform.toast
 import com.kito.core.presentation.components.AboutELabsDialog
+import com.kito.core.presentation.components.AttendanceBarCard
 import com.kito.core.presentation.components.OverallAttendanceCard
 import com.kito.core.presentation.components.ScheduleCard
 import com.kito.core.presentation.components.UIColors
+import com.kito.core.presentation.components.UpcomingEventCard
 import com.kito.core.presentation.components.UpcomingExamCard
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.core.presentation.navigation3.Routes
 import com.kito.core.presentation.navigation3.TabRoutes
+import com.kito.core.presentation.navigation3.isTopAsState
 import com.kito.core.presentation.navigation3.navigateTab
 import com.kito.feature.settings.presentation.components.LoginDialogBox
 import dev.chrisbanes.haze.ExperimentalHazeApi
@@ -117,9 +123,7 @@ fun HomeScreen(
     val uiColors = UIColors()
     val name by viewmodel.name.collectAsState()
     val sapLoggedIn by viewmodel.sapLoggedIn.collectAsState()
-    val averageAttendancePercentage by viewmodel.averageAttendancePercentage.collectAsState()
-    val highestAttendancePercentage by viewmodel.highestAttendancePercentage.collectAsState()
-    val lowestAttendancePercentage by viewmodel.lowestAttendancePercentage.collectAsState()
+    val attendance by viewmodel.attendance.collectAsState()
     val schedule by viewmodel.schedule.collectAsState()
     val syncState by viewmodel.syncState.collectAsState()
     val hazeState = rememberHazeState()
@@ -128,6 +132,10 @@ fun HomeScreen(
     val loginState by viewmodel.loginState.collectAsState()
     val isOnline by viewmodel.isOnline.collectAsState()
     val examModel by viewmodel.examModel.collectAsState()
+    val isTabTop by tabNavBackStack.isTopAsState(TabRoutes.Home)
+    val isRootTop by rootNavBackStack.isTopAsState(Routes.Tabs)
+    val isTopScreen = isTabTop && isRootTop
+    val lifecycleOwner = LocalLifecycleOwner.current
     val currentDate = currentLocalDateTime().date
     val recruitmentEndDate = LocalDate(2026, 2, 22)
 
@@ -139,19 +147,37 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        val today = currentLocalDateTime().dayOfWeek
-        val dayString = when (today) {
-            DayOfWeek.MONDAY -> "MON"
-            DayOfWeek.TUESDAY -> "TUE"
-            DayOfWeek.WEDNESDAY -> "WED"
-            DayOfWeek.THURSDAY -> "THU"
-            DayOfWeek.FRIDAY -> "FRI"
-            DayOfWeek.SATURDAY -> "SAT"
-            DayOfWeek.SUNDAY -> "SUN"
+    LaunchedEffect(Unit,isTopScreen,lifecycleOwner) {
+        if (isTopScreen) {
+            val today = currentLocalDateTime().dayOfWeek
+            val dayString = when (today) {
+                DayOfWeek.MONDAY -> "MON"
+                DayOfWeek.TUESDAY -> "TUE"
+                DayOfWeek.WEDNESDAY -> "WED"
+                DayOfWeek.THURSDAY -> "THU"
+                DayOfWeek.FRIDAY -> "FRI"
+                DayOfWeek.SATURDAY -> "SAT"
+                DayOfWeek.SUNDAY -> "SUN"
+            }
+            viewmodel.updateDay(dayString)
+            viewmodel.getExamSchedule()
         }
-        viewmodel.updateDay(dayString)
-        viewmodel.getExamSchedule()
+        lifecycleOwner.lifecycle.repeatOnLifecycle(
+            Lifecycle.State.STARTED
+        ) {
+            val today = currentLocalDateTime().dayOfWeek
+            val dayString = when (today) {
+                DayOfWeek.MONDAY -> "MON"
+                DayOfWeek.TUESDAY -> "TUE"
+                DayOfWeek.WEDNESDAY -> "WED"
+                DayOfWeek.THURSDAY -> "THU"
+                DayOfWeek.FRIDAY -> "FRI"
+                DayOfWeek.SATURDAY -> "SAT"
+                DayOfWeek.SUNDAY -> "SUN"
+            }
+            viewmodel.updateDay(dayString)
+            viewmodel.getExamSchedule()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -300,6 +326,7 @@ fun HomeScreen(
                         }
 
                         if (currentDate <= recruitmentEndDate) {
+//                        if (false){
                             item {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -395,6 +422,43 @@ fun HomeScreen(
                                 )
                             }
                         }
+
+                        if (false){
+                            item {
+                                Spacer(Modifier.height(8.dp))
+                            }
+                            item {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "Upcoming Events",
+                                        color = uiColors.textPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                        },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
+                                            contentDescription = "Notifications",
+                                            tint = uiColors.textPrimary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            item {
+                                UpcomingEventCard()
+                            }
+                        }
+
                         item {
                             Spacer(Modifier.height(8.dp))
                         }
@@ -433,22 +497,19 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .fillMaxHeight()
+                                    .height(260.dp)
                             ) {
-                                OverallAttendanceCard(
-                                    colors = uiColors,
-                                    sapLoggedIn = sapLoggedIn,
-                                    percentageOverall = averageAttendancePercentage,
-                                    percentageHighest = highestAttendancePercentage,
-                                    percentageLowest = lowestAttendancePercentage,
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        isLoginDialogOpen = true
-                                    },
+                                AttendanceBarCard(
+                                    attendance = attendance,
                                     onNavigate = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                                         tabNavBackStack.navigateTab(TabRoutes.Attendance)
                                     },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                        isLoginDialogOpen = true
+                                    },
+                                    sapLoggedIn = sapLoggedIn
                                 )
                             }
                         }
@@ -554,14 +615,13 @@ fun JoinELabsBanner(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Check if we should show the banner (before or on Feb 22, 2026)
     val currentDate = currentLocalDateTime().date
     val recruitmentStartDate = LocalDate(2026, 2, 21)
     val recruitmentEndDate = LocalDate(2026, 2, 22)
     val shouldShowBanner = currentDate <= recruitmentEndDate
 
     if (!shouldShowBanner) {
-        return // Don't render anything after Feb 22
+        return
     }
 
     // Calculate countdown

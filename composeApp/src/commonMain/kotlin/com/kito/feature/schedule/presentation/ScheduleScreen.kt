@@ -70,6 +70,7 @@ import androidx.compose.ui.zIndex
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.common.util.formatTo12Hour
 import com.kito.core.platform.openUrl
+import com.kito.core.platform.sendEmail
 import com.kito.core.presentation.components.ExpressiveEasing
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.animation.PandaSleepingAnimation
@@ -438,7 +439,11 @@ fun ScheduleScreen(
             )
             IconButton(
                 onClick = {
-                    openUrl("mailto:elabs.kiito@gmail.com?subject=KIITO%20Schedule%20Report")
+                    sendEmail(
+                        to = "elabs.kiito@gmail.com",
+                        subject = "KIITO Schedule Report",
+                        body = ""
+                    )
                 },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.White.copy(alpha = 0.08f),

@@ -62,7 +62,7 @@ class HomeViewModel (
         _day.value = day
     }
 
-    private val attendance: StateFlow<List<AttendanceEntity>> =
+    val attendance: StateFlow<List<AttendanceEntity>> =
         attendanceRepository
             .getAllAttendance()
             .stateIn(
@@ -126,40 +126,40 @@ class HomeViewModel (
                 SharingStarted.WhileSubscribed(5_000),
                 emptyList()
             )
-    val averageAttendancePercentage: StateFlow<Double> =
-        attendance
-            .map { list ->
-                if (list.isEmpty()) {
-                    0.0
-                } else {
-                    list.map { it.percentage }.average()
-                }
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = 0.0
-            )
-    val highestAttendancePercentage: StateFlow<Double> =
-        attendance
-            .map { list ->
-                list.maxOfOrNull { it.percentage } ?: 0.0
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = 0.0
-            )
-    val lowestAttendancePercentage: StateFlow<Double> =
-        attendance
-            .map { list ->
-                list.minOfOrNull { it.percentage } ?: 0.0
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = 0.0
-            )
+//    val averageAttendancePercentage: StateFlow<Double> =
+//        attendance
+//            .map { list ->
+//                if (list.isEmpty()) {
+//                    0.0
+//                } else {
+//                    list.map { it.percentage }.average()
+//                }
+//            }
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(5_000),
+//                initialValue = 0.0
+//            )
+//    val highestAttendancePercentage: StateFlow<Double> =
+//        attendance
+//            .map { list ->
+//                list.maxOfOrNull { it.percentage } ?: 0.0
+//            }
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(5_000),
+//                initialValue = 0.0
+//            )
+//    val lowestAttendancePercentage: StateFlow<Double> =
+//        attendance
+//            .map { list ->
+//                list.minOfOrNull { it.percentage } ?: 0.0
+//            }
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(5_000),
+//                initialValue = 0.0
+//            )
     fun login(
         password: String
     ){
