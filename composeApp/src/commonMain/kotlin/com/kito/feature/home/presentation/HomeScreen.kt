@@ -37,7 +37,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -266,6 +269,25 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .weight(1f)
                                 )
+                                if (false) {
+                                    IconButton(
+                                        onClick = {
+
+                                        },
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (false) {
+                                                Icons.Default.NotificationsActive
+                                            } else {
+                                                Icons.Outlined.NotificationsOff
+                                            },
+                                            contentDescription = "notifications",
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
                                 IconButton(
                                     onClick = {
                                         sendEmail(
@@ -282,9 +304,10 @@ fun HomeScreen(
                                     Icon(
                                         imageVector = Icons.Default.Report,
                                         contentDescription = "Report",
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 }
+                                Spacer(modifier = Modifier.width(4.dp))
                                 IconButton(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -298,7 +321,7 @@ fun HomeScreen(
                                         imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
                                         contentDescription = "Notifications",
                                         tint = uiColors.textPrimary,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }

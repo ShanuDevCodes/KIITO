@@ -355,11 +355,12 @@ fun WaterAnimation(
 
     var waveShift by remember { mutableFloatStateOf(0f) }
 
+    val colors = UIColors()
     val waterBrush = Brush.verticalGradient(
-        0.0f to Color(0xFFC69009),   // muted gold highlight
-        0.45f to Color(0xFFB07A3C),  // soft bronze
-        0.75f to Color(0xFF7A4A1E),  // warm brown
-        1.0f to Color(0xFF4A2A12)    // deep base shadow
+        0.0f to colors.accentOrangeEnd.copy(alpha = 0.9f),
+        0.35f to colors.accentOrangeStart,
+        0.75f to colors.progressAccent,
+        1.0f to Color(0xFF5A2A05)
     )
 
     LaunchedEffect(Unit,waterLevel) {

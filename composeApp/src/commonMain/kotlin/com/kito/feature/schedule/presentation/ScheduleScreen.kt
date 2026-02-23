@@ -34,7 +34,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowCircleLeft
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -459,6 +461,29 @@ fun ScheduleScreen(
                 modifier = Modifier
                     .weight(1f)
             )
+            if (false) {
+                IconButton(
+                    onClick = {
+
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.White.copy(alpha = 0.08f),
+                        contentColor = uiColors.progressAccent
+                    ),
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = if (true) {
+                            Icons.Default.NotificationsActive
+                        } else {
+                            Icons.Outlined.NotificationsOff
+                        },
+                        contentDescription = "notifications",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
             IconButton(
                 onClick = {
                     sendEmail(
