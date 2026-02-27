@@ -88,17 +88,37 @@ actual class SecureStorage(private val context: Context) {
     }
 
     actual suspend fun getSapPassword(): String {
+        val encrypted = context.dataStore.data.first()[KEY_SAP_PASSWORD]
+            ?: return ""
+        try {
+            return decrypt(encrypted)
+        } catch (_: Exception) {
+        }
+
         return try {
-            val encrypted = context.dataStore.data.first()[KEY_SAP_PASSWORD]
-            if (encrypted.isNullOrBlank()) {
-                ""
-            } else {
-                decrypt(encrypted)
+            val legacyPlain = decryptLegacy(encrypted)
+
+            val reEncrypted = encrypt(legacyPlain)
+            context.dataStore.edit { prefs ->
+                prefs[KEY_SAP_PASSWORD] = reEncrypted
             }
+
+            legacyPlain
         } catch (_: Exception) {
             clearSapPassword()
             ""
         }
+    }
+
+    private fun decryptLegacy(cipherTextBase64: String): String {
+        val cipherText = Base64.decode(cipherTextBase64, Base64.DEFAULT)
+
+        val plainText = aead.decrypt(
+            cipherText,
+            null
+        )
+
+        return String(plainText, Charsets.UTF_8)
     }
 
     actual val isLoggedInFlow: Flow<Boolean> =
