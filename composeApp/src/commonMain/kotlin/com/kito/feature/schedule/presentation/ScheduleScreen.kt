@@ -616,6 +616,7 @@ fun todayKey(): String {
         4 -> "THU"
         5 -> "FRI"
         6 -> "SAT"
+        7 -> "SUN"
         else -> "MON"
     }
 }
