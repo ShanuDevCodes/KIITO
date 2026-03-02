@@ -6,8 +6,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,7 +17,9 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -47,12 +51,12 @@ fun RopeTabRow(
 
     val density = LocalDensity.current
 
-    TabRow(
+    SecondaryTabRow(
         selectedTabIndex = selectedTab,
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
-        divider = {},
+        modifier = Modifier,
+        containerColor = Color.Transparent,
+        contentColor = uiColors.textSecondary,
         indicator = {
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -84,28 +88,28 @@ fun RopeTabRow(
                                 path.moveTo(startX, top)
                             }
 
-                            path.quadraticBezierTo(
+                            path.quadraticTo(
                                 startX + width,
                                 top,
                                 startX + width,
                                 height / 2
                             )
 
-                            path.quadraticBezierTo(
+                            path.quadraticTo(
                                 startX + width,
                                 bottom,
                                 startX + width / 2,
                                 bottom
                             )
 
-                            path.quadraticBezierTo(
+                            path.quadraticTo(
                                 startX,
                                 bottom,
                                 startX,
                                 height / 2
                             )
 
-                            path.quadraticBezierTo(
+                            path.quadraticTo(
                                 startX,
                                 top,
                                 startX + width,
@@ -145,7 +149,7 @@ fun RopeTabRow(
                                 width = 10f,
                                 cap = StrokeCap.Round,
                                 join = StrokeJoin.Round,
-                                pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
+                                pathEffect = PathEffect.dashPathEffect(
                                     intervals = floatArrayOf(
                                         ribbonLength,
                                         totalLength
@@ -156,19 +160,19 @@ fun RopeTabRow(
                         )
                     }
             )
-        }
+        },
+        divider = {}
     ) {
-
         tabs.forEachIndexed { index, title ->
-
             Tab(
                 selected = selectedTab == index,
                 onClick = { onTabSelected(index) },
                 selectedContentColor = uiColors.progressAccent,
-                unselectedContentColor = uiColors.cardBackgroundHigh,
+                unselectedContentColor = Color(0xFF846F68),
                 modifier = Modifier.onSizeChanged {
                     tabWidths[index] = it.width.toFloat()
-                }
+                },
+                interactionSource = NoRippleInteractionSource
             ) {
                 Text(
                     text = title,

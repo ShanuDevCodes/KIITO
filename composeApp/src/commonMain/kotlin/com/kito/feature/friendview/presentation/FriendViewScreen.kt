@@ -611,7 +611,7 @@ fun FriendView(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
-                                    imageVector = if (!showAddFriendDialog) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
+                                    imageVector = if (!showDropdown) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
                                     contentDescription = "Drop Down",
                                     modifier = Modifier
                                         .size(20.dp),

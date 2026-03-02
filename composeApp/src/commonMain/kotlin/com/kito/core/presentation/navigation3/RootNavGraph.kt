@@ -146,7 +146,11 @@ fun RootNavGraph(
                 )
             }
             entry<Routes.GPACalc> {
-                GPAScreen()
+                GPAScreen(
+                    onBack = {
+                        rootNavBackStack.removeAt(rootNavBackStack.lastIndex)
+                    }
+                )
             }
             entry<Routes.Calendar> {
                 CalendarScreen()

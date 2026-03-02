@@ -1,4 +1,4 @@
-package com.kito.feature.gpa.presentation
+package com.kito.feature.gpa.presentation.components
 data class Subject(
     val name: String,
     val credit: Int

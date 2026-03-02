@@ -259,7 +259,7 @@ fun ScheduleCard(
                             }
                         }
                     }
-                }else{
+                }else if (ongoing == null && upcomingList.isEmpty() && nextSchedule.isEmpty()){
                     item{
                         Box(
                             modifier = Modifier

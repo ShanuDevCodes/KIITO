@@ -1,9 +1,10 @@
-package com.kito.feature.gpa.presentation
+package com.kito.feature.gpa.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -82,7 +83,10 @@ fun SGPAScreen(
             .fillMaxSize()
             .background(Color(0xFF121116))
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(2.5.dp)
+        verticalArrangement = Arrangement.spacedBy(2.5.dp),
+        contentPadding = PaddingValues(
+            top = WindowInsets().asPaddingValues().calculateTopPadding() + 288.dp
+        )
     ) {
 
         item { Spacer(modifier = Modifier.height(16.dp)) }

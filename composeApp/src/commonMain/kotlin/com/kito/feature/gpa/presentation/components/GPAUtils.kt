@@ -1,4 +1,4 @@
-package com.kito.feature.gpa.presentation
+package com.kito.feature.gpa.presentation.components
 
 val gradePoints = mapOf(
     "O" to 10,

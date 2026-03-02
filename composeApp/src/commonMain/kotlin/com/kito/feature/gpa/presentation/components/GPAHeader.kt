@@ -1,10 +1,7 @@
-package com.kito.feature.gpa.presentation
+package com.kito.feature.gpa.presentation.components
 
 import androidx.compose.animation.Animatable
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.kito.core.presentation.components.meshGradient
 import com.kito.core.presentation.components.shimmer
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @Composable
 fun GPAHeader(
@@ -78,7 +76,7 @@ fun GPAHeader(
     LaunchedEffect(Unit) {
         meshColorAnimators.forEachIndexed { i, anim ->
             launch {
-                val random = kotlin.random.Random(i * 97)
+                val random = Random(i * 97)
                 while (true) {
                     anim.animateTo(
                         targetValue = meshColors[random.nextInt(meshColors.size)],
@@ -226,7 +224,7 @@ fun GPAHeader(
                             ) {
                                 listOf(
                                     "CSE", "CSSE", "CSCE",
-                                    "IT", "ECS", "ECE"
+                                    "IT", "ECS"/*, "ECE"*/
                                 ).forEach { branch ->
                                     DropdownMenuItem(
                                         text = { Text(branch) },
