@@ -31,9 +31,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.ArrowCircleLeft
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.outlined.NotificationsOff
@@ -75,7 +72,6 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.common.util.formatTo12Hour
-import com.kito.core.platform.openUrl
 import com.kito.core.platform.sendEmail
 import com.kito.core.presentation.components.ExpressiveEasing
 import com.kito.core.presentation.components.UIColors
@@ -607,7 +603,7 @@ fun Modifier.horizontalCarouselTransition(
     }
 }
 
-private fun todayKey(): String {
+fun todayKey(): String {
     val dt = currentLocalDateTime()
     return when (dt.dayOfWeek.isoDayNumber) {
         1 -> "MON"
@@ -616,16 +612,17 @@ private fun todayKey(): String {
         4 -> "THU"
         5 -> "FRI"
         6 -> "SAT"
+        7 -> "SUN"
         else -> "MON"
     }
 }
 
-private fun parseTime(time: String): LocalTime {
+fun parseTime(time: String): LocalTime {
     val parts = time.split(":")
     return LocalTime(parts[0].toInt(), parts[1].toInt(), if (parts.size > 2) parts[2].toInt() else 0)
 }
 
-private fun isClassOngoing(
+fun isClassOngoing(
     startTime: String,
     endTime: String,
     now: LocalTime
@@ -639,7 +636,7 @@ private fun isClassOngoing(
     }
 }
 
-private fun isClassUpcoming(
+fun isClassUpcoming(
     startTime: String,
     windowMinutes: Int = 15,
     now: LocalTime

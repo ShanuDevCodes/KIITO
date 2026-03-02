@@ -13,6 +13,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.kito.core.presentation.components.ExpressiveEasing
 import com.kito.feature.attendance.presentation.AttendanceListScreen
+import com.kito.feature.calendar.presentation.CalendarScreen
 import com.kito.feature.faculty.presentation.FacultyScreen
 import com.kito.feature.home.presentation.HomeScreen
 import com.kito.feature.settings.presentation.SettingsScreen
@@ -22,50 +23,23 @@ fun TabNavGraph(
     rootNavStack: NavBackStack<NavKey>,
     tabNavStack: NavBackStack<NavKey>,
     snackbarHostState: SnackbarHostState
-){
+) {
     NavDisplay(
         backStack = tabNavStack,
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator()
         ),
         transitionSpec = {
-            fadeIn(
-                animationSpec = tween(
-                    durationMillis = 400,
-                    easing = ExpressiveEasing.Emphasized
-                )
-            ) togetherWith fadeOut(
-                animationSpec = tween(
-                    durationMillis = 400,
-                    easing = ExpressiveEasing.Emphasized
-                )
-            )
+            fadeIn(animationSpec = tween(400, easing = ExpressiveEasing.Emphasized)) togetherWith
+                    fadeOut(animationSpec = tween(400, easing = ExpressiveEasing.Emphasized))
         },
         popTransitionSpec = {
-            fadeIn(
-                animationSpec = tween(
-                    durationMillis = 400,
-                    easing = ExpressiveEasing.Emphasized
-                )
-            ) togetherWith fadeOut(
-                animationSpec = tween(
-                    durationMillis = 400,
-                    easing = ExpressiveEasing.Emphasized
-                )
-            )
+            fadeIn(animationSpec = tween(400, easing = ExpressiveEasing.Emphasized)) togetherWith
+                    fadeOut(animationSpec = tween(400, easing = ExpressiveEasing.Emphasized))
         },
         predictivePopTransitionSpec = {
-            fadeIn(
-                animationSpec = tween(
-                    durationMillis = 400,
-                    easing = ExpressiveEasing.Emphasized
-                )
-            ) togetherWith fadeOut(
-                animationSpec = tween(
-                    durationMillis = 400,
-                    easing = ExpressiveEasing.Emphasized
-                )
-            )
+            fadeIn(animationSpec = tween(400, easing = ExpressiveEasing.Emphasized)) togetherWith
+                    fadeOut(animationSpec = tween(400, easing = ExpressiveEasing.Emphasized))
         },
         entryProvider = entryProvider {
             entry<TabRoutes.Home> {
@@ -74,19 +48,19 @@ fun TabNavGraph(
                     tabNavBackStack = tabNavStack
                 )
             }
-            entry<TabRoutes.Profile> {
-                SettingsScreen(
-                    tabNavBackStack = tabNavStack,
-                    snackbarHostState = snackbarHostState
-                )
+            entry<TabRoutes.Attendance> {
+                AttendanceListScreen()
             }
             entry<TabRoutes.Faculty> {
                 FacultyScreen(
                     rootNavBackStack = rootNavStack
                 )
             }
-            entry<TabRoutes.Attendance> {
-                AttendanceListScreen()
+            entry<TabRoutes.Profile> {
+                SettingsScreen(
+                    tabNavBackStack = tabNavStack,
+                    snackbarHostState = snackbarHostState
+                )
             }
         }
     )

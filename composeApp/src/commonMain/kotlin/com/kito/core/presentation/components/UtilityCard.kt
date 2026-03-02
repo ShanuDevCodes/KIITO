@@ -18,7 +18,6 @@ import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.Group
-import androidx.compose.material.icons.rounded.Upcoming
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
+import com.kito.core.presentation.navigation3.Routes
 
 
 data class Utilities(
@@ -42,7 +43,8 @@ data class Utilities(
     val icon: ImageVector,
     val itemBoxColor: Color,
     val textColor: Color,
-    val iconGradient: Brush
+    val iconGradient: Brush,
+    val destination: NavKey? = null
 )
 
 val UtilityList = listOf(
@@ -56,10 +58,11 @@ val UtilityList = listOf(
                 Color(0xFFC69D89),
                 Color(0xFF684B3B)
             )
-        )
+        ),
+        destination = Routes.GPACalc
     ),
     Utilities(
-        title = "Peer Sync",
+        title = "Friend Schedule",
         icon = Icons.Rounded.Group,
         itemBoxColor = Color(0xFF583030),
         textColor = Color(0xFFF9C1C1),
@@ -68,10 +71,11 @@ val UtilityList = listOf(
                 Color(0xFFC68989),
                 Color(0xFF683B3B)
             )
-        )
+        ),
+        destination = Routes.FriendView
     ),
     Utilities(
-        title = "Holiday Calendar",
+        title = "Holiday List",
         icon = Icons.Rounded.EventAvailable,
         itemBoxColor = Color(0xFF304558),
         textColor = Color(0xFFC1E4F9),
@@ -80,7 +84,8 @@ val UtilityList = listOf(
                 Color(0xFF89B8C6),
                 Color(0xFF3B5C68)
             )
-        )
+        ),
+        destination = Routes.HolidayList
     ),
     Utilities(
         title = "Exam Schedule",
@@ -92,20 +97,22 @@ val UtilityList = listOf(
                 Color(0xFFA689C6),
                 Color(0xFF4B3B68)
             )
-        )
+        ),
+        destination = Routes.ExamSchedule
     ),
-    Utilities(
-        title = "Campus Calendar",
-        icon = Icons.Rounded.CalendarMonth,
-        itemBoxColor = Color(0xFF30583E),
-        textColor = Color(0xFFC1F9D2),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFF89C6A2),
-                Color(0xFF3B684B)
-            )
-        )
-    ),
+//    Utilities(
+//        title = "Campus Calendar",
+//        icon = Icons.Rounded.CalendarMonth,
+//        itemBoxColor = Color(0xFF30583E),
+//        textColor = Color(0xFFC1F9D2),
+//        iconGradient = Brush.horizontalGradient(
+//            colors = listOf(
+//                Color(0xFF89C6A2),
+//                Color(0xFF3B684B)
+//            )
+//        ),
+//        destination = Routes.Calendar
+//    ),
     Utilities(
         title = "Coming Soon",
         icon = Icons.Rounded.AutoAwesome,
@@ -122,7 +129,11 @@ val UtilityList = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun UtilityCard() {
+fun UtilityCard(
+    onCLick: (
+        destination: NavKey?
+    ) -> Unit
+) {
     val colors = UIColors()
     Box(
         modifier = Modifier
@@ -179,7 +190,9 @@ fun UtilityCard() {
                         .fillMaxSize()
                         .clickable(
                             onClick = {
-
+                                onCLick(
+                                    UtilityList[index].destination
+                                )
                             }
                         )
                 ) {

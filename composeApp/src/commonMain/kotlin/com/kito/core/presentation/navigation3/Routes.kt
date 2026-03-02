@@ -26,6 +26,17 @@ sealed interface Routes: NavKey {
     @Serializable
     data class Promotions(val url: String): Routes, NavKey
 
+    @Serializable
+    object FriendView: Routes, NavKey
+
+    @Serializable
+    object HolidayList: Routes, NavKey
+
+    @Serializable
+    object GPACalc: Routes, NavKey
+
+    @Serializable
+    object Calendar: Routes, NavKey
 }
 
 @Serializable

@@ -15,8 +15,12 @@ import androidx.navigation3.ui.NavDisplay
 import com.kito.core.presentation.components.ExpressiveEasing
 import com.kito.feature.auth.presentation.OnBoardingScreen
 import com.kito.feature.auth.presentation.UserSetupScreen
+import com.kito.feature.calendar.presentation.CalendarScreen
 import com.kito.feature.exam.presentation.UpcomingExamScreen
 import com.kito.feature.faculty.presentation.FacultyDetailScreen
+import com.kito.feature.friendview.presentation.FriendView
+import com.kito.feature.gpa.presentation.GPAScreen
+import com.kito.feature.holiday.presentation.HolidayListScreen
 import com.kito.feature.promotions.presentations.PromotionsScreen
 import com.kito.feature.schedule.presentation.ScheduleScreen
 
@@ -92,7 +96,11 @@ fun RootNavGraph(
                 )
             }
             entry<Routes.ExamSchedule>{
-                UpcomingExamScreen()
+                UpcomingExamScreen(
+                    onBack = {
+                        rootNavBackStack.removeAt(rootNavBackStack.lastIndex)
+                    }
+                )
             }
             entry<Routes.FacultyDetail>{
                 FacultyDetailScreen(
@@ -122,6 +130,30 @@ fun RootNavGraph(
                 PromotionsScreen(
                     url = it.url
                 )
+            }
+            entry<Routes.FriendView> {
+                FriendView(
+                    onBack = {
+                        rootNavBackStack.removeAt(rootNavBackStack.lastIndex)
+                    }
+                )
+            }
+            entry<Routes.HolidayList> {
+                HolidayListScreen(
+                    onBack = {
+                        rootNavBackStack.removeAt(rootNavBackStack.lastIndex)
+                    }
+                )
+            }
+            entry<Routes.GPACalc> {
+                GPAScreen(
+                    onBack = {
+                        rootNavBackStack.removeAt(rootNavBackStack.lastIndex)
+                    }
+                )
+            }
+            entry<Routes.Calendar> {
+                CalendarScreen()
             }
         }
     )

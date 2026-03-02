@@ -11,9 +11,12 @@ import com.kito.core.presentation.components.StartupSyncGuard
 import com.kito.feature.app.presentation.AppViewModel
 import com.kito.feature.attendance.presentation.AttendanceListScreenViewModel
 import com.kito.feature.auth.presentation.UserSetupViewModel
+import com.kito.feature.calendar.presentation.CalendarViewModel
 import com.kito.feature.exam.presentation.UpcomingExamViewModel
 import com.kito.feature.faculty.presentation.FacultyDetailViewModel
 import com.kito.feature.faculty.presentation.FacultyScreenViewModel
+import com.kito.feature.friendview.presentation.FriendViewViewmodel
+import com.kito.feature.gpa.presentation.GPAViewmodel
 import com.kito.feature.home.presentation.HomeViewModel
 import com.kito.feature.schedule.presentation.ScheduleScreenViewModel
 import com.kito.feature.settings.presentation.SettingsViewModel
@@ -46,6 +49,7 @@ val commonViewModelModule = module {
 
     single { AppViewModel(get(), get()) }
     singleOf(::UserSetupViewModel)
+    singleOf(::FriendViewViewmodel)
     single { UpcomingExamViewModel(get(), get()) }
     single { FacultyScreenViewModel(get(), get()) }
     single { FacultyDetailViewModel(get()) }
@@ -53,4 +57,6 @@ val commonViewModelModule = module {
     single { SettingsViewModel(get(), get(), get(), get(), get()) }
     single { HomeViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     single { AttendanceListScreenViewModel(get(), get(), get(), get(), get()) }
+    singleOf(::GPAViewmodel)
+    single { CalendarViewModel(get()) }
 }

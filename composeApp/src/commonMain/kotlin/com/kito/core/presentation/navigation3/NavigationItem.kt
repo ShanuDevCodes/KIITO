@@ -1,6 +1,7 @@
 package com.kito.core.presentation.navigation3
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.School
@@ -31,14 +32,14 @@ val NavigationItems = listOf(
     ),
     BottomBarTab(
         title = "Faculty",
-        Icons.Default.School,
-        Color(0xFFFFA574),
-        TabRoutes.Faculty
+        icon = Icons.Default.School,
+        color = Color(0xFFFFA574),
+        destination = TabRoutes.Faculty
     ),
     BottomBarTab(
         title = "Settings",
         icon = Icons.Filled.Settings,
         color = Color(0xFFFFA574),
         destination = TabRoutes.Profile
-    )
+    ),
 )

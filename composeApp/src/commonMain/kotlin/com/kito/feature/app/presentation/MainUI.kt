@@ -52,6 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.savedstate.serialization.SavedStateConfiguration
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.crossfade
 import com.kito.core.datastore.PrefsRepository
 import com.kito.core.presentation.navigation.BottomBarTabs
 import com.kito.core.presentation.navigation3.NavigationItems
@@ -70,10 +74,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.koin.compose.koinInject
-import coil3.ImageLoader
-import coil3.compose.setSingletonImageLoaderFactory
-import coil3.network.ktor3.KtorNetworkFetcherFactory
-import coil3.request.crossfade
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalHazeMaterialsApi::class, ExperimentalHazeApi::class
@@ -128,6 +128,10 @@ fun MainUI(
                     subclass(Routes.Onboarding::class, Routes.Onboarding.serializer())
                     subclass(Routes.UserSetup::class, Routes.UserSetup.serializer())
                     subclass(Routes.Promotions::class, Routes.Promotions.serializer())
+                    subclass(Routes.FriendView::class, Routes.FriendView.serializer())
+                    subclass(Routes.HolidayList::class, Routes.HolidayList.serializer())
+                    subclass(Routes.GPACalc::class, Routes.GPACalc.serializer())
+                    subclass(Routes.Calendar::class, Routes.Calendar.serializer())
                 }
             }
         },

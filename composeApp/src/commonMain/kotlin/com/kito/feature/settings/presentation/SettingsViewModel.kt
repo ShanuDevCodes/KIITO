@@ -212,14 +212,7 @@ class SettingsViewModel(
                     SyncUiState.Success
                 },
                 onFailure = {
-                    val friendlyMessage = when {
-                        it.message?.contains("Unable to resolve host") == true -> 
-                            "Network error: Cannot connect to server. Check your internet connection."
-                        it.message?.contains("supabase") == true -> 
-                            "Network error: Cannot reach server. Please try again."
-                        else -> "Login failed: Unknown Error"
-                    }
-                    SyncUiState.Error(friendlyMessage)
+                    SyncUiState.Error(it.message ?: "Sync failed")
                 }
             )
         }
