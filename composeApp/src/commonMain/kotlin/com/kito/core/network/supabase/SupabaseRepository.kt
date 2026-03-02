@@ -5,7 +5,6 @@ import com.kito.core.database.entity.SectionEntity
 import com.kito.core.database.entity.StudentEntity
 import com.kito.core.network.supabase.model.EventAndAdModel
 import com.kito.core.network.supabase.model.LatestAppVersionModel
-import com.kito.core.network.supabase.model.AdModel
 import com.kito.core.network.supabase.model.CalendarEventModel
 import com.kito.core.network.supabase.model.MidsemScheduleModel
 import com.kito.core.network.supabase.model.PlatformClass
@@ -92,8 +91,8 @@ class SupabaseRepository(
         }.body()
     }
 
-    suspend fun getAds(): List<AdModel> {
-        return client.get("rest/v1/ads") {
+    suspend fun getEventsAndAds(): List<EventAndAdModel> {
+        return client.get("rest/v1/events_and_ads") {
             parameter("is_active", "eq.true")
             parameter("order", "display_order.asc")
         }.body()

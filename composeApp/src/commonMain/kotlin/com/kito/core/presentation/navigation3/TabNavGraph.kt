@@ -56,9 +56,6 @@ fun TabNavGraph(
                     rootNavBackStack = rootNavStack
                 )
             }
-            entry<TabRoutes.Calendar> {
-                CalendarScreen()   // ← added
-            }
             entry<TabRoutes.Profile> {
                 SettingsScreen(
                     tabNavBackStack = tabNavStack,

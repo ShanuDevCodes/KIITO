@@ -54,7 +54,3 @@ sealed interface TabRoutes: NavKey {
     @Serializable
     object Profile : TabRoutes,NavKey
 }
-
-    @Serializable
-    object Calendar : TabRoutes, NavKey  // ← fixed: implements TabRoutes
-}

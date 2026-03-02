@@ -37,12 +37,6 @@ val NavigationItems = listOf(
         destination = TabRoutes.Faculty
     ),
     BottomBarTab(
-        title = "Calendar",
-        icon = Icons.Filled.CalendarMonth,
-        color = Color(0xFFFFA574),
-        destination = TabRoutes.Calendar
-    ),
-    BottomBarTab(
         title = "Settings",
         icon = Icons.Filled.Settings,
         color = Color(0xFFFFA574),
