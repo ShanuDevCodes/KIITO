@@ -399,6 +399,7 @@ fun HomeScreen(
                                 ){
                                     UtilityCard(
                                         onCLick = {navKey ->
+                                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                                             if (navKey != null){
                                                 rootNavBackStack.add(navKey)
                                             }
