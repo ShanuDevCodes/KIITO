@@ -149,6 +149,8 @@ androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigat
 # Google Tink (Encryption)
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
 
+backdrop = { module = "io.github.kashif-mehmood-km:backdrop", version = "0.0.1-alpha02" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -56,6 +57,13 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
+import com.kashif_e.backdrop.drawBackdrop
+import com.kashif_e.backdrop.effects.blur
+import com.kashif_e.backdrop.effects.colorControls
+import com.kashif_e.backdrop.effects.lens
+import com.kashif_e.backdrop.effects.vibrancy
 import com.kito.core.datastore.PrefsRepository
 import com.kito.core.presentation.navigation.BottomBarTabs
 import com.kito.core.presentation.navigation3.NavigationItems
@@ -174,6 +182,7 @@ fun MainUI(
     }
 
     val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     Surface {
         Scaffold(
             containerColor = Color.Transparent,
@@ -197,12 +206,30 @@ fun MainUI(
                             .fillMaxWidth()
                             .height(64.dp)
                             .clip(CircleShape)
-                            .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                                blurRadius = 15.dp
-                                noiseFactor = 0.05f
-                                inputScale = HazeInputScale.Auto
-                                alpha = 0.98f
-                            }
+//                            .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                                blurRadius = 15.dp
+//                                noiseFactor = 0.05f
+//                                inputScale = HazeInputScale.Auto
+//                                alpha = 0.98f
+//                            }
+                            .drawBackdrop(
+                                backdrop = backdrop,
+                                shape = { RoundedCornerShape(24.dp) },
+                                effects = {
+                                    blur(4.dp.toPx())
+//                                    colorControls(
+//                                        brightness = 0.1f,    // -1.0 to 1.0
+//                                        contrast = 1.2f,      // 0.0 to 2.0
+//                                        saturation = 1.5f     // 0.0 to 2.0
+//                                    )
+                                    vibrancy()
+                                    lens(
+                                        refractionHeight = 24.dp.toPx(),
+                                        refractionAmount = 32.dp.toPx(),
+                                        chromaticAberration = false  // RGB color separation
+                                    )
+                                }
+                            )
                             .border(
                                 width = Dp.Hairline,
                                 brush = Brush.verticalGradient(
@@ -293,6 +320,7 @@ fun MainUI(
                 Box(
                     modifier = Modifier
                         .hazeSource(hazeState)
+                        .layerBackdrop(backdrop)
                 ) {
                     RootNavGraph(
                         rootNavBackStack = rootBackStack,

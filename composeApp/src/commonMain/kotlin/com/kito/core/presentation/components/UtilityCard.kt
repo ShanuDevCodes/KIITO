@@ -1,6 +1,7 @@
 package com.kito.core.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,9 +34,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
+import com.kashif_e.backdrop.backdrops.LayerBackdrop
+import com.kashif_e.backdrop.drawBackdrop
+import com.kashif_e.backdrop.effects.blur
+import com.kashif_e.backdrop.effects.lens
+import com.kashif_e.backdrop.effects.vibrancy
 import com.kito.core.presentation.navigation3.Routes
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.HazeMaterials
 
 
 data class Utilities(
@@ -100,19 +111,19 @@ val UtilityList = listOf(
         ),
         destination = Routes.ExamSchedule
     ),
-//    Utilities(
-//        title = "Campus Calendar",
-//        icon = Icons.Rounded.CalendarMonth,
-//        itemBoxColor = Color(0xFF30583E),
-//        textColor = Color(0xFFC1F9D2),
-//        iconGradient = Brush.horizontalGradient(
-//            colors = listOf(
-//                Color(0xFF89C6A2),
-//                Color(0xFF3B684B)
-//            )
-//        ),
-//        destination = Routes.Calendar
-//    ),
+    Utilities(
+        title = "Campus Calendar",
+        icon = Icons.Rounded.CalendarMonth,
+        itemBoxColor = Color(0xFF30583E),
+        textColor = Color(0xFFC1F9D2),
+        iconGradient = Brush.horizontalGradient(
+            colors = listOf(
+                Color(0xFF89C6A2),
+                Color(0xFF3B684B)
+            )
+        ),
+        destination = Routes.Calendar
+    ),
     Utilities(
         title = "Coming Soon",
         icon = Icons.Rounded.AutoAwesome,
@@ -132,7 +143,8 @@ val UtilityList = listOf(
 fun UtilityCard(
     onCLick: (
         destination: NavKey?
-    ) -> Unit
+    ) -> Unit,
+    backdrop: LayerBackdrop
 ) {
     val colors = UIColors()
     Box(
@@ -141,7 +153,35 @@ fun UtilityCard(
                 RoundedCornerShape(22.dp)
             )
             .background(
-                color = colors.cardBackground
+                color = colors.cardBackground.copy(alpha = 0.5f)
+            )
+            .border(
+                width = Dp.Hairline,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.5f),
+                        Color.White.copy(alpha = 0.1f),
+                    )
+                ),
+                shape = RoundedCornerShape(22.dp)
+            )
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { RoundedCornerShape(24.dp) },
+                effects = {
+                    blur(4.dp.toPx())
+//                    colorControls(
+//                        brightness = 0.1f,    // -1.0 to 1.0
+//                        contrast = 1.2f,      // 0.0 to 2.0
+//                        saturation = 1.5f     // 0.0 to 2.0
+//                    )
+                    vibrancy()
+                    lens(
+                        refractionHeight = 24.dp.toPx(),
+                        refractionAmount = 32.dp.toPx(),
+                        chromaticAberration = false  // RGB color separation
+                    )
+                }
             )
             .fillMaxWidth()
     ) {

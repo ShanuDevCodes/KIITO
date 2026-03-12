@@ -7,6 +7,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.kito.core.database.entity.AttendanceEntity
@@ -180,6 +182,16 @@ fun AttendanceBarCard(
                 onClick = {
                     onNavigate()
                 }
+            )
+            .border(
+                width = Dp.Hairline,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.5f),
+                        Color.White.copy(alpha = 0.1f),
+                    )
+                ),
+                shape = RoundedCornerShape(26.dp)
             ),
         contentAlignment = Alignment.Center
     ) {

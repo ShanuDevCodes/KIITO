@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,14 +34,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kashif_e.backdrop.backdrops.LayerBackdrop
+import com.kashif_e.backdrop.drawBackdrop
+import com.kashif_e.backdrop.effects.blur
+import com.kashif_e.backdrop.effects.colorControls
+import com.kashif_e.backdrop.effects.lens
+import com.kashif_e.backdrop.effects.vibrancy
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.common.util.formatTo12Hour
 import com.kito.core.database.entity.StudentSectionEntity
 import com.kito.core.presentation.components.animation.PageNotFoundAnimation
 import com.kito.core.presentation.components.animation.RelaxAnimation
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
@@ -53,7 +67,8 @@ fun ScheduleCard(
     isScheduleEmpty: Boolean,
     schedule: List<StudentSectionEntity>,
     nextSchedule: List<StudentSectionEntity>,
-    onCLick: () -> Unit
+    onCLick: () -> Unit,
+    backdrop: LayerBackdrop
 ) {
     val now = rememberCurrentTime()
     val (ongoing, upcomingList) = remember(schedule, now) {
@@ -106,6 +121,35 @@ fun ScheduleCard(
         modifier = Modifier
             .clip(RoundedCornerShape(22.dp))
             .clickable { onCLick() }
+            .border(
+                width = Dp.Hairline,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.5f),
+                        Color.White.copy(alpha = 0.1f),
+                    )
+                ),
+                shape = RoundedCornerShape(22.dp)
+            )
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { RoundedCornerShape(24.dp) },
+                effects = {
+                    blur(4.dp.toPx())
+//                    colorControls(
+//                        brightness = 0.1f,    // -1.0 to 1.0
+//                        contrast = 1.2f,      // 0.0 to 2.0
+//                        saturation = 1.5f     // 0.0 to 2.0
+//                    )
+                    vibrancy()
+                    lens(
+                        refractionHeight = 24.dp.toPx(),
+                        refractionAmount = 32.dp.toPx(),
+                        chromaticAberration = false  // RGB color separation
+                    )
+                }
+            )
+
     ) {
         LazyColumn(
             contentPadding = PaddingValues(bottom = 8.dp),
@@ -113,7 +157,7 @@ fun ScheduleCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(165.dp)
-                .background(colors.cardBackground, RoundedCornerShape(22.dp))
+//                .background(colors.cardBackground.copy(alpha = 0.5f), RoundedCornerShape(22.dp))
                 .padding(horizontal = 8.dp)
         ) {
             if(!isScheduleEmpty) {

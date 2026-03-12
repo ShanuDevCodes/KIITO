@@ -74,10 +74,17 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
+import com.kashif_e.backdrop.drawBackdrop
+import com.kashif_e.backdrop.effects.blur
+import com.kashif_e.backdrop.effects.lens
+import com.kashif_e.backdrop.effects.vibrancy
 import com.kito.core.presentation.components.FacultyCardContent
 import com.kito.core.presentation.components.FacultyCardShimmer
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.animation.NoInternetAnimation
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.state.SearchResultState
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.core.presentation.navigation3.Routes
@@ -107,7 +114,8 @@ fun FacultyScreen(
     val facultyList by viewModel.faculty.collectAsState()
     val searchResultState by viewModel.searchResultState.collectAsState()
     val facultySearchResult by viewModel.facultySearchResult.collectAsState()
-    val hazeState = rememberHazeState()
+//    val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     val cardHaze = rememberHazeState()
     val uiColors = UIColors()
     val textFieldState = rememberTextFieldState()
@@ -252,7 +260,8 @@ fun FacultyScreen(
                                 start = 16.dp,
                                 end = 16.dp
                             )
-                            .hazeSource(hazeState)
+//                            .hazeSource(hazeState)
+                            .layerBackdrop(backdrop)
                             .fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
@@ -313,7 +322,8 @@ fun FacultyScreen(
                             ),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                             modifier = Modifier
-                                .hazeSource(hazeState)
+//                                .hazeSource(hazeState)
+                                .layerBackdrop(backdrop)
                                 .fillMaxSize()
                                 .padding(horizontal = 16.dp)
                         ) {
@@ -474,11 +484,14 @@ fun FacultyScreen(
             }
             Column(
                 modifier = Modifier
-                    .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                        blurRadius = 15.dp
-                        noiseFactor = 0.05f
-                        alpha = 0.98f
-                    }
+//                    .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                        blurRadius = 15.dp
+//                        noiseFactor = 0.05f
+//                        alpha = 0.98f
+//                    }
+                    .customBackdrop(
+                        backdrop
+                    )
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {

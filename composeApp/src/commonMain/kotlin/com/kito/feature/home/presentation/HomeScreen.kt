@@ -75,6 +75,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -83,6 +84,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import coil3.compose.AsyncImage
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
+import com.kashif_e.backdrop.drawBackdrop
+import com.kashif_e.backdrop.effects.blur
+import com.kashif_e.backdrop.effects.lens
+import com.kashif_e.backdrop.effects.vibrancy
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.network.supabase.model.EventAndAdModel
 import com.kito.core.platform.openUrl
@@ -90,6 +97,7 @@ import com.kito.core.platform.sendEmail
 import com.kito.core.platform.toast
 import com.kito.core.presentation.components.AboutELabsDialog
 import com.kito.core.presentation.components.AttendanceBarCard
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.ScheduleCard
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.UtilityCard
@@ -136,6 +144,7 @@ fun HomeScreen(
     val nextSchedule by viewmodel.nextSchedule.collectAsState()
     val syncState by viewmodel.syncState.collectAsState()
     val hazeState = rememberHazeState()
+    val primaryBackdrop = rememberLayerBackdrop()
     val haptic = LocalHapticFeedback.current
     var isLoginDialogOpen by remember { mutableStateOf(false) }
     val loginState by viewmodel.loginState.collectAsState()
@@ -146,6 +155,7 @@ fun HomeScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val eventsAndAds by viewmodel.ads.collectAsState()
     val isScheduleEmpty by viewmodel.isScheduleEmpty.collectAsState()
+    val backdrop = rememberLayerBackdrop()
 
     LaunchedEffect(loginState) {
         if (loginState is SyncUiState.Success) {
@@ -218,10 +228,17 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .hazeSource(hazeState)
+                .layerBackdrop(primaryBackdrop)
         ) {
             Box(
+                modifier = Modifier
+                    .layerBackdrop(backdrop)
+            ) {
+                GlowBackground()
+            }
+            Box(
                 Modifier
-                    .background(Color(0xFF121116))
+//                    .background(Color(0xFF121116))
             ) {
                 Column(
                     modifier = Modifier
@@ -350,7 +367,8 @@ fun HomeScreen(
                                     onCLick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                                         rootNavBackStack.add(Routes.Schedule)
-                                    }
+                                    },
+                                    backdrop = backdrop
                                 )
                             }
                         }
@@ -403,7 +421,8 @@ fun HomeScreen(
                                             if (navKey != null){
                                                 rootNavBackStack.add(navKey)
                                             }
-                                        }
+                                        },
+                                        backdrop = backdrop
                                     )
                                 }
                             }
@@ -527,12 +546,30 @@ fun HomeScreen(
         }
         Column(
             modifier = Modifier
-                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                    blurRadius = 15.dp
-                    noiseFactor = 0.05f
-                    inputScale = HazeInputScale.Auto
-                    alpha = 0.98f
-                }
+//                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                    blurRadius = 15.dp
+//                    noiseFactor = 0.05f
+//                    inputScale = HazeInputScale.Auto
+//                    alpha = 0.98f
+//                }
+                .drawBackdrop(
+                    backdrop = primaryBackdrop,
+                    shape = { RoundedCornerShape(16.dp) },
+                    effects = {
+                        blur(4.dp.toPx())
+//                    colorControls(
+//                        brightness = 0.1f,    // -1.0 to 1.0
+//                        contrast = 1.2f,      // 0.0 to 2.0
+//                        saturation = 1.5f     // 0.0 to 2.0
+//                    )
+                        vibrancy()
+                        lens(
+                            refractionHeight = 24.dp.toPx(),
+                            refractionAmount = 32.dp.toPx(),
+                            chromaticAberration = false  // RGB color separation
+                        )
+                    }
+                )
                 .padding(horizontal = 12.dp)
         ) {
             Row(
@@ -893,6 +930,16 @@ fun EventAndAdBanner(
                         page = page,
                         pagerState = pagerState,
                         scale = 0.90f
+                    )
+                    .border(
+                        width = Dp.Hairline,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.5f),
+                                Color.White.copy(alpha = 0.1f),
+                            )
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     ),
                 shape = RoundedCornerShape(16.dp),
                 onClick = {
