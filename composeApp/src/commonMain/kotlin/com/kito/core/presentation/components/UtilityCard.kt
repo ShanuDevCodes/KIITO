@@ -111,19 +111,19 @@ val UtilityList = listOf(
         ),
         destination = Routes.ExamSchedule
     ),
-    Utilities(
-        title = "Campus Calendar",
-        icon = Icons.Rounded.CalendarMonth,
-        itemBoxColor = Color(0xFF30583E),
-        textColor = Color(0xFFC1F9D2),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFF89C6A2),
-                Color(0xFF3B684B)
-            )
-        ),
-        destination = Routes.Calendar
-    ),
+//    Utilities(
+//        title = "Campus Calendar",
+//        icon = Icons.Rounded.CalendarMonth,
+//        itemBoxColor = Color(0xFF30583E),
+//        textColor = Color(0xFFC1F9D2),
+//        iconGradient = Brush.horizontalGradient(
+//            colors = listOf(
+//                Color(0xFF89C6A2),
+//                Color(0xFF3B684B)
+//            )
+//        ),
+//        destination = Routes.Calendar
+//    ),
     Utilities(
         title = "Coming Soon",
         icon = Icons.Rounded.AutoAwesome,

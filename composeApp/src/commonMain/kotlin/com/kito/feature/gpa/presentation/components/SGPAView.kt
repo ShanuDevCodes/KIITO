@@ -81,7 +81,7 @@ fun SGPAScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121116))
+//            .background(Color(0xFF121116))
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(2.5.dp),
         contentPadding = PaddingValues(

@@ -50,8 +50,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.network.supabase.model.TeacherScheduleByIDModel
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.meshGradient
 import com.kito.core.presentation.components.shimmer
 import com.kito.core.presentation.components.state.SyncUiState
@@ -88,7 +92,8 @@ fun FacultyDetailScreen(
 ) {
     val syncState by viewModel.syncState.collectAsState()
     val uiColors = UIColors()
-    val hazeState = rememberHazeState()
+//    val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     val cardHaze = rememberHazeState()
     val faculty by viewModel.faculty.collectAsState()
     val schedule by viewModel.schedule.collectAsState()
@@ -180,8 +185,9 @@ fun FacultyDetailScreen(
     }
 
     Box(modifier = Modifier.hazeSource(cardHaze)) {
+        GlowBackground()
         Box(
-            modifier = Modifier.background(Color(0xFF121116))
+//            modifier = Modifier.background(Color(0xFF121116))
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(
@@ -192,7 +198,8 @@ fun FacultyDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
-                    .hazeSource(hazeState)
+//                    .hazeSource(hazeState)
+                    .layerBackdrop(backdrop)
             ) {
                 item {
                     Card(
@@ -450,11 +457,12 @@ fun FacultyDetailScreen(
             }
             Column(
                 modifier = Modifier
-                    .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                        blurRadius = 15.dp
-                        noiseFactor = 0.05f
-                        alpha = 0.98f
-                    }
+//                    .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                        blurRadius = 15.dp
+//                        noiseFactor = 0.05f
+//                        alpha = 0.98f
+//                    }
+                    .customBackdrop(backdrop)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {

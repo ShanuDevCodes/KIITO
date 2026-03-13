@@ -81,13 +81,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp.Companion.Hairline
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.common.util.formatTo12Hour
 import com.kito.core.platform.sendEmail
 import com.kito.core.presentation.components.ExpressiveEasing
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.animation.PageNotFoundAnimation
 import com.kito.core.presentation.components.animation.PandaSleepingAnimation
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.meshGradient
 import com.kito.feature.friendview.presentation.component.AddFriendDialog
 import com.kito.feature.schedule.presentation.WeekDay
@@ -123,6 +127,7 @@ fun FriendView(
     val friendRolls by viewmodel.friendRolls.collectAsState()
     var showAddFriendDialog by remember { mutableStateOf(false) }
     val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     val uiColors = UIColors()
     val coroutineScope = rememberCoroutineScope()
     val weekDays = WeekDay.entries
@@ -208,11 +213,15 @@ fun FriendView(
         )
     }
     Box {
+        Box(){
+            GlowBackground()
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF121116))
+//                .background(Color(0xFF121116))
                 .hazeSource(hazeState)
+                .layerBackdrop(backdrop)
         ) {
             HorizontalPager(
                 contentPadding = PaddingValues(
@@ -537,12 +546,13 @@ fun FriendView(
         }
         Box(
             modifier = Modifier
-                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                    blurRadius = 15.dp
-                    noiseFactor = 0.05f
-                    inputScale = HazeInputScale.Auto
-                    alpha = 0.98f
-                }
+//                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                    blurRadius = 15.dp
+//                    noiseFactor = 0.05f
+//                    inputScale = HazeInputScale.Auto
+//                    alpha = 0.98f
+//                }
+                .customBackdrop(backdrop)
                 .fillMaxWidth()
         ) {
             Column(

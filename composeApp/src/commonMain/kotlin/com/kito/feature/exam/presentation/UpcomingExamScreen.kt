@@ -48,10 +48,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.common.util.formatDate
 import com.kito.core.common.util.formatTo12Hour
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.animation.NoDataFoundAnimation
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.meshGradient
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
@@ -78,7 +82,8 @@ fun UpcomingExamScreen(
     onBack:() -> Unit
 ) {
     val uiColors = UIColors()
-    val hazeState = rememberHazeState()
+//    val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     val examModel by viewmodel.examModel.collectAsState()
     val uiState by viewmodel.uiState.collectAsState()
     val meshColors = listOf(
@@ -115,8 +120,12 @@ fun UpcomingExamScreen(
             }
         }
     }
+    Box(){
+        GlowBackground()
+    }
     Box(
-        modifier = Modifier.background(Color(0xFF121116))
+        modifier = Modifier
+//            .background(Color(0xFF121116))
     ) {
         LazyColumn(
             contentPadding = PaddingValues(
@@ -125,7 +134,8 @@ fun UpcomingExamScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(2.5.dp),
             modifier = Modifier
-                .hazeSource(hazeState)
+//                .hazeSource(hazeState)
+                .layerBackdrop(backdrop = backdrop)
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
         ) {
@@ -293,12 +303,13 @@ fun UpcomingExamScreen(
         }
         Column(
             modifier = Modifier
-                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                    blurRadius = 15.dp
-                    noiseFactor = 0.05f
-                    inputScale = HazeInputScale.Auto
-                    alpha = 0.98f
-                }
+//                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                    blurRadius = 15.dp
+//                    noiseFactor = 0.05f
+//                    inputScale = HazeInputScale.Auto
+//                    alpha = 0.98f
+//                }
+                .customBackdrop(backdrop)
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {

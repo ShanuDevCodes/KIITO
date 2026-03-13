@@ -82,6 +82,7 @@ import com.kashif_e.backdrop.effects.lens
 import com.kashif_e.backdrop.effects.vibrancy
 import com.kito.core.presentation.components.FacultyCardContent
 import com.kito.core.presentation.components.FacultyCardShimmer
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.animation.NoInternetAnimation
 import com.kito.core.presentation.components.customBackdrop
@@ -227,8 +228,9 @@ fun FacultyScreen(
     Box(
         modifier = Modifier.hazeSource(cardHaze)
     ) {
+        GlowBackground()
         Box(
-            modifier = Modifier.background(Color(0xFF121116))
+//            modifier = Modifier.background(Color(0xFF121116))
         ) {
             when (syncState) {
                 is SyncUiState.Error -> {

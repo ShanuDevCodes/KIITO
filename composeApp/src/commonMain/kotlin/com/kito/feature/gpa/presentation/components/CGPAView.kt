@@ -83,7 +83,7 @@ fun CGPAScreen() {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121116))
+//            .background(Color(0xFF121116))
             .padding(horizontal = 16.dp)
             .imePadding(),
         verticalArrangement = Arrangement.spacedBy(2.5.dp),

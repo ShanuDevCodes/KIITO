@@ -1083,6 +1083,7 @@ import com.kito.core.database.entity.AttendanceEntity
 import com.kito.core.database.entity.toAttendanceEntity
 import com.kito.core.platform.toast
 import com.kito.core.presentation.components.AttendanceCard
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.OverallAttendanceCard
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.state.SyncUiState
@@ -1158,7 +1159,12 @@ fun AttendanceListScreen(
     }
 
     // ── Root box — no layerBackdrop here anymore ──────────────────────────────
-    Box(modifier = Modifier.background(Color(0xFF121116))) {
+    Box(){
+        GlowBackground()
+    }
+    Box(modifier = Modifier
+//        .background(Color(0xFF121116))
+    ) {
         PullToRefreshBox(
             state = pullToRefreshState,
             isRefreshing = syncState is SyncUiState.Loading,

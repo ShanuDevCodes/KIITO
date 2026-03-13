@@ -70,12 +70,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.common.util.formatTo12Hour
 import com.kito.core.platform.sendEmail
 import com.kito.core.presentation.components.ExpressiveEasing
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
 import com.kito.core.presentation.components.animation.PandaSleepingAnimation
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.meshGradient
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
@@ -114,7 +119,8 @@ fun ScheduleScreen(
     }
     val uiColors = UIColors()
     val coroutineScope = rememberCoroutineScope()
-    val hazeState = rememberHazeState()
+//    val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     val weekDays = WeekDay.entries
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -187,10 +193,14 @@ fun ScheduleScreen(
             )
         )
     }
+    Box(){
+        GlowBackground()
+    }
     Box(
         modifier = Modifier
-            .background(Color(0xFF121116))
-            .hazeSource(hazeState)
+//            .background(Color(0xFF121116))
+            .layerBackdrop(backdrop)
+//            .hazeSource(hazeState)
     ) {
         HorizontalPager(
             contentPadding = PaddingValues(
@@ -413,12 +423,13 @@ fun ScheduleScreen(
     }
     Column(
         modifier = Modifier
-            .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                blurRadius = 15.dp
-                noiseFactor = 0.05f
-                inputScale = HazeInputScale.Auto
-                alpha = 0.98f
-            }
+//            .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                blurRadius = 15.dp
+//                noiseFactor = 0.05f
+//                inputScale = HazeInputScale.Auto
+//                alpha = 0.98f
+//            }
+            .customBackdrop(backdrop)
             .fillMaxWidth(),
     ) {
         Spacer(

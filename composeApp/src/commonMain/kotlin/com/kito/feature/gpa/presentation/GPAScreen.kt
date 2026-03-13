@@ -28,9 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.platform.sendEmail
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.RopeTabRow
 import com.kito.core.presentation.components.UIColors
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.feature.gpa.presentation.components.CGPAScreen
 import com.kito.feature.gpa.presentation.components.GPAHeader
 import com.kito.feature.gpa.presentation.components.SGPAScreen
@@ -57,7 +62,8 @@ fun GPAScreen(
     val student by viewModel.student.collectAsState()
     val selectedSemester by viewModel.semester.collectAsState()
     val selectedBranch by viewModel.branch.collectAsState()
-    val hazeState = rememberHazeState()
+//    val hazeState = rememberHazeState()
+    val backDrop = rememberLayerBackdrop()
     val roll by viewModel.roll.collectAsState()
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -67,16 +73,19 @@ fun GPAScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121116))
+//            .background(Color(0xFF121116))
     ) {
 
-
         Box(
-            modifier = Modifier.hazeSource(hazeState)
+            modifier = Modifier
+                .layerBackdrop(backDrop)
+//                .hazeSource(hazeState)
         ) {
+            GlowBackground()
             HorizontalPager(
                 state = pagerState
             ){
@@ -93,12 +102,13 @@ fun GPAScreen(
 
         Box(
             modifier = Modifier
-                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                    blurRadius = 15.dp
-                    noiseFactor = 0.05f
-                    inputScale = HazeInputScale.Auto
-                    alpha = 0.98f
-                }
+//                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                    blurRadius = 15.dp
+//                    noiseFactor = 0.05f
+//                    inputScale = HazeInputScale.Auto
+//                    alpha = 0.98f
+//                }
+                .customBackdrop(backDrop)
         ) {
             Column(
                 modifier = Modifier

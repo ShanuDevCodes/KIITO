@@ -51,8 +51,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.common.util.currentLocalDateTime
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
+import com.kito.core.presentation.components.customBackdrop
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -83,7 +87,8 @@ fun HolidayListScreen(
 ) {
     val uiColors = remember { UIColors() }
     val listState = rememberLazyListState()
-    val hazeState = rememberHazeState()
+//    val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     LaunchedEffect(Unit) {
         delay(600)
 
@@ -143,17 +148,20 @@ fun HolidayListScreen(
             }
         }
     }
-
+    Box(){
+        GlowBackground()
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121116))
+//            .background(Color(0xFF121116))
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState)
+//                .hazeSource(hazeState)
+                .layerBackdrop(backdrop)
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(
                 top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 70.dp,
@@ -347,11 +355,12 @@ fun HolidayListScreen(
 
         Column(
             modifier = Modifier
-                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                    blurRadius = 15.dp
-                    noiseFactor = 0.05f
-                    alpha = 0.98f
-                }
+//                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                    blurRadius = 15.dp
+//                    noiseFactor = 0.05f
+//                    alpha = 0.98f
+//                }
+                .customBackdrop(backdrop)
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {

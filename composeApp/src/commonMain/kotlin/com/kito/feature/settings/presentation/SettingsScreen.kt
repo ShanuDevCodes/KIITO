@@ -63,6 +63,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.kashif_e.backdrop.backdrops.layerBackdrop
+import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
 import com.kito.core.platform.NotificationPermissionEffect
 import com.kito.core.platform.areNotificationsEnabled
 import com.kito.core.platform.canScheduleExactAlarms
@@ -70,7 +72,9 @@ import com.kito.core.platform.openAlarmSettings
 import com.kito.core.platform.openAppSettings
 import com.kito.core.platform.openNotificationSettings
 import com.kito.core.platform.sendEmail
+import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.UIColors
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.core.presentation.navigation3.TabRoutes
 import com.kito.core.presentation.navigation3.navigateTab
@@ -105,6 +109,7 @@ fun SettingsScreen(
     val uiColors = UIColors()
     val haptic = LocalHapticFeedback.current
     val hazeState = rememberHazeState()
+    val backdrop = rememberLayerBackdrop()
     val scope = rememberCoroutineScope()
     val name by viewModel.name.collectAsState()
     val roll by viewModel.rollNumber.collectAsState()
@@ -299,10 +304,12 @@ fun SettingsScreen(
         }
     }
     Box {
+        GlowBackground()
         Box(
             modifier = Modifier
                 .hazeSource(hazeState)
-                .background(Color(0xFF121116))
+                .layerBackdrop(backdrop)
+//                .background(Color(0xFF121116))
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(
@@ -419,12 +426,13 @@ fun SettingsScreen(
         }
         Column(
             modifier = Modifier
-                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-                    blurRadius = 15.dp
-                    noiseFactor = 0.05f
-                    inputScale = HazeInputScale.Auto
-                    alpha = 0.98f
-                }
+//                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+//                    blurRadius = 15.dp
+//                    noiseFactor = 0.05f
+//                    inputScale = HazeInputScale.Auto
+//                    alpha = 0.98f
+//                }
+                .customBackdrop(backdrop)
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
