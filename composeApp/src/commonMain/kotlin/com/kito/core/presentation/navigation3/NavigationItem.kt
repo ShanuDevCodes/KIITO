@@ -21,25 +21,25 @@ val NavigationItems = listOf(
     BottomBarTab(
         title = "Home",
         icon = Icons.Filled.Home,
-        color = Color(0xFFFFA574),
+        color = Color(0xFFF66414),
         destination = TabRoutes.Home
     ),
     BottomBarTab(
         title = "Attendance",
         icon = Icons.Filled.CheckCircle,
-        color = Color(0xFFFFA574),
+        color = Color(0xFFF66414),
         destination = TabRoutes.Attendance
     ),
     BottomBarTab(
         title = "Faculty",
         icon = Icons.Default.School,
-        color = Color(0xFFFFA574),
+        color = Color(0xFFF66414),
         destination = TabRoutes.Faculty
     ),
     BottomBarTab(
         title = "Settings",
         icon = Icons.Filled.Settings,
-        color = Color(0xFFFFA574),
+        color = Color(0xFFF66414),
         destination = TabRoutes.Profile
     ),
 )

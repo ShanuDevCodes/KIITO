@@ -104,7 +104,7 @@ fun MainUI(
 
     val prefs: PrefsRepository = koinInject()
     var startDestination by remember { mutableStateOf(initialDestination) }
-    
+
     // Only fetch if initialDestination was null (mainly for iOS or fallback)
     LaunchedEffect(Unit) {
         if (startDestination == null) {
@@ -217,11 +217,13 @@ fun MainUI(
                                 shape = { RoundedCornerShape(24.dp) },
                                 effects = {
                                     blur(4.dp.toPx())
-//                                    colorControls(
-//                                        brightness = 0.1f,    // -1.0 to 1.0
-//                                        contrast = 1.2f,      // 0.0 to 2.0
-//                                        saturation = 1.5f     // 0.0 to 2.0
-//                                    )
+                                    if (selectedTabIndex == 0) {
+                                        colorControls(
+                                            brightness = -0.05f,    // -1.0 to 1.0
+//                                            contrast = 1.2f,      // 0.0 to 2.0
+//                                            saturation = 1.5f     // 0.0 to 2.0
+                                        )
+                                    }
                                     vibrancy()
                                     lens(
                                         refractionHeight = 24.dp.toPx(),
@@ -257,16 +259,29 @@ fun MainUI(
                             )
                         )
 
-                        Canvas(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
+                        Canvas(modifier = Modifier.fillMaxSize()) {
                             val tabWidth = size.width / NavigationItems.size
                             val centerOffset = tabWidth * animatedSelectedTabIndex + tabWidth / 2
 
+                            // ── White base glow — ensures contrast on any background color ─────
+//                            drawCircle(
+//                                brush = Brush.radialGradient(
+//                                    colors = listOf(
+//                                        Color.White.copy(alpha = 0.25f),
+//                                        Color.Transparent
+//                                    ),
+//                                    center = Offset(centerOffset, size.height * 0.55f),
+//                                    radius = tabWidth * 0.7f
+//                                ),
+//                                radius = tabWidth * 0.7f,
+//                                center = Offset(centerOffset, size.height * 0.55f)
+//                            )
+
+                            // ── Colored glow on top ────────────────────────────────────────────
                             drawCircle(
                                 brush = Brush.radialGradient(
                                     colors = listOf(
-                                        animatedColor.copy(alpha = 0.3f),
+                                        animatedColor.copy(alpha = 0.45f),  // bumped from 0.3f
                                         Color.Transparent
                                     ),
                                     center = Offset(centerOffset, size.height * 0.55f),
@@ -276,13 +291,9 @@ fun MainUI(
                                 center = Offset(centerOffset, size.height * 0.55f)
                             )
 
+                            // ── Animated border arc — unchanged ───────────────────────────────
                             val path = Path().apply {
-                                addRoundRect(
-                                    RoundRect(
-                                        size.toRect(),
-                                        CornerRadius(size.height / 2f)
-                                    )
-                                )
+                                addRoundRect(RoundRect(size.toRect(), CornerRadius(size.height / 2f)))
                             }
                             val measure = PathMeasure()
                             measure.setPath(path, false)
