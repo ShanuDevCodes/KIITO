@@ -1,6 +1,7 @@
 package com.kito.feature.settings.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -58,6 +60,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -266,9 +269,9 @@ fun SettingsScreen(
                 withDismissAction = true
             )
             if (result == SnackbarResult.ActionPerformed) {
-                if(isAndroid()) {
+                if (isAndroid()) {
                     openAppSettings()
-                }else{
+                } else {
                     openNotificationSettings()
                 }
             }
@@ -303,12 +306,14 @@ fun SettingsScreen(
             viewModel.syncStateIdle()
         }
     }
-    Box {
+    Box(
+        modifier = Modifier
+            .hazeSource(hazeState)
+            .layerBackdrop(backdrop)
+    ) {
         GlowBackground()
         Box(
             modifier = Modifier
-                .hazeSource(hazeState)
-                .layerBackdrop(backdrop)
 //                .background(Color(0xFF121116))
         ) {
             LazyColumn(
@@ -326,7 +331,6 @@ fun SettingsScreen(
 
                 itemsIndexed(settingsItems) { index, item ->
                     Card(
-
                         shape = RoundedCornerShape(
                             topStart = if (index == 0) 24.dp else 4.dp,
                             topEnd = if (index == 0) 24.dp else 4.dp,
@@ -338,11 +342,32 @@ fun SettingsScreen(
                             .background(
                                 brush = Brush.linearGradient(
                                     colors = listOf(
-                                        uiColors.cardBackground,
-                                        Color(0xFF2F222F),
-                                        Color(0xFF2F222F),
-                                        uiColors.cardBackgroundHigh
+                                        uiColors.cardBackground.copy(alpha = 0.6f),
+                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                        uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
                                     )
+                                ),
+                                shape = RoundedCornerShape(
+                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                    bottomStart = if (index == settingsItems.size - 1) 24.dp else 4.dp,
+                                    bottomEnd = if (index == settingsItems.size - 1) 24.dp else 4.dp
+                                )
+                            )
+                            .border(
+                                width = Dp.Hairline,
+                                brush = Brush.linearGradient(
+                                    colorStops = arrayOf(
+                                        0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                        0.20f to Color.White.copy(alpha = 0.30f),
+                                        0.40f to Color.White.copy(alpha = if (index == settingsItems.size - 1) 0.08f else 0.04f),
+                                        0.65f to Color.Transparent,
+                                        0.85f to Color.White.copy(alpha = 0.03f),
+                                        1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                    ),
+                                    start = Offset(0f, 0f),
+                                    end = Offset(600f, 600f)
                                 ),
                                 shape = RoundedCornerShape(
                                     topStart = if (index == 0) 24.dp else 4.dp,
@@ -424,32 +449,32 @@ fun SettingsScreen(
                 }
             }
         }
-        Column(
-            modifier = Modifier
+    }
+    Column(
+        modifier = Modifier
 //                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                    blurRadius = 15.dp
 //                    noiseFactor = 0.05f
 //                    inputScale = HazeInputScale.Auto
 //                    alpha = 0.98f
 //                }
-                .customBackdrop(backdrop)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            Spacer(
-                modifier = Modifier.height(
-                    16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                )
+            .customBackdrop(backdrop)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Spacer(
+            modifier = Modifier.height(
+                16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             )
-            Text(
-                text = "Settings",
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.SemiBold,
-                color = uiColors.textPrimary,
-                style = MaterialTheme.typography.titleLargeEmphasized
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        )
+        Text(
+            text = "Settings",
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.SemiBold,
+            color = uiColors.textPrimary,
+            style = MaterialTheme.typography.titleLargeEmphasized
+        )
+        Spacer(modifier = Modifier.height(16.dp))
     }
     if (isNameChangeDialogOpen) {
         NameChangeDialogBox(

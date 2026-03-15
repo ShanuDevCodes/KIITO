@@ -77,12 +77,11 @@ fun GPAScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .layerBackdrop(backDrop)
 //            .background(Color(0xFF121116))
     ) {
-
         Box(
             modifier = Modifier
-                .layerBackdrop(backDrop)
 //                .hazeSource(hazeState)
         ) {
             GlowBackground()
@@ -99,117 +98,116 @@ fun GPAScreen(
                 }
             }
         }
-
-        Box(
-            modifier = Modifier
+    }
+    Box(
+        modifier = Modifier
 //                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                    blurRadius = 15.dp
 //                    noiseFactor = 0.05f
 //                    inputScale = HazeInputScale.Auto
 //                    alpha = 0.98f
 //                }
-                .customBackdrop(backDrop)
+            .customBackdrop(backDrop)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(
+                    top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                    start = 16.dp,
+                    end = 16.dp
+                )
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(
-                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
-                        start = 16.dp,
-                        end = 16.dp
-                    )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                IconButton(
+                    onClick = {
+                        onBack()
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.White.copy(alpha = 0.08f),
+                        contentColor = uiColors.progressAccent
+                    ),
+                    modifier = Modifier.size(32.dp)
+                ){
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Report",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "GPA Calc",
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.SemiBold,
+                    color = uiColors.textPrimary,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
+                    modifier = Modifier
+                        .weight(1f)
+                )
+                IconButton(
+                    onClick = {
+                        sendEmail(
+                            to = "elabs.kiito@gmail.com",
+                            subject = "KIITO GPA Calc Screen Report",
+                            body = ""
+                        )
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.White.copy(alpha = 0.08f),
+                        contentColor = Color(0xFFB32727)
+                    ),
+                    modifier = Modifier.size(32.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            onBack()
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            contentColor = uiColors.progressAccent
-                        ),
-                        modifier = Modifier.size(32.dp)
-                    ){
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Report",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "GPA Calc",
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.SemiBold,
-                        color = uiColors.textPrimary,
-                        style = MaterialTheme.typography.titleLargeEmphasized,
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                    IconButton(
-                        onClick = {
-                            sendEmail(
-                                to = "elabs.kiito@gmail.com",
-                                subject = "KIITO GPA Calc Screen Report",
-                                body = ""
-                            )
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            contentColor = Color(0xFFB32727)
-                        ),
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Report,
-                            contentDescription = "Report",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Box() {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .clip(
-                                RoundedCornerShape(24.dp)
-                            )
-                            .background(Color(0xFF121116))
-                    )
-                    GPAHeader(
-                        roll = roll,
-                        isLoading = roll.isEmpty(),
-                        selectedSemester = selectedSemester,
-                        selectedBranch = selectedBranch,
-                        onSemesterSelected = {
-                            viewModel.updateSemester(it)
-                        },
-                        onBranchSelected = {
-                            viewModel.updateBranch(it)
-                        }
+                    Icon(
+                        imageVector = Icons.Default.Report,
+                        contentDescription = "Report",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                val tabProgress = pagerState.currentPage + pagerState.currentPageOffsetFraction
-                RopeTabRow(
-                    tabPosition = tabProgress,
-                    onTabSelected = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(
-                                page = it,
-                                animationSpec = tween(
-                                    durationMillis = 400,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-                        }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Box() {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(
+                            RoundedCornerShape(24.dp)
+                        )
+                        .background(Color(0xFF121116))
+                )
+                GPAHeader(
+                    roll = roll,
+                    isLoading = roll.isEmpty(),
+                    selectedSemester = selectedSemester,
+                    selectedBranch = selectedBranch,
+                    onSemesterSelected = {
+                        viewModel.updateSemester(it)
+                    },
+                    onBranchSelected = {
+                        viewModel.updateBranch(it)
                     }
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            val tabProgress = pagerState.currentPage + pagerState.currentPageOffsetFraction
+            RopeTabRow(
+                tabPosition = tabProgress,
+                onTabSelected = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                            page = it,
+                            animationSpec = tween(
+                                durationMillis = 400,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
+                    }
+                }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

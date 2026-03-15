@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,11 +64,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -226,7 +229,9 @@ fun FacultyScreen(
         }
     }
     Box(
-        modifier = Modifier.hazeSource(cardHaze)
+        modifier = Modifier
+            .layerBackdrop(backdrop)
+            .hazeSource(cardHaze)
     ) {
         GlowBackground()
         Box(
@@ -263,7 +268,6 @@ fun FacultyScreen(
                                 end = 16.dp
                             )
 //                            .hazeSource(hazeState)
-                            .layerBackdrop(backdrop)
                             .fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
@@ -273,7 +277,7 @@ fun FacultyScreen(
                                 modifier = Modifier
                                     .fillMaxWidth(),
                                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+//                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                 shape = RoundedCornerShape(
                                     topStart = if (index == 0) 24.dp else 4.dp,
                                     topEnd = if (index == 0) 24.dp else 4.dp,
@@ -287,11 +291,32 @@ fun FacultyScreen(
                                         .background(
                                             brush = Brush.linearGradient(
                                                 colors = listOf(
-                                                    uiColors.cardBackground,
-                                                    Color(0xFF2F222F),
-                                                    Color(0xFF2F222F),
-                                                    uiColors.cardBackgroundHigh
+                                                    uiColors.cardBackground.copy(alpha = 0.6f),
+                                                    Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                    Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                    uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
                                                 )
+                                            )
+                                        )
+                                        .border(
+                                            width = Dp.Hairline,
+                                            brush = Brush.linearGradient(
+                                                colorStops = arrayOf(
+                                                    0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                    0.20f to Color.White.copy(alpha = 0.30f),
+                                                    0.40f to Color.White.copy(alpha = if (index == facultyList.size - 1) 0.08f else 0.04f),
+                                                    0.65f to Color.Transparent,
+                                                    0.85f to Color.White.copy(alpha = 0.03f),
+                                                    1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                ),
+                                                start = Offset(0f, 0f),
+                                                end = Offset(600f, 600f)
+                                            ),
+                                            shape = RoundedCornerShape(
+                                                topStart = if (index == 0) 24.dp else 4.dp,
+                                                topEnd = if (index == 0) 24.dp else 4.dp,
+                                                bottomStart = if (index == facultyList.size - 1) 24.dp else 4.dp,
+                                                bottomEnd = if (index == facultyList.size - 1) 24.dp else 4.dp
                                             )
                                         )
                                         .padding(16.dp)
@@ -325,7 +350,6 @@ fun FacultyScreen(
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                             modifier = Modifier
 //                                .hazeSource(hazeState)
-                                .layerBackdrop(backdrop)
                                 .fillMaxSize()
                                 .padding(horizontal = 16.dp)
                         ) {
@@ -341,7 +365,7 @@ fun FacultyScreen(
                                             .fillMaxWidth()
                                             .heightIn(min = 100.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+//                                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                         shape = RoundedCornerShape(
                                             topStart = if (index == 0) 24.dp else 4.dp,
                                             topEnd = if (index == 0) 24.dp else 4.dp,
@@ -362,11 +386,32 @@ fun FacultyScreen(
                                                 .background(
                                                     brush = Brush.linearGradient(
                                                         colors = listOf(
-                                                            uiColors.cardBackground,
-                                                            Color(0xFF2F222F),
-                                                            Color(0xFF2F222F),
-                                                            uiColors.cardBackgroundHigh
+                                                            uiColors.cardBackground.copy(alpha = 0.6f),
+                                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                            uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
                                                         )
+                                                    )
+                                                )
+                                                .border(
+                                                    width = Dp.Hairline,
+                                                    brush = Brush.linearGradient(
+                                                        colorStops = arrayOf(
+                                                            0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                            0.20f to Color.White.copy(alpha = 0.30f),
+                                                            0.40f to Color.White.copy(alpha = if (index == facultyList.size - 1) 0.08f else 0.04f),
+                                                            0.65f to Color.Transparent,
+                                                            0.85f to Color.White.copy(alpha = 0.03f),
+                                                            1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                        ),
+                                                        start = Offset(0f, 0f),
+                                                        end = Offset(600f, 600f)
+                                                    ),
+                                                    shape = RoundedCornerShape(
+                                                        topStart = if (index == 0) 24.dp else 4.dp,
+                                                        topEnd = if (index == 0) 24.dp else 4.dp,
+                                                        bottomStart = if (index == facultyList.size - 1) 24.dp else 4.dp,
+                                                        bottomEnd = if (index == facultyList.size - 1) 24.dp else 4.dp
                                                     )
                                                 )
                                                 .padding(16.dp)
@@ -413,7 +458,7 @@ fun FacultyScreen(
                                             .fillMaxWidth()
                                             .heightIn(min = 100.dp),
                                         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+//                                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                         shape = RoundedCornerShape(
                                             topStart = if (index == 0) 24.dp else 4.dp,
                                             topEnd = if (index == 0) 24.dp else 4.dp,
@@ -434,11 +479,32 @@ fun FacultyScreen(
                                                 .background(
                                                     brush = Brush.linearGradient(
                                                         colors = listOf(
-                                                            uiColors.cardBackground,
-                                                            Color(0xFF2F222F),
-                                                            Color(0xFF2F222F),
-                                                            uiColors.cardBackgroundHigh
+                                                            uiColors.cardBackground.copy(alpha = 0.6f),
+                                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                            uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
                                                         )
+                                                    )
+                                                )
+                                                .border(
+                                                    width = Dp.Hairline,
+                                                    brush = Brush.linearGradient(
+                                                        colorStops = arrayOf(
+                                                            0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                            0.20f to Color.White.copy(alpha = 0.30f),
+                                                            0.40f to Color.White.copy(alpha = if (index == facultySearchResult.size - 1) 0.08f else 0.04f),
+                                                            0.65f to Color.Transparent,
+                                                            0.85f to Color.White.copy(alpha = 0.03f),
+                                                            1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                        ),
+                                                        start = Offset(0f, 0f),
+                                                        end = Offset(600f, 600f)
+                                                    ),
+                                                    shape = RoundedCornerShape(
+                                                        topStart = if (index == 0) 24.dp else 4.dp,
+                                                        topEnd = if (index == 0) 24.dp else 4.dp,
+                                                        bottomStart = if (index == facultySearchResult.size - 1) 24.dp else 4.dp,
+                                                        bottomEnd = if (index == facultySearchResult.size - 1) 24.dp else 4.dp
                                                     )
                                                 )
                                                 .padding(16.dp)
@@ -484,94 +550,94 @@ fun FacultyScreen(
                     }
                 }
             }
-            Column(
-                modifier = Modifier
+        }
+    }
+    Column(
+        modifier = Modifier
 //                    .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                        blurRadius = 15.dp
 //                        noiseFactor = 0.05f
 //                        alpha = 0.98f
 //                    }
-                    .customBackdrop(
-                        backdrop
-                    )
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+            .customBackdrop(
+                backdrop
+            )
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(
+            modifier = Modifier.height(
+                16.dp + WindowInsets.statusBars.asPaddingValues()
+                    .calculateTopPadding()
+            )
+        )
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(
-                    modifier = Modifier.height(
-                        16.dp + WindowInsets.statusBars.asPaddingValues()
-                            .calculateTopPadding()
-                    )
+                Text(
+                    text = "Faculty",
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.SemiBold,
+                    color = uiColors.textPrimary,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
+                    modifier = Modifier.weight(1f)
                 )
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Faculty",
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.SemiBold,
-                            color = uiColors.textPrimary,
-                            style = MaterialTheme.typography.titleLargeEmphasized,
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (isOnline) {
-                            IconButton(
-                                onClick = {
-                                    scope.launch {
-                                        searchBarState.animateToExpanded()
-                                    }
-                                },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = Color.White.copy(alpha = 0.08f),
-                                    contentColor = uiColors.accentOrangeStart
-                                ),
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PersonSearch,
-                                    contentDescription = "Search",
-                                    modifier = Modifier.size(24.dp)
-                                )
+                if (isOnline) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                searchBarState.animateToExpanded()
                             }
-                        }
-                    }
-                    this@Column.AnimatedVisibility(
-                        visible = searchBarState.currentValue == SearchBarValue.Expanded,
-                        enter = fadeIn(
-                            tween(
-                                durationMillis = 400,
-                                easing = FastOutSlowInEasing
-                            )
-                        ) + expandVertically(
-                            tween(
-                                durationMillis = 400,
-                                easing = FastOutSlowInEasing
-                            )
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            contentColor = uiColors.accentOrangeStart
                         ),
-                        exit = fadeOut(
-                            tween(
-                                durationMillis = 400,
-                                easing = FastOutSlowInEasing
-                            )
-                        ) + shrinkVertically(
-                            tween(
-                                durationMillis = 400,
-                                easing = FastOutSlowInEasing
-                            )
-                        ),
+                        modifier = Modifier.size(32.dp)
                     ) {
-                        SearchBar(
-                            state = searchBarState,
-                            inputField = inputField
+                        Icon(
+                            imageVector = Icons.Default.PersonSearch,
+                            contentDescription = "Search",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+            }
+            this@Column.AnimatedVisibility(
+                visible = searchBarState.currentValue == SearchBarValue.Expanded,
+                enter = fadeIn(
+                    tween(
+                        durationMillis = 400,
+                        easing = FastOutSlowInEasing
+                    )
+                ) + expandVertically(
+                    tween(
+                        durationMillis = 400,
+                        easing = FastOutSlowInEasing
+                    )
+                ),
+                exit = fadeOut(
+                    tween(
+                        durationMillis = 400,
+                        easing = FastOutSlowInEasing
+                    )
+                ) + shrinkVertically(
+                    tween(
+                        durationMillis = 400,
+                        easing = FastOutSlowInEasing
+                    )
+                ),
+            ) {
+                SearchBar(
+                    state = searchBarState,
+                    inputField = inputField
+                )
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

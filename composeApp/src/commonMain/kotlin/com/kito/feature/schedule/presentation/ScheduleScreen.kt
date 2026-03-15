@@ -67,6 +67,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
@@ -193,230 +194,327 @@ fun ScheduleScreen(
             )
         )
     }
-    Box(){
-        GlowBackground()
-    }
     Box(
         modifier = Modifier
-//            .background(Color(0xFF121116))
             .layerBackdrop(backdrop)
-//            .hazeSource(hazeState)
     ) {
-        HorizontalPager(
-            contentPadding = PaddingValues(
-                start = 28.dp,
-                end = 28.dp,
-            ),
-            state = pagerState,
+        Box() {
+            GlowBackground()
+        }
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-        ) { page ->
-            val day = weekDays[page]
-            val daySchedule = schedule[day].orEmpty()
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(2.5.dp),
+//            .background(Color(0xFF121116))
+//            .hazeSource(hazeState)
+        ) {
+            HorizontalPager(
+                contentPadding = PaddingValues(
+                    start = 28.dp,
+                    end = 28.dp,
+                ),
+                state = pagerState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .horizontalCarouselTransition(page, pagerState),
-            ) {
-                item {
-                    Spacer(
-                        modifier = Modifier.height(
-                            WindowInsets.statusBars.asPaddingValues()
-                                .calculateTopPadding() + 132.dp
-                        )
-                    )
-                }
-                if (daySchedule.isNotEmpty()) {
-                    itemsIndexed(daySchedule) { index, item ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .then(
-                                    if(page == currentPage && isClassUpcoming(startTime = item.startTime,now = now) && today != "SUN") {
-                                        Modifier
-                                            .border(
-                                                width = 2.dp,
-                                                brush = Brush.verticalGradient(
-                                                    colors = listOf(
-                                                        uiColors.progressAccent,
-                                                        uiColors.progressAccent
-                                                    )
-                                                ),
-                                                shape = RoundedCornerShape(
-                                                    topStart = if (index == 0) 24.dp else 4.dp,
-                                                    topEnd = if (index == 0) 24.dp else 4.dp,
-                                                    bottomStart = if (index == daySchedule.size - 1) 24.dp else 4.dp,
-                                                    bottomEnd = if (index == daySchedule.size - 1) 24.dp else 4.dp
-                                                )
-                                            )
-                                    }else{
-                                        Modifier
-                                    }
-                                ),
-                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                            shape = RoundedCornerShape(
-                                topStart = if (index == 0) 24.dp else 4.dp,
-                                topEnd = if (index == 0) 24.dp else 4.dp,
-                                bottomStart = if (index == daySchedule.size - 1) 24.dp else 4.dp,
-                                bottomEnd = if (index == daySchedule.size - 1) 24.dp else 4.dp
+            ) { page ->
+                val day = weekDays[page]
+                val daySchedule = schedule[day].orEmpty()
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(2.5.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .horizontalCarouselTransition(page, pagerState),
+                ) {
+                    item {
+                        Spacer(
+                            modifier = Modifier.height(
+                                WindowInsets.statusBars.asPaddingValues()
+                                    .calculateTopPadding() + 132.dp
                             )
-                        ) {
-                            Box(
+                        )
+                    }
+                    if (daySchedule.isNotEmpty()) {
+                        itemsIndexed(daySchedule) { index, item ->
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
+                                    .fillMaxWidth()
+                                    .height(100.dp)
                                     .then(
-                                        if (page == currentPage && isClassOngoing(startTime = item.startTime, endTime = item.endTime, now = now) && today != "SUN"){
-                                            Modifier.meshGradient(
+                                        if (page == currentPage && isClassUpcoming(
+                                                startTime = item.startTime,
+                                                now = now
+                                            ) && today != "SUN"
+                                        ) {
+                                            Modifier
+                                                .border(
+                                                    width = 2.dp,
+                                                    brush = Brush.verticalGradient(
+                                                        colors = listOf(
+                                                            uiColors.progressAccent,
+                                                            uiColors.progressAccent
+                                                        )
+                                                    ),
+                                                    shape = RoundedCornerShape(
+                                                        topStart = if (index == 0) 24.dp else 4.dp,
+                                                        topEnd = if (index == 0) 24.dp else 4.dp,
+                                                        bottomStart = if (index == daySchedule.size - 1) 24.dp else 4.dp,
+                                                        bottomEnd = if (index == daySchedule.size - 1) 24.dp else 4.dp
+                                                    )
+                                                )
+                                        } else {
+                                            Modifier
+                                        }
+                                    ),
+                                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                shape = RoundedCornerShape(
+                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                    bottomStart = if (index == daySchedule.size - 1) 24.dp else 4.dp,
+                                    bottomEnd = if (index == daySchedule.size - 1) 24.dp else 4.dp
+                                )
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .then(
+                                            if (page == currentPage && isClassOngoing(
+                                                    startTime = item.startTime,
+                                                    endTime = item.endTime,
+                                                    now = now
+                                                ) && today != "SUN"
+                                            ) {
+                                                Modifier.meshGradient(
                                                     points = listOf(
 
                                                         // ───── TOP ROW ─────
                                                         listOf(
-                                                            Offset(0f, 0f) to meshColorAnimators[0].value,
-                                                            Offset(0.25f, 0f) to meshColorAnimators[1].value,
-                                                            Offset(0.5f, 0f) to meshColorAnimators[2].value,
-                                                            Offset(0.75f, 0f) to meshColorAnimators[3].value,
-                                                            Offset(1f, 0f) to meshColorAnimators[4].value,
+                                                            Offset(
+                                                                0f,
+                                                                0f
+                                                            ) to meshColorAnimators[0].value,
+                                                            Offset(
+                                                                0.25f,
+                                                                0f
+                                                            ) to meshColorAnimators[1].value,
+                                                            Offset(
+                                                                0.5f,
+                                                                0f
+                                                            ) to meshColorAnimators[2].value,
+                                                            Offset(
+                                                                0.75f,
+                                                                0f
+                                                            ) to meshColorAnimators[3].value,
+                                                            Offset(
+                                                                1f,
+                                                                0f
+                                                            ) to meshColorAnimators[4].value,
                                                         ),
 
                                                         // ───── MIDDLE ROW (curved glow band) ─────
                                                         listOf(
-                                                            Offset(-0.05f, 0.55f) to meshColorAnimators[5].value,
-                                                            Offset(0.2f, animatedPointTop.value) to meshColorAnimators[6].value,
-                                                            Offset(0.5f, 0.6f) to meshColorAnimators[7].value,
-                                                            Offset(0.8f, animatedPointMid.value) to meshColorAnimators[8].value,
-                                                            Offset(1.05f, 0.55f) to meshColorAnimators[9].value,
+                                                            Offset(
+                                                                -0.05f,
+                                                                0.55f
+                                                            ) to meshColorAnimators[5].value,
+                                                            Offset(
+                                                                0.2f,
+                                                                animatedPointTop.value
+                                                            ) to meshColorAnimators[6].value,
+                                                            Offset(
+                                                                0.5f,
+                                                                0.6f
+                                                            ) to meshColorAnimators[7].value,
+                                                            Offset(
+                                                                0.8f,
+                                                                animatedPointMid.value
+                                                            ) to meshColorAnimators[8].value,
+                                                            Offset(
+                                                                1.05f,
+                                                                0.55f
+                                                            ) to meshColorAnimators[9].value,
                                                         ),
 
                                                         // ───── BOTTOM ROW (independent animation per point) ─────
                                                         listOf(
-                                                            Offset(0f, 1f) to meshColorAnimators[10].value,
-                                                            Offset(0.25f, 1f) to meshColorAnimators[11].value,
-                                                            Offset(0.5f, 1f) to meshColorAnimators[12].value,
-                                                            Offset(0.75f, 1f) to meshColorAnimators[13].value,
-                                                            Offset(1f, 1f) to meshColorAnimators[14].value,
+                                                            Offset(
+                                                                0f,
+                                                                1f
+                                                            ) to meshColorAnimators[10].value,
+                                                            Offset(
+                                                                0.25f,
+                                                                1f
+                                                            ) to meshColorAnimators[11].value,
+                                                            Offset(
+                                                                0.5f,
+                                                                1f
+                                                            ) to meshColorAnimators[12].value,
+                                                            Offset(
+                                                                0.75f,
+                                                                1f
+                                                            ) to meshColorAnimators[13].value,
+                                                            Offset(
+                                                                1f,
+                                                                1f
+                                                            ) to meshColorAnimators[14].value,
                                                         ),
                                                     ),
                                                     resolutionX = 30
                                                 )
-                                        }else{
-                                            Modifier.background(
-                                                brush = Brush.linearGradient(
-                                                    colors = listOf(
-                                                        uiColors.cardBackground,
-                                                        Color(0xFF2F222F),
-                                                        Color(0xFF2F222F),
-                                                        uiColors.cardBackgroundHigh
+                                            } else {
+                                                Modifier
+                                                    .background(
+                                                        brush = Brush.linearGradient(
+                                                            colors = listOf(
+                                                                uiColors.cardBackground.copy(alpha = 0.6f),
+                                                                Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                                Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                                uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                                            )
+                                                        ),
+                                                        shape = RoundedCornerShape(
+                                                            topStart = if (index == 0) 24.dp else 4.dp,
+                                                            topEnd = if (index == 0) 24.dp else 4.dp,
+                                                            bottomStart = if (index == daySchedule.lastIndex) 24.dp else 4.dp,
+                                                            bottomEnd = if (index == daySchedule.lastIndex) 24.dp else 4.dp
+                                                        )
                                                     )
-                                                )
-                                            )
-                                        }
-                                    )
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .padding(12.dp)
-                                        .fillMaxSize()
+                                                    .border(
+                                                        width = Dp.Hairline,
+                                                        brush = Brush.linearGradient(
+                                                            colorStops = arrayOf(
+                                                                0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                                0.20f to Color.White.copy(alpha = 0.30f),
+                                                                0.40f to Color.White.copy(alpha = if (index == daySchedule.lastIndex) 0.08f else 0.04f),
+                                                                0.65f to Color.Transparent,
+                                                                0.85f to Color.White.copy(alpha = 0.03f),
+                                                                1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                            ),
+                                                            start = Offset(0f, 0f),
+                                                            end = Offset(600f, 600f)
+                                                        ),
+                                                        shape = RoundedCornerShape(
+                                                            topStart = if (index == 0) 24.dp else 4.dp,
+                                                            topEnd = if (index == 0) 24.dp else 4.dp,
+                                                            bottomStart = if (index == daySchedule.lastIndex) 24.dp else 4.dp,
+                                                            bottomEnd = if (index == daySchedule.lastIndex) 24.dp else 4.dp
+                                                        )
+                                                    )
+                                            }
+                                        )
                                 ) {
-                                    Box(
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier
-                                            .width(4.dp)
-                                            .height(48.dp)
-                                            .background(
-                                                Brush.verticalGradient(
-                                                    listOf(
-                                                        uiColors.accentOrangeStart,
-                                                        uiColors.accentOrangeEnd
-                                                    )
-                                                ),
-                                                RoundedCornerShape(2.dp)
-                                            )
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Column(
-                                            verticalArrangement = Arrangement.Center,
+                                            .padding(12.dp)
+                                            .fillMaxSize()
+                                    ) {
+                                        Box(
                                             modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(vertical = 6.dp)
-                                                .weight(1f)
-                                        ) {
+                                                .width(4.dp)
+                                                .height(48.dp)
+                                                .background(
+                                                    Brush.verticalGradient(
+                                                        listOf(
+                                                            uiColors.accentOrangeStart,
+                                                            uiColors.accentOrangeEnd
+                                                        )
+                                                    ),
+                                                    RoundedCornerShape(2.dp)
+                                                )
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Column(
+                                                verticalArrangement = Arrangement.Center,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(vertical = 6.dp)
+                                                    .weight(1f)
+                                            ) {
+                                                Text(
+                                                    text = item.subject,
+                                                    color = uiColors.textPrimary,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontFamily = FontFamily.Monospace,
+                                                    style = MaterialTheme.typography.headlineSmallEmphasized,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Text(
+                                                    text = "${formatTo12Hour(item.startTime)} - ${
+                                                        formatTo12Hour(
+                                                            item.endTime
+                                                        )
+                                                    }",
+                                                    color = uiColors.textPrimary.copy(alpha = 0.85f),
+                                                    style = MaterialTheme.typography.labelLargeEmphasized,
+                                                    fontFamily = FontFamily.Monospace,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
                                             Text(
-                                                text = item.subject,
+                                                text = item.room ?: "No Room",
                                                 color = uiColors.textPrimary,
                                                 fontWeight = FontWeight.Bold,
                                                 fontFamily = FontFamily.Monospace,
-                                                style = MaterialTheme.typography.headlineSmallEmphasized,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            Text(
-                                                text = "${formatTo12Hour(item.startTime)} - ${
-                                                    formatTo12Hour(
-                                                        item.endTime
-                                                    )
-                                                }",
-                                                color = uiColors.textPrimary.copy(alpha = 0.85f),
-                                                style = MaterialTheme.typography.labelLargeEmphasized,
-                                                fontFamily = FontFamily.Monospace,
+                                                style = MaterialTheme.typography.titleMediumEmphasized,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                         }
-                                        Text(
-                                            text = item.room ?: "No Room",
-                                            color = uiColors.textPrimary,
-                                            fontWeight = FontWeight.Bold,
-                                            fontFamily = FontFamily.Monospace,
-                                            style = MaterialTheme.typography.titleMediumEmphasized,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
                                     }
                                 }
                             }
                         }
-                    }
-                } else {
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                            shape = RoundedCornerShape(24.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
+                    } else {
+                        item {
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .height(600.dp)
-                                    .background(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                uiColors.cardBackground,
-                                                Color(0xFF2F222F),
-                                                Color(0xFF2F222F),
-                                                uiColors.cardBackgroundHigh
-                                            )
-                                        )
-                                    )
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                shape = RoundedCornerShape(24.dp)
                             ) {
-                                PandaSleepingAnimation()
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .height(600.dp)
+                                        .background(
+                                            brush = Brush.linearGradient(
+                                                colors = listOf(
+                                                    uiColors.cardBackground.copy(alpha = 0.6f),
+                                                    Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                    Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                    uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(24.dp)
+                                        )
+                                        .border(
+                                            width = Dp.Hairline,
+                                            brush = Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.White.copy(alpha = 0.5f),
+                                                    Color.White.copy(alpha = 0.1f),
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(24.dp)
+                                        )
+                                ) {
+                                    PandaSleepingAnimation()
+                                }
                             }
                         }
                     }
-                }
-                item{
-                    Spacer(
-                        modifier = Modifier.height(
-                            86.dp + WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding()
+                    item {
+                        Spacer(
+                            modifier = Modifier.height(
+                                86.dp + WindowInsets.navigationBars.asPaddingValues()
+                                    .calculateBottomPadding()
+                            )
                         )
-                    )
+                    }
                 }
             }
         }

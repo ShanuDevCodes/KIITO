@@ -249,7 +249,7 @@ fun ScheduleCard(
                     itemsIndexed(upcomingList) { index, upcoming ->
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = colors.cardBackgroundHigh
+                                containerColor = Color.Transparent
                             ),
                             shape = RoundedCornerShape(
                                 topStart = if (index == 0) 12.dp else 4.dp,
@@ -258,7 +258,46 @@ fun ScheduleCard(
                                 bottomEnd = if (index == upcomingList.lastIndex) 12.dp else 4.dp
                             )
                         ) {
-                            Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+                            Box(modifier = Modifier
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            colors.cardBackground.copy(alpha = 0.6f),
+                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                            colors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(
+                                        topStart = if (index == 0) 12.dp else 4.dp,
+                                        topEnd = if (index == 0) 12.dp else 4.dp,
+                                        bottomStart = if (index == upcomingList.lastIndex) 12.dp else 4.dp,
+                                        bottomEnd = if (index == upcomingList.lastIndex) 12.dp else 4.dp
+                                    )
+                                )
+                                .border(
+                                    width = Dp.Hairline,
+                                    brush = Brush.linearGradient(
+                                        colorStops = arrayOf(
+                                            0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                            0.20f to Color.White.copy(alpha = 0.30f),
+                                            0.40f to Color.White.copy(alpha = if (index == upcomingList.lastIndex) 0.08f else 0.04f),
+                                            0.65f to Color.Transparent,
+                                            0.85f to Color.White.copy(alpha = 0.03f),
+                                            1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                        ),
+                                        start = Offset(0f, 0f),
+                                        end = Offset(600f, 600f)
+                                    ),
+                                    shape = RoundedCornerShape(
+                                        topStart = if (index == 0) 12.dp else 4.dp,
+                                        topEnd = if (index == 0) 12.dp else 4.dp,
+                                        bottomStart = if (index == upcomingList.lastIndex) 12.dp else 4.dp,
+                                        bottomEnd = if (index == upcomingList.lastIndex) 12.dp else 4.dp
+                                    )
+                                )
+                                .padding(horizontal = 8.dp)
+                            ) {
                                 ScheduleItem(
                                     title = upcoming.subject,
                                     time = "${formatTo12Hour(upcoming.startTime)} - ${
@@ -282,7 +321,7 @@ fun ScheduleCard(
                     itemsIndexed(nextSchedule) { index, upcoming ->
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = colors.cardBackgroundHigh
+                                containerColor = Color.Transparent
                             ),
                             shape = RoundedCornerShape(
                                 topStart = if (index == 0) 12.dp else 4.dp,
@@ -291,7 +330,46 @@ fun ScheduleCard(
                                 bottomEnd = if (index == nextSchedule.lastIndex) 12.dp else 4.dp
                             )
                         ) {
-                            Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+                            Box(modifier = Modifier
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            colors.cardBackground.copy(alpha = 0.6f),
+                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                            Color(0xFF2F222F).copy(alpha = 0.6f),
+                                            colors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(
+                                        topStart = if (index == 0) 12.dp else 4.dp,
+                                        topEnd = if (index == 0) 12.dp else 4.dp,
+                                        bottomStart = if (index == nextSchedule.lastIndex) 12.dp else 4.dp,
+                                        bottomEnd = if (index == nextSchedule.lastIndex) 12.dp else 4.dp
+                                    )
+                                )
+                                .border(
+                                    width = Dp.Hairline,
+                                    brush = Brush.linearGradient(
+                                        colorStops = arrayOf(
+                                            0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                            0.20f to Color.White.copy(alpha = 0.30f),
+                                            0.40f to Color.White.copy(alpha = if (index == nextSchedule.lastIndex) 0.08f else 0.04f),
+                                            0.65f to Color.Transparent,
+                                            0.85f to Color.White.copy(alpha = 0.03f),
+                                            1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                        ),
+                                        start = Offset(0f, 0f),
+                                        end = Offset(600f, 600f)
+                                    ),
+                                    shape = RoundedCornerShape(
+                                        topStart = if (index == 0) 12.dp else 4.dp,
+                                        topEnd = if (index == 0) 12.dp else 4.dp,
+                                        bottomStart = if (index == nextSchedule.lastIndex) 12.dp else 4.dp,
+                                        bottomEnd = if (index == nextSchedule.lastIndex) 12.dp else 4.dp
+                                    )
+                                )
+                                .padding(horizontal = 8.dp)
+                            ) {
                                 ScheduleItem(
                                     title = upcoming.subject,
                                     time = "${formatTo12Hour(upcoming.startTime)} - ${

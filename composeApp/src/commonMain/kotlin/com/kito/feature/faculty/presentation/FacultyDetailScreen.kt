@@ -6,6 +6,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kashif_e.backdrop.backdrops.layerBackdrop
 import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
@@ -184,7 +186,10 @@ fun FacultyDetailScreen(
         }
     }
 
-    Box(modifier = Modifier.hazeSource(cardHaze)) {
+    Box(modifier = Modifier
+        .layerBackdrop(backdrop)
+        .hazeSource(cardHaze)
+    ) {
         GlowBackground()
         Box(
 //            modifier = Modifier.background(Color(0xFF121116))
@@ -199,13 +204,13 @@ fun FacultyDetailScreen(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
 //                    .hazeSource(hazeState)
-                    .layerBackdrop(backdrop)
+
             ) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                        elevation = CardDefaults.cardElevation(6.dp),
+                        elevation = CardDefaults.cardElevation(0.dp),
                         shape = RoundedCornerShape(24.dp)
                     ) {
                         Box(
@@ -248,6 +253,16 @@ fun FacultyDetailScreen(
                                         ),
                                     ),
                                     resolutionX = 30
+                                )
+                                .border(
+                                    width = Dp.Hairline,
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.White.copy(alpha = 0.5f),
+                                            Color.White.copy(alpha = 0.1f),
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(24.dp)
                                 )
                                 .padding(20.dp)
                         ) {
@@ -345,7 +360,7 @@ fun FacultyDetailScreen(
                                         .fillMaxWidth()
                                         .heightIn(min = 100.dp),
                                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                     shape = RoundedCornerShape(
                                         topStart = if (index == 0) 24.dp else 4.dp,
                                         topEnd = if (index == 0) 24.dp else 4.dp,
@@ -359,11 +374,38 @@ fun FacultyDetailScreen(
                                             .background(
                                                 brush = Brush.linearGradient(
                                                     colors = listOf(
-                                                        uiColors.cardBackground,
-                                                        Color(0xFF2F222F),
-                                                        Color(0xFF2F222F),
-                                                        uiColors.cardBackgroundHigh
+                                                        uiColors.cardBackground.copy(alpha = 0.6f),
+                                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                        uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
                                                     )
+                                                ),
+                                                shape = RoundedCornerShape(
+                                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                                    bottomStart = if (index == 2) 24.dp else 4.dp,
+                                                    bottomEnd = if (index == 2) 24.dp else 4.dp
+                                                )
+                                            )
+                                            .border(
+                                                width = Dp.Hairline,
+                                                brush = Brush.linearGradient(
+                                                    colorStops = arrayOf(
+                                                        0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                        0.20f to Color.White.copy(alpha = 0.30f),
+                                                        0.40f to Color.White.copy(alpha = if (index == 2) 0.08f else 0.04f),
+                                                        0.65f to Color.Transparent,
+                                                        0.85f to Color.White.copy(alpha = 0.03f),
+                                                        1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                    ),
+                                                    start = Offset(0f, 0f),
+                                                    end = Offset(600f, 600f)
+                                                ),
+                                                shape = RoundedCornerShape(
+                                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                                    bottomStart = if (index == 2) 24.dp else 4.dp,
+                                                    bottomEnd = if (index == 2) 24.dp else 4.dp
                                                 )
                                             )
                                             .padding(16.dp)
@@ -393,7 +435,7 @@ fun FacultyDetailScreen(
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                     shape = RoundedCornerShape(
                                         topStart = if (index == 0) 24.dp else 4.dp,
                                         topEnd = if (index == 0) 24.dp else 4.dp,
@@ -407,11 +449,38 @@ fun FacultyDetailScreen(
                                             .background(
                                                 brush = Brush.linearGradient(
                                                     colors = listOf(
-                                                        uiColors.cardBackground,
-                                                        Color(0xFF2F222F),
-                                                        Color(0xFF2F222F),
-                                                        uiColors.cardBackgroundHigh
+                                                        uiColors.cardBackground.copy(alpha = 0.6f),
+                                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                        uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
                                                     )
+                                                ),
+                                                shape = RoundedCornerShape(
+                                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                                    bottomStart = if (index == classes.size - 1) 24.dp else 4.dp,
+                                                    bottomEnd = if (index == classes.size - 1) 24.dp else 4.dp
+                                                )
+                                            )
+                                            .border(
+                                                width = Dp.Hairline,
+                                                brush = Brush.linearGradient(
+                                                    colorStops = arrayOf(
+                                                        0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                        0.20f to Color.White.copy(alpha = 0.30f),
+                                                        0.40f to Color.White.copy(alpha = if (index == classes.size - 1) 0.08f else 0.04f),
+                                                        0.65f to Color.Transparent,
+                                                        0.85f to Color.White.copy(alpha = 0.03f),
+                                                        1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                    ),
+                                                    start = Offset(0f, 0f),
+                                                    end = Offset(600f, 600f)
+                                                ),
+                                                shape = RoundedCornerShape(
+                                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                                    bottomStart = if (index == classes.size - 1) 24.dp else 4.dp,
+                                                    bottomEnd = if (index == classes.size - 1) 24.dp else 4.dp
                                                 )
                                             )
                                             .padding(16.dp)
@@ -455,53 +524,53 @@ fun FacultyDetailScreen(
                     }
                 }
             }
-            Column(
-                modifier = Modifier
+        }
+    }
+    Column(
+        modifier = Modifier
 //                    .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                        blurRadius = 15.dp
 //                        noiseFactor = 0.05f
 //                        alpha = 0.98f
 //                    }
-                    .customBackdrop(backdrop)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Spacer(
-                    modifier = Modifier.height(
-                        16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                    )
+            .customBackdrop(backdrop)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(
+            modifier = Modifier.height(
+                16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            )
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {
+                    onBack()
+                },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.White.copy(alpha = 0.08f),
+                    contentColor = uiColors.progressAccent
+                ),
+                modifier = Modifier.size(32.dp)
+            ){
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Report",
+                    modifier = Modifier.size(24.dp)
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = {
-                            onBack()
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            contentColor = uiColors.progressAccent
-                        ),
-                        modifier = Modifier.size(32.dp)
-                    ){
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Report",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Faculty Detail",
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.SemiBold,
-                        color = uiColors.textPrimary,
-                        style = MaterialTheme.typography.titleLargeEmphasized
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Faculty Detail",
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.SemiBold,
+                color = uiColors.textPrimary,
+                style = MaterialTheme.typography.titleLargeEmphasized
+            )
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 fun formatTime(time: String): String {

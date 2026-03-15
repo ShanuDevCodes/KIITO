@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kashif_e.backdrop.backdrops.layerBackdrop
 import com.kashif_e.backdrop.backdrops.rememberLayerBackdrop
@@ -120,170 +122,231 @@ fun UpcomingExamScreen(
             }
         }
     }
-    Box(){
-        GlowBackground()
-    }
     Box(
         modifier = Modifier
-//            .background(Color(0xFF121116))
+            .layerBackdrop(backdrop = backdrop)
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(
-                top = WindowInsets.statusBars.asPaddingValues()
-                    .calculateTopPadding() + 46.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(2.5.dp),
+        Box() {
+            GlowBackground()
+        }
+        Box(
             modifier = Modifier
-//                .hazeSource(hazeState)
-                .layerBackdrop(backdrop = backdrop)
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+//            .background(Color(0xFF121116))
         ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            itemsIndexed(examModel) { index, item ->
-                val today = Clock.System.now()
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .date
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    top = WindowInsets.statusBars.asPaddingValues()
+                        .calculateTopPadding() + 46.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(2.5.dp),
+                modifier = Modifier
+//                .hazeSource(hazeState)
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                itemsIndexed(examModel) { index, item ->
+                    val today = Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .date
 
-                val examDate = LocalDate.parse(item.date)
+                    val examDate = LocalDate.parse(item.date)
 
-                val daysLeft = examDate.toEpochDays() - today.toEpochDays()
+                    val daysLeft = examDate.toEpochDays() - today.toEpochDays()
 
-                val showGradient = index == 0 && daysLeft <= 7
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    shape = RoundedCornerShape(
-                        topStart = if (index == 0) 24.dp else 4.dp,
-                        topEnd = if (index == 0) 24.dp else 4.dp,
-                        bottomStart = if (index == examModel.size - 1) 24.dp else 4.dp,
-                        bottomEnd = if (index == examModel.size - 1) 24.dp else 4.dp
-                    )
-                ) {
-                    Box(
+                    val showGradient = index == 0 && daysLeft <= 7
+                    Card(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .then(
-                                if (showGradient) {
-                                    Modifier.meshGradient(
-                                        points = listOf(
-
-                                            // ───── TOP ROW ─────
-                                            listOf(
-                                                Offset(0f, 0f) to meshColorAnimators[0].value,
-                                                Offset(0.25f, 0f) to meshColorAnimators[1].value,
-                                                Offset(0.5f, 0f) to meshColorAnimators[2].value,
-                                                Offset(0.75f, 0f) to meshColorAnimators[3].value,
-                                                Offset(1f, 0f) to meshColorAnimators[4].value,
-                                            ),
-
-                                            // ───── MIDDLE ROW (curved glow band) ─────
-                                            listOf(
-                                                Offset(-0.05f, 0.55f) to meshColorAnimators[5].value,
-                                                Offset(0.2f, animatedPointTop.value) to meshColorAnimators[6].value,
-                                                Offset(0.5f, 0.6f) to meshColorAnimators[7].value,
-                                                Offset(0.8f, animatedPointMid.value) to meshColorAnimators[8].value,
-                                                Offset(1.05f, 0.55f) to meshColorAnimators[9].value,
-                                            ),
-
-                                            // ───── BOTTOM ROW (independent animation per point) ─────
-                                            listOf(
-                                                Offset(0f, 1f) to meshColorAnimators[10].value,
-                                                Offset(0.25f, 1f) to meshColorAnimators[11].value,
-                                                Offset(0.5f, 1f) to meshColorAnimators[12].value,
-                                                Offset(0.75f, 1f) to meshColorAnimators[13].value,
-                                                Offset(1f, 1f) to meshColorAnimators[14].value,
-                                            ),
-                                        ),
-                                        resolutionX = 30
-                                    )
-                                }else{
-                                    Modifier.background(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                uiColors.cardBackground,
-                                                Color(0xFF2F222F),
-                                                Color(0xFF2F222F),
-                                                uiColors.cardBackgroundHigh
-                                            )
-                                        )
-                                    )
-                                }
-                            )
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        shape = RoundedCornerShape(
+                            topStart = if (index == 0) 24.dp else 4.dp,
+                            topEnd = if (index == 0) 24.dp else 4.dp,
+                            bottomStart = if (index == examModel.size - 1) 24.dp else 4.dp,
+                            bottomEnd = if (index == examModel.size - 1) 24.dp else 4.dp
+                        )
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                        Box(
                             modifier = Modifier
-                                .padding(12.dp)
                                 .fillMaxSize()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(4.dp)
-                                    .height(48.dp)
-                                    .background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                uiColors.accentOrangeStart,
-                                                uiColors.accentOrangeEnd
+                                .then(
+                                    if (showGradient) {
+                                        Modifier.meshGradient(
+                                            points = listOf(
+
+                                                // ───── TOP ROW ─────
+                                                listOf(
+                                                    Offset(0f, 0f) to meshColorAnimators[0].value,
+                                                    Offset(
+                                                        0.25f,
+                                                        0f
+                                                    ) to meshColorAnimators[1].value,
+                                                    Offset(0.5f, 0f) to meshColorAnimators[2].value,
+                                                    Offset(
+                                                        0.75f,
+                                                        0f
+                                                    ) to meshColorAnimators[3].value,
+                                                    Offset(1f, 0f) to meshColorAnimators[4].value,
+                                                ),
+
+                                                // ───── MIDDLE ROW (curved glow band) ─────
+                                                listOf(
+                                                    Offset(
+                                                        -0.05f,
+                                                        0.55f
+                                                    ) to meshColorAnimators[5].value,
+                                                    Offset(
+                                                        0.2f,
+                                                        animatedPointTop.value
+                                                    ) to meshColorAnimators[6].value,
+                                                    Offset(
+                                                        0.5f,
+                                                        0.6f
+                                                    ) to meshColorAnimators[7].value,
+                                                    Offset(
+                                                        0.8f,
+                                                        animatedPointMid.value
+                                                    ) to meshColorAnimators[8].value,
+                                                    Offset(
+                                                        1.05f,
+                                                        0.55f
+                                                    ) to meshColorAnimators[9].value,
+                                                ),
+
+                                                // ───── BOTTOM ROW (independent animation per point) ─────
+                                                listOf(
+                                                    Offset(0f, 1f) to meshColorAnimators[10].value,
+                                                    Offset(
+                                                        0.25f,
+                                                        1f
+                                                    ) to meshColorAnimators[11].value,
+                                                    Offset(
+                                                        0.5f,
+                                                        1f
+                                                    ) to meshColorAnimators[12].value,
+                                                    Offset(
+                                                        0.75f,
+                                                        1f
+                                                    ) to meshColorAnimators[13].value,
+                                                    Offset(1f, 1f) to meshColorAnimators[14].value,
+                                                ),
+                                            ),
+                                            resolutionX = 30
+                                        )
+                                    } else {
+                                        Modifier
+                                            .background(
+                                                brush = Brush.linearGradient(
+                                                    colors = listOf(
+                                                        uiColors.cardBackground.copy(alpha = 0.6f),
+                                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                        Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                        uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                                    )
+                                                ),
+                                                shape = RoundedCornerShape(
+                                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                                    bottomStart = if (index == examModel.lastIndex) 24.dp else 4.dp,
+                                                    bottomEnd = if (index == examModel.lastIndex) 24.dp else 4.dp
+                                                )
                                             )
-                                        ),
-                                        RoundedCornerShape(2.dp)
-                                    )
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
+                                            .border(
+                                                width = Dp.Hairline,
+                                                brush = Brush.linearGradient(
+                                                    colorStops = arrayOf(
+                                                        0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                        0.20f to Color.White.copy(alpha = 0.30f),
+                                                        0.40f to Color.White.copy(alpha = if (index == examModel.lastIndex) 0.08f else 0.04f),
+                                                        0.65f to Color.Transparent,
+                                                        0.85f to Color.White.copy(alpha = 0.03f),
+                                                        1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                    ),
+                                                    start = Offset(0f, 0f),
+                                                    end = Offset(600f, 600f)
+                                                ),
+                                                shape = RoundedCornerShape(
+                                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                                    bottomStart = if (index == examModel.lastIndex) 24.dp else 4.dp,
+                                                    bottomEnd = if (index == examModel.lastIndex) 24.dp else 4.dp
+                                                )
+                                            )
+                                    }
+                                )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .fillMaxSize()
+                            ) {
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(vertical = 6.dp)
-                                        .weight(1f)
-                                ) {
+                                        .width(4.dp)
+                                        .height(48.dp)
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    uiColors.accentOrangeStart,
+                                                    uiColors.accentOrangeEnd
+                                                )
+                                            ),
+                                            RoundedCornerShape(2.dp)
+                                        )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(vertical = 6.dp)
+                                            .weight(1f)
+                                    ) {
+                                        Text(
+                                            text = item.subject,
+                                            color = uiColors.textPrimary,
+                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = FontFamily.Monospace,
+                                            style = MaterialTheme.typography.titleMediumEmphasized,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = "${formatTo12Hour(item.start_time)} - ${
+                                                formatTo12Hour(
+                                                    item.end_time
+                                                )
+                                            }",
+                                            color = uiColors.textPrimary.copy(alpha = 0.85f),
+                                            style = MaterialTheme.typography.labelSmallEmphasized,
+                                            fontFamily = FontFamily.Monospace,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    val formattedDate = remember(item.date) {
+                                        formatDate(item.date)
+                                    }
                                     Text(
-                                        text = item.subject,
+                                        text = formattedDate,
                                         color = uiColors.textPrimary,
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontFamily.Monospace,
-                                        style = MaterialTheme.typography.titleMediumEmphasized,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = "${formatTo12Hour(item.start_time)} - ${
-                                            formatTo12Hour(
-                                                item.end_time
-                                            )
-                                        }",
-                                        color = uiColors.textPrimary.copy(alpha = 0.85f),
-                                        style = MaterialTheme.typography.labelSmallEmphasized,
-                                        fontFamily = FontFamily.Monospace,
+                                        style = MaterialTheme.typography.titleSmallEmphasized,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                                val formattedDate = remember(item.date) {
-                                    formatDate(item.date)
-                                }
-                                Text(
-                                    text = formattedDate,
-                                    color = uiColors.textPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace,
-                                    style = MaterialTheme.typography.titleSmallEmphasized,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
                             }
                         }
                     }
                 }
-            }
 //            item {
 //                Spacer(
 //                    modifier = Modifier.height(
@@ -292,62 +355,63 @@ fun UpcomingExamScreen(
 //                    )
 //                )
 //            }
-        }
-        if (examModel.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                NoDataFoundAnimation()
+            }
+            if (examModel.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    NoDataFoundAnimation()
+                }
             }
         }
-        Column(
-            modifier = Modifier
+    }
+    Column(
+        modifier = Modifier
 //                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                    blurRadius = 15.dp
 //                    noiseFactor = 0.05f
 //                    inputScale = HazeInputScale.Auto
 //                    alpha = 0.98f
 //                }
-                .customBackdrop(backdrop)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            Spacer(
-                modifier = Modifier.height(
-                    16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                )
+            .customBackdrop(backdrop)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Spacer(
+            modifier = Modifier.height(
+                16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(
+                onClick = {
+                    onBack()
+                },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.White.copy(alpha = 0.08f),
+                    contentColor = uiColors.progressAccent
+                ),
+                modifier = Modifier.size(32.dp)
             ) {
-                IconButton(
-                    onClick = {
-                        onBack()
-                    },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.08f),
-                        contentColor = uiColors.progressAccent
-                    ),
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "pop back stack",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Upcoming Exams",
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.SemiBold,
-                    color = uiColors.textPrimary,
-                    style = MaterialTheme.typography.titleLargeEmphasized,
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "pop back stack",
+                    modifier = Modifier.size(24.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Upcoming Exams",
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.SemiBold,
+                color = uiColors.textPrimary,
+                style = MaterialTheme.typography.titleLargeEmphasized,
+            )
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

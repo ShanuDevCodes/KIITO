@@ -224,12 +224,12 @@ fun HomeScreen(
         }
     }
 
-    Box() {
-        Box(
-            modifier = Modifier
-                .hazeSource(hazeState)
-                .layerBackdrop(primaryBackdrop)
-        ) {
+    Box(
+        modifier = Modifier
+            .hazeSource(hazeState)
+            .layerBackdrop(primaryBackdrop)
+    ) {
+        Box{
             Box(
                 modifier = Modifier
                     .layerBackdrop(backdrop)
@@ -544,79 +544,79 @@ fun HomeScreen(
                 }
             }
         }
-        Column(
-            modifier = Modifier
+    }
+    Column(
+        modifier = Modifier
 //                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                    blurRadius = 15.dp
 //                    noiseFactor = 0.05f
 //                    inputScale = HazeInputScale.Auto
 //                    alpha = 0.98f
 //                }
-                .drawBackdrop(
-                    backdrop = primaryBackdrop,
-                    shape = { RoundedCornerShape(16.dp) },
-                    effects = {
-                        blur(4.dp.toPx())
+            .drawBackdrop(
+                backdrop = primaryBackdrop,
+                shape = { RoundedCornerShape(16.dp) },
+                effects = {
+                    blur(4.dp.toPx())
 //                    colorControls(
 //                        brightness = 0.1f,    // -1.0 to 1.0
 //                        contrast = 1.2f,      // 0.0 to 2.0
 //                        saturation = 1.5f     // 0.0 to 2.0
 //                    )
-                        vibrancy()
-                        lens(
-                            refractionHeight = 24.dp.toPx(),
-                            refractionAmount = 32.dp.toPx(),
-                            chromaticAberration = false  // RGB color separation
-                        )
-                    }
+                    vibrancy()
+                    lens(
+                        refractionHeight = 24.dp.toPx(),
+                        refractionAmount = 32.dp.toPx(),
+                        chromaticAberration = false  // RGB color separation
+                    )
+                }
+            )
+            .padding(horizontal = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(
+                    top = 8.dp + WindowInsets.statusBars.asPaddingValues()
+                        .calculateTopPadding()
                 )
-                .padding(horizontal = 12.dp)
+                .fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
                 modifier = Modifier
-                    .padding(
-                        top = 8.dp + WindowInsets.statusBars.asPaddingValues()
-                            .calculateTopPadding()
-                    )
-                    .fillMaxWidth()
+                    .weight(1f)
             ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = "Welcome",
-                        color = uiColors.progressAccent,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = FontFamily.Monospace,
-                        style = MaterialTheme.typography.titleMediumEmphasized
-                    )
-                    Text(
-                        text = name.trim().substringBefore(" "),
-                        color = uiColors.textPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        style = MaterialTheme.typography.headlineLargeEmphasized,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        showAboutDialog = !showAboutDialog
-                    },
-                    modifier = Modifier.size(60.dp)
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.e_labs_logo),
-                        contentDescription = "Logo",
-                    )
-                }
+                Text(
+                    text = "Welcome",
+                    color = uiColors.progressAccent,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.titleMediumEmphasized
+                )
+                Text(
+                    text = name.trim().substringBefore(" "),
+                    color = uiColors.textPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.headlineLargeEmphasized,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            Spacer(modifier = Modifier.height(6.dp))
+            IconButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    showAboutDialog = !showAboutDialog
+                },
+                modifier = Modifier.size(60.dp)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.e_labs_logo),
+                    contentDescription = "Logo",
+                )
+            }
         }
+        Spacer(modifier = Modifier.height(6.dp))
     }
     if (showAboutDialog) {
         AboutELabsDialog(

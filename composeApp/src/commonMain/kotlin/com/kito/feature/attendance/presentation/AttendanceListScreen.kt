@@ -90,6 +90,7 @@ import com.kito.core.presentation.components.AttendanceCard
 import com.kito.core.presentation.components.GlowBackground
 import com.kito.core.presentation.components.OverallAttendanceCard
 import com.kito.core.presentation.components.UIColors
+import com.kito.core.presentation.components.customBackdrop
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.feature.settings.presentation.components.LoginDialogBox
 import com.kito.sap.SubjectAttendance
@@ -163,328 +164,236 @@ fun AttendanceListScreen(
     }
 
     // ── Root box — no layerBackdrop here anymore ──────────────────────────────
-    Box(){
-        GlowBackground()
-    }
-    Box(modifier = Modifier
-//        .background(Color(0xFF121116))
+    Box(
+        modifier = Modifier
+            .layerBackdrop(backdrop)
+            .hazeSource(hazeState)
     ) {
-        PullToRefreshBox(
-            state = pullToRefreshState,
-            isRefreshing = syncState is SyncUiState.Loading,
-            onRefresh = {
-                if (isOnline) viewModel.refresh()
-                else toast("No Internet Connection")
-            },
-            indicator = {},
+        Box() {
+            GlowBackground()
+        }
+        Box(
+            modifier = Modifier
+//        .background(Color(0xFF121116))
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    top = WindowInsets.statusBars.asPaddingValues()
-                        .calculateTopPadding() + 46.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(2.5.dp),
-                modifier = Modifier
-                    .graphicsLayer {
-                        translationY = pullOffsetPx
-                    }
-                    // ✅ hazeSource feeds both the top-bar effect and the card hazeState
-                    .hazeSource(hazeState)
-                    .layerBackdrop(backdrop)
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+            PullToRefreshBox(
+                state = pullToRefreshState,
+                isRefreshing = syncState is SyncUiState.Loading,
+                onRefresh = {
+                    if (isOnline) viewModel.refresh()
+                    else toast("No Internet Connection")
+                },
+                indicator = {},
             ) {
-                item { Spacer(modifier = Modifier.height(20.dp)) }
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        top = WindowInsets.statusBars.asPaddingValues()
+                            .calculateTopPadding() + 46.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(2.5.dp),
+                    modifier = Modifier
+                        .graphicsLayer {
+                            translationY = pullOffsetPx
+                        }
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                ) {
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
 
-                item {
-                    OverallAttendanceCard(
-                        colors = uiColors,
-                        sapLoggedIn = sapLoggedIn,
-                        percentageOverall = averageAttendancePercentage,
-                        percentageHighest = highestAttendancePercentage,
-                        percentageLowest = lowestAttendancePercentage,
-                    )
-                }
+                    item {
+                        OverallAttendanceCard(
+                            colors = uiColors,
+                            sapLoggedIn = sapLoggedIn,
+                            percentageOverall = averageAttendancePercentage,
+                            percentageHighest = highestAttendancePercentage,
+                            percentageLowest = lowestAttendancePercentage,
+                        )
+                    }
 
-                item { Spacer(modifier = Modifier.height(4.dp)) }
+                    item { Spacer(modifier = Modifier.height(4.dp)) }
 
-                if (sapLoggedIn) {
-                    itemsIndexed(attendance) { index, item ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 100.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                            shape = RoundedCornerShape(
-                                topStart = if (index == 0) 24.dp else 4.dp,
-                                topEnd = if (index == 0) 24.dp else 4.dp,
-                                bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
-                                bottomEnd = if (index == attendance.size - 1) 24.dp else 4.dp
-                            ),
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                currentAttendance.value = item
-                            }
-                        ) {
-                            Box(
+                    if (sapLoggedIn) {
+                        itemsIndexed(attendance) { index, item ->
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                uiColors.cardBackground.copy(alpha = 0.6f),
-                                                Color(0xFF2F222F).copy(alpha = 0.6f),
-                                                Color(0xFF2F222F).copy(alpha = 0.6f),
-                                                uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                shape = RoundedCornerShape(
+                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                    bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
+                                    bottomEnd = if (index == attendance.size - 1) 24.dp else 4.dp
+                                ),
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                    currentAttendance.value = item
+                                }
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            brush = Brush.linearGradient(
+                                                colors = listOf(
+                                                    uiColors.cardBackground.copy(alpha = 0.6f),
+                                                    Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                    Color(0xFF2F222F).copy(alpha = 0.6f),
+                                                    uiColors.cardBackgroundHigh.copy(alpha = 0.6f)
+                                                )
                                             )
                                         )
-                                    )
-//                                    .border(
-//                                        width = Dp.Hairline,
-//                                        brush = Brush.verticalGradient(
-//                                            colors = listOf(
-//                                                Color.White.copy(alpha = 0.5f),
-//                                                Color.White.copy(alpha = 0.1f),
-//                                            )
-//                                        ),
-//                                        shape = RoundedCornerShape(
-//                                            topStart = if (index == 0) 24.dp else 4.dp,
-//                                            topEnd = if (index == 0) 24.dp else 4.dp,
-//                                            bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
-//                                            bottomEnd = if (index == attendance.size - 1) 24.dp else 4.dp
-//                                        )
-//                                    )
-                                    .then(
-                                        if (index == 0){
-                                            Modifier
-                                                .border(
-                                                    width = Dp.Hairline,
-                                                    brush = Brush.verticalGradient(
-                                                        colors = listOf(
-                                                            Color.White.copy(alpha = 0.5f),
-                                                            Color.White.copy(alpha = 0.1f),
-                                                        )
-                                                    ),
-                                                    shape = RoundedCornerShape(
-                                                        topStart = if (index == 0) 24.dp else 4.dp,
-                                                        topEnd = if (index == 0) 24.dp else 4.dp,
-                                                        bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
-                                                        bottomEnd = if (index == attendance.size - 1) 24.dp else 4.dp
-                                                    )
-                                                )
-                                        }else{
-                                            Modifier
-                                                .drawWithContent {
-                                                    drawContent()
-                                                    val cr = 24.dp.toPx()
-
-                                                    // Top edge
-                                                    drawLine(
-                                                        brush = Brush.horizontalGradient(
-                                                            colors = listOf(
-                                                                Color.White.copy(alpha = 0f),
-                                                                Color.White.copy(alpha = 0.55f),
-                                                                Color.White.copy(alpha = 0.55f),
-                                                                Color.White.copy(alpha = 0f),
-                                                            )
-                                                        ),
-                                                        start = Offset(cr, 1f),
-                                                        end = Offset(size.width - cr, 1f),
-                                                        strokeWidth = 2f
-                                                    )
-
-                                                    // Bottom edge — darker, glass shadow
-                                                    drawLine(
-                                                        brush = Brush.horizontalGradient(
-                                                            colors = listOf(
-                                                                Color.Black.copy(alpha = 0f),
-                                                                Color.Black.copy(alpha = 0.4f),
-                                                                Color.Black.copy(alpha = 0.4f),
-                                                                Color.Black.copy(alpha = 0f),
-                                                            )
-                                                        ),
-                                                        start = Offset(cr, size.height - 1f),
-                                                        end = Offset(size.width - cr, size.height - 1f),
-                                                        strokeWidth = 2f
-                                                    )
-
-                                                    // Left edge glint
-                                                    drawLine(
-                                                        brush = Brush.verticalGradient(
-                                                            colors = listOf(
-                                                                Color.White.copy(alpha = 0.3f),
-                                                                Color.White.copy(alpha = 0f),
-                                                            )
-                                                        ),
-                                                        start = Offset(1f, cr),
-                                                        end = Offset(1f, size.height * 0.6f),
-                                                        strokeWidth = 1.5f
-                                                    )
-
-                                                    // Right edge — dimmer opposite glint
-                                                    drawLine(
-                                                        brush = Brush.verticalGradient(
-                                                            colors = listOf(
-                                                                Color.White.copy(alpha = 0.12f),
-                                                                Color.White.copy(alpha = 0f),
-                                                            )
-                                                        ),
-                                                        start = Offset(size.width - 1f, cr),
-                                                        end = Offset(size.width - 1f, size.height * 0.4f),
-                                                        strokeWidth = 1.5f
-                                                    )
-                                                }
-                                        }
-                                    )
-
+                                        .border(
+                                            width = Dp.Hairline,
+                                            brush = Brush.linearGradient(
+                                                colorStops = arrayOf(
+                                                    0.00f to Color.White.copy(alpha = if (index == 0) 0.85f else 0.12f),
+                                                    0.20f to Color.White.copy(alpha = 0.30f),
+                                                    0.40f to Color.White.copy(alpha = if (index == attendance.size - 1) 0.08f else 0.04f),
+                                                    0.65f to Color.Transparent,
+                                                    0.85f to Color.White.copy(alpha = 0.03f),
+                                                    1.00f to Color.White.copy(alpha = if (index == 0) 0.18f else 0.05f)
+                                                ),
+                                                start = Offset(0f, 0f),
+                                                end = Offset(600f, 600f)
+                                            ),
+                                            shape = RoundedCornerShape(
+                                                topStart    = if (index == 0) 24.dp else 4.dp,
+                                                topEnd      = if (index == 0) 24.dp else 4.dp,
+                                                bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
+                                                bottomEnd   = if (index == attendance.size - 1) 24.dp else 4.dp
+                                            )
+                                        )
+                                ) {
+                                    AttendanceCard(item)
+                                }
+                            }
+                        }
+                        item {
+                            Spacer(
+                                modifier = Modifier.height(
+                                    86.dp + WindowInsets.navigationBars.asPaddingValues()
+                                        .calculateBottomPadding()
+                                )
+                            )
+                        }
+                    } else {
+                        itemsIndexed(sampleAttendance.map {
+                            it.toAttendanceEntity(year = "2025", term = "1")
+                        }) { index, item ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 100.dp),
+                                colors = CardDefaults.cardColors(containerColor = uiColors.cardBackground),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                shape = RoundedCornerShape(
+                                    topStart = if (index == 0) 24.dp else 4.dp,
+                                    topEnd = if (index == 0) 24.dp else 4.dp,
+                                    bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
+                                    bottomEnd = if (index == attendance.size - 1) 24.dp else 4.dp
+                                )
                             ) {
                                 AttendanceCard(item)
                             }
                         }
-                    }
-                    item {
-                        Spacer(
-                            modifier = Modifier.height(
-                                86.dp + WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding()
+                        item {
+                            Spacer(
+                                modifier = Modifier.height(
+                                    86.dp + WindowInsets.navigationBars.asPaddingValues()
+                                        .calculateBottomPadding()
+                                )
                             )
-                        )
-                    }
-                } else {
-                    itemsIndexed(sampleAttendance.map {
-                        it.toAttendanceEntity(year = "2025", term = "1")
-                    }) { index, item ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 100.dp),
-                            colors = CardDefaults.cardColors(containerColor = uiColors.cardBackground),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                            shape = RoundedCornerShape(
-                                topStart = if (index == 0) 24.dp else 4.dp,
-                                topEnd = if (index == 0) 24.dp else 4.dp,
-                                bottomStart = if (index == attendance.size - 1) 24.dp else 4.dp,
-                                bottomEnd = if (index == attendance.size - 1) 24.dp else 4.dp
-                            )
-                        ) {
-                            AttendanceCard(item)
                         }
                     }
-                    item {
-                        Spacer(
-                            modifier = Modifier.height(
-                                86.dp + WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding()
-                            )
-                        )
-                    }
                 }
+
+                InstagramPullIndicator(
+                    pullState = pullToRefreshState,
+                    isRefreshing = syncState is SyncUiState.Loading
+                )
             }
-
-            InstagramPullIndicator(
-                pullState = pullToRefreshState,
-                isRefreshing = syncState is SyncUiState.Loading
-            )
         }
-
-        // ── Top bar — now uses hazeEffect instead of drawBackdrop ─────────────
-        // Removed: layerBackdrop / drawBackdrop / rememberLayerBackdrop
-        // Those were competing with hazeSource for hardware layer ownership,
-        // causing the RenderThread SIGSEGV.
-        Column(
-            modifier = Modifier
+    }
+            // ── Top bar — now uses hazeEffect instead of drawBackdrop ─────────────
+            // Removed: layerBackdrop / drawBackdrop / rememberLayerBackdrop
+            // Those were competing with hazeSource for hardware layer ownership,
+            // causing the RenderThread SIGSEGV.
+            Column(
+                modifier = Modifier
 //                .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
 //                    blurRadius = 15.dp
 //                    noiseFactor = 0.05f
 //                    inputScale = HazeInputScale.Auto
 //                    alpha = 0.98f
 //                }
-                .drawBackdrop(
-                    backdrop = backdrop,
-                    shape = { RoundedCornerShape(24.dp) },
-                    effects = {
-                        blur(4.dp.toPx())
-//                    colorControls(
-//                        brightness = 0.1f,    // -1.0 to 1.0
-//                        contrast = 1.2f,      // 0.0 to 2.0
-//                        saturation = 1.5f     // 0.0 to 2.0
-//                    )
-                        vibrancy()
-                        lens(
-                            refractionHeight = 24.dp.toPx(),
-                            refractionAmount = 32.dp.toPx(),
-                            chromaticAberration = false  // RGB color separation
-                        )
-                    }
-                )
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        ) {
-            Spacer(
-                modifier = Modifier.height(
-                    16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                )
-            )
-            Row {
-                Text(
-                    text = "Attendance",
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.SemiBold,
-                    color = uiColors.textPrimary,
-                    style = MaterialTheme.typography.titleLargeEmphasized,
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        if (!sapLoggedIn) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = WindowInsets.statusBars.asPaddingValues()
-                            .calculateTopPadding() + 46.dp
-                    )
+                    .customBackdrop(backdrop)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
             ) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-//                        .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
-//                            blurRadius = 15.dp
-//                            noiseFactor = 0.05f
-//                            inputScale = HazeInputScale.Auto
-//                            alpha = 0.98f
-//                        }
-                        .pointerInput(Unit) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    awaitPointerEvent().changes.forEach { it.consume() }
-                                }
-                            }
-                        }
-                )
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        isLoginDialogOpen = true
-                    },
-                    modifier = Modifier.align(Alignment.Center),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = uiColors.progressAccent,
-                        contentColor = uiColors.textPrimary
+                Spacer(
+                    modifier = Modifier.height(
+                        16.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                     )
-                ) {
+                )
+                Row {
                     Text(
-                        text = "Connect to sap",
+                        text = "Attendance",
                         fontFamily = FontFamily.Monospace,
-                        style = MaterialTheme.typography.labelMediumEmphasized
+                        fontWeight = FontWeight.SemiBold,
+                        color = uiColors.textPrimary,
+                        style = MaterialTheme.typography.titleLargeEmphasized,
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-        }
-    }
 
+            if (!sapLoggedIn) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            top = WindowInsets.statusBars.asPaddingValues()
+                                .calculateTopPadding() + 46.dp
+                        )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                        .hazeEffect(state = hazeState, style = HazeMaterials.ultraThin()) {
+                            blurRadius = 15.dp
+                            noiseFactor = 0.05f
+                            inputScale = HazeInputScale.Auto
+                            alpha = 0.98f
+                        }
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        awaitPointerEvent().changes.forEach { it.consume() }
+                                    }
+                                }
+                            }
+                    )
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                            isLoginDialogOpen = true
+                        },
+                        modifier = Modifier.align(Alignment.Center),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = uiColors.progressAccent,
+                            contentColor = uiColors.textPrimary
+                        )
+                    ) {
+                        Text(
+                            text = "Connect to sap",
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.labelMediumEmphasized
+                        )
+                    }
+                }
+            }
     currentAttendance.value?.let { att ->
         AttendanceDialog(
             requiredAttendance = requiredAttendance.value,

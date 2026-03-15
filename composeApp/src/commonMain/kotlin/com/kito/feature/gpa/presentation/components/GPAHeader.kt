@@ -4,6 +4,8 @@ import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,9 +35,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kito.core.presentation.components.meshGradient
 import com.kito.core.presentation.components.shimmer
@@ -133,6 +137,16 @@ fun GPAHeader(
                         ),
                     ),
                     resolutionX = 30
+                )
+                .border(
+                    width = Dp.Hairline,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.5f),
+                            Color.White.copy(alpha = 0.1f),
+                        )
+                    ),
+                    shape = RoundedCornerShape(26.dp)
                 )
                 .padding(20.dp)
         ) {
