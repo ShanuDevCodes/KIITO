@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -41,6 +42,8 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.kito.core.presentation.navigation3.Routes
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,6 +75,8 @@ fun RestaurantMenuScreen(
     val state by viewModel.menuState.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
     var showBrowseMenu by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     // Load menu once when screen enters
     LaunchedEffect(route.restaurantId) {
@@ -124,7 +129,8 @@ fun RestaurantMenuScreen(
                 onOrderDish     = { dishId ->
                     val url = viewModel.buildRedirectUrl(route.restaurantId, dishId)
                     uriHandler.openUri(url)
-                }
+                },
+                listState       = listState
             )
         }
 
@@ -135,7 +141,18 @@ fun RestaurantMenuScreen(
                 onCategoryClick = { category ->
                     showBrowseMenu = false
                     viewModel.expandCategory(category)
-                    // Scroll is handled by expanded state — category will be visible
+                    coroutineScope.launch {
+                        var index = 4 // Banner, Name, Stats, Search
+                        for ((cat, dishes) in state.dishesByCategory) {
+                            if (cat == category) break
+                            index += 1
+                            if (state.expandedCategories.contains(cat)) {
+                                index += dishes.size
+                            }
+                        }
+                        delay(100)
+                        listState.animateScrollToItem(index)
+                    }
                 },
                 onDismiss = { showBrowseMenu = false }
             )
@@ -155,10 +172,9 @@ private fun MenuContent(
     onSearchChange: (String) -> Unit,
     onToggleCategory: (String) -> Unit,
     onMenuButtonClick: () -> Unit,
-    onOrderDish: (dishId: String) -> Unit
+    onOrderDish: (dishId: String) -> Unit,
+    listState: LazyListState = rememberLazyListState()
 ) {
-    val listState = rememberLazyListState()
-
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
