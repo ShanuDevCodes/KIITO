@@ -1,5 +1,6 @@
 package com.kito.core.presentation.components
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.kito.core.presentation.navigation3.Routes
 import kito.composeapp.generated.resources.Res
 import kito.composeapp.generated.resources.khaoo_gully
@@ -133,7 +135,8 @@ val UtilityList = listOf(
     )
 )
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalSharedTransitionApi::class)
 @Composable
 fun UtilityCard(
     onCLick: (
@@ -141,6 +144,8 @@ fun UtilityCard(
     ) -> Unit
 ) {
     val colors = UIColors()
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedContentScope = LocalRootNavAnimatedContentScope.current ?: LocalNavAnimatedContentScope.current
     Box(
         modifier = Modifier
             .clip(
@@ -152,35 +157,6 @@ fun UtilityCard(
             .fillMaxWidth()
     ) {
         Column {
-//            ShrinkingCarouselRow(
-//                itemCount = 6,
-//                itemWidth = 100.dp,
-//                itemSpacing = 8.dp,
-//                minScale = 0.6f
-//            ) { index ->
-//                GradientIcon(
-//                    imageVector = Icons.Rounded.CalendarMonth,
-//                    contentDescription = "Calendar",
-//                    modifier = Modifier
-//                        .size(64.dp)
-//                        .align(Alignment.BottomEnd)
-//                        .offset(x = 8.dp, y = 4.dp)
-//                        .graphicsLayer { scaleX = 1.2f; scaleY = 1.2f},
-//                    gradient = Brush.horizontalGradient(
-//                        colors = listOf(Color(0xFFC7895F), Color(0xFF765138))
-//                    )
-//                )
-//                Text(
-//                    text = "GPA",
-//                    maxLines = 1,
-//                    overflow = TextOverflow.Ellipsis,
-//                    modifier = Modifier.padding(8.dp),
-//                    fontFamily = FontFamily.Monospace,
-//                    style = MaterialTheme.typography.titleMediumEmphasized,
-//                    fontWeight = FontWeight.SemiBold,
-//                    color = Color(0xFFC7895F)
-//                )
-//            }
             ParallaxCarouselRow(
                 itemCount = UtilityList.size,
                 itemWidth = 100.dp,
@@ -191,17 +167,30 @@ fun UtilityCard(
                     UtilityList[index].itemBoxColor
                 }
             ) { index ->
+                val destination = UtilityList[index].destination
+                val sharedModifier = if (sharedTransitionScope != null && destination != null) {
+                    with(sharedTransitionScope) {
+                        Modifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "utility-card-${destination}"),
+                            animatedVisibilityScope = animatedContentScope,
+                            boundsTransform = UtilityBoundsTransform,
+                        )
+                    }
+                } else Modifier
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable(
                             onClick = {
-                                onCLick(
-                                    UtilityList[index].destination
-                                )
+                                onCLick(destination)
                             }
                         )
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(sharedModifier)
+                    )
                     val painter = when {
                         UtilityList[index].iconVector != null ->
                             rememberVectorPainter(UtilityList[index].iconVector!!)
