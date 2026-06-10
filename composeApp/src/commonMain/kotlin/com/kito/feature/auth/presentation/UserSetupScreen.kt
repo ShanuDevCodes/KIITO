@@ -44,19 +44,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.NativeColorFilter
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.presentation.components.UIColors
-import com.kito.core.presentation.components.shimmer
 import kito.composeapp.generated.resources.Res
 import kito.composeapp.generated.resources.e_labs_logo
 import kito.composeapp.generated.resources.google
+import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
@@ -74,10 +71,10 @@ fun UserSetupScreen(
 //    var selectedTerm by rememberSaveable { mutableStateOf("Autumn") }
     var name by rememberSaveable { mutableStateOf("") }
     var kiitRollNumber by rememberSaveable { mutableStateOf("") }
-    var sapPassword by rememberSaveable { mutableStateOf("")}
+//    var sapPassword by rememberSaveable { mutableStateOf("")}
     val now = currentLocalDateTime()
     val currentYear = now.year
-    val month = now.monthNumber
+    val month = now.month.number
     val derivedYear = if (month < 5) {
         currentYear - 1
     } else {
