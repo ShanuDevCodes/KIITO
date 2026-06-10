@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,96 +54,108 @@ data class Utilities(
     val iconGradient: Brush,
     val destination: NavKey? = null
 )
-
-val UtilityList = listOf(
-    Utilities(
-        title = "Khaoo Gully",
-//        iconVector = Icons.Rounded.CalendarMonth,
-        iconRes = Res.drawable.khaoo_gully,
-        itemBoxColor = Color(0xFF30583E),
-        textColor = Color(0xFFC1F9D2),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFF89C6A2),
-                Color(0xFF3B684B)
+fun getUtilityList(
+    isKhaooGullyEnabled: Boolean
+): List<Utilities> = buildList {
+    if (isKhaooGullyEnabled) {
+        add(
+            Utilities(
+                title = "Khaoo Gully",
+                iconRes = Res.drawable.khaoo_gully,
+                itemBoxColor = Color(0xFF30583E),
+                textColor = Color(0xFFC1F9D2),
+                iconGradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFF89C6A2),
+                        Color(0xFF3B684B)
+                    )
+                ),
+                destination = Routes.Calendar
             )
-        ),
-        destination = Routes.Calendar
-    ),
-    Utilities(
-        title = "GPA Calc",
-        iconVector = Icons.Rounded.Calculate,
-        itemBoxColor = Color(0xFF583E30),
-        textColor = Color(0xFFF9E1C1),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFFC69D89),
-                Color(0xFF684B3B)
-            )
-        ),
-        destination = Routes.GPACalc
-    ),
-    Utilities(
-        title = "Friend Schedule",
-        iconVector = Icons.Rounded.Group,
-        itemBoxColor = Color(0xFF583030),
-        textColor = Color(0xFFF9C1C1),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFFC68989),
-                Color(0xFF683B3B)
-            )
-        ),
-        destination = Routes.FriendView
-    ),
-    Utilities(
-        title = "Holiday List",
-        iconVector = Icons.Rounded.EventAvailable,
-        itemBoxColor = Color(0xFF304558),
-        textColor = Color(0xFFC1E4F9),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFF89B8C6),
-                Color(0xFF3B5C68)
-            )
-        ),
-        destination = Routes.HolidayList
-    ),
-    Utilities(
-        title = "Exam Schedule",
-        iconVector = Icons.AutoMirrored.Rounded.Assignment,
-        itemBoxColor = Color(0xFF3E3058),
-        textColor = Color(0xFFE1C1F9),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFFA689C6),
-                Color(0xFF4B3B68)
-            )
-        ),
-        destination = Routes.ExamSchedule
-    ),
-    Utilities(
-        title = "Coming Soon",
-        iconVector = Icons.Rounded.AutoAwesome,
-        itemBoxColor = Color(0xFF2D3242),
-        textColor = Color(0xFFECEDFF),
-        iconGradient = Brush.horizontalGradient(
-            colors = listOf(
-                Color(0xFF6C7293),
-                Color(0xFF1C2128)
+        )
+    }
+    addAll(
+        listOf(
+            Utilities(
+                title = "GPA Calc",
+                iconVector = Icons.Rounded.Calculate,
+                itemBoxColor = Color(0xFF583E30),
+                textColor = Color(0xFFF9E1C1),
+                iconGradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFFC69D89),
+                        Color(0xFF684B3B)
+                    )
+                ),
+                destination = Routes.GPACalc
+            ),
+            Utilities(
+                title = "Friend Schedule",
+                iconVector = Icons.Rounded.Group,
+                itemBoxColor = Color(0xFF583030),
+                textColor = Color(0xFFF9C1C1),
+                iconGradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFFC68989),
+                        Color(0xFF683B3B)
+                    )
+                ),
+                destination = Routes.FriendView
+            ),
+            Utilities(
+                title = "Holiday List",
+                iconVector = Icons.Rounded.EventAvailable,
+                itemBoxColor = Color(0xFF304558),
+                textColor = Color(0xFFC1E4F9),
+                iconGradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFF89B8C6),
+                        Color(0xFF3B5C68)
+                    )
+                ),
+                destination = Routes.HolidayList
+            ),
+            Utilities(
+                title = "Exam Schedule",
+                iconVector = Icons.AutoMirrored.Rounded.Assignment,
+                itemBoxColor = Color(0xFF3E3058),
+                textColor = Color(0xFFE1C1F9),
+                iconGradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFFA689C6),
+                        Color(0xFF4B3B68)
+                    )
+                ),
+                destination = Routes.ExamSchedule
+            ),
+            Utilities(
+                title = "Coming Soon",
+                iconVector = Icons.Rounded.AutoAwesome,
+                itemBoxColor = Color(0xFF2D3242),
+                textColor = Color(0xFFECEDFF),
+                iconGradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        Color(0xFF6C7293),
+                        Color(0xFF1C2128)
+                    )
+                )
             )
         )
     )
-)
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalSharedTransitionApi::class)
 @Composable
 fun UtilityCard(
+    isKhaooGullyEnabled : Boolean,
     onCLick: (
         destination: NavKey?
     ) -> Unit
 ) {
+    val UtilityList = remember(isKhaooGullyEnabled) {
+        getUtilityList(isKhaooGullyEnabled)
+    }
     val colors = UIColors()
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalRootNavAnimatedContentScope.current ?: LocalNavAnimatedContentScope.current
