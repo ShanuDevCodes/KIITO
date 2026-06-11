@@ -57,6 +57,10 @@ import kito.composeapp.generated.resources.google
 import kotlinx.datetime.number
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.compose.auth.composeAuth
+import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
+import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 
 @Composable
 fun UserSetupScreen(
@@ -64,13 +68,28 @@ fun UserSetupScreen(
     userSetupViewModel: UserSetupViewModel = koinInject()
 ) {
     val setupState by userSetupViewModel.setupState.collectAsState()
+    val loadingSource by userSetupViewModel.loadingSource.collectAsState()
     LaunchedEffect(setupState) {
         if (setupState is SetupState.Success) {
             onSetupComplete()
         }
     }
+
+    val supabaseClient: SupabaseClient = koinInject()
+    val googleSignIn = supabaseClient.composeAuth.rememberSignInWithGoogle(
+        onResult = { result ->
+            when (result) {
+                is NativeSignInResult.Success -> Unit
+                is NativeSignInResult.ClosedByUser -> userSetupViewModel.onSignInCancelled()
+                is NativeSignInResult.Error -> userSetupViewModel.onSignInError(result.message)
+                is NativeSignInResult.NetworkError -> userSetupViewModel.onSignInError(result.message)
+            }
+        }
+    )
+
     UserSetupContent(
         setupState = setupState,
+        loadingSource = loadingSource,
         onSubmit = { name, roll, year, term ->
             userSetupViewModel.completeSetup(
                 name = name,
@@ -78,6 +97,10 @@ fun UserSetupScreen(
                 year = year,
                 term = term
             )
+        },
+        onGoogleSignIn = {
+            userSetupViewModel.onSignInStarted()
+            googleSignIn.startFlow()
         }
     )
 }
@@ -86,7 +109,9 @@ fun UserSetupScreen(
 @Composable
 private fun UserSetupContent(
     setupState: SetupState,
-    onSubmit: (name: String, roll: String, year: String, term: String) -> Unit
+    loadingSource: LoadingSource,
+    onSubmit: (name: String, roll: String, year: String, term: String) -> Unit,
+    onGoogleSignIn: () -> Unit
 ) {
 //    val years = (currentYear - 5..currentYear).map { it.toString() }.reversed()
 //    val terms = listOf(
@@ -114,6 +139,8 @@ private fun UserSetupContent(
     var sapTerm by rememberSaveable { mutableStateOf(derivedTerm) }
     val uiColor = UIColors()
     val loading = setupState is SetupState.Loading
+    val manualLoading = loadingSource == LoadingSource.Manual
+    val googleLoading = loadingSource == LoadingSource.Google
 //    var passwordVisible by remember { mutableStateOf(false) }
 //    var yearExpanded by remember { mutableStateOf(false) }
 //    val yearState = rememberTextFieldState(sapYear)
@@ -434,7 +461,7 @@ private fun UserSetupContent(
                     onClick = {
                         onSubmit(name, kiitRollNumber, sapYear, sapTerm)
                     },
-                    enabled = if (name.isNotBlank() && kiitRollNumber.isNotBlank() && kiitRollNumber.length > 6 && !loading) true else false,
+                    enabled = name.isNotBlank() && kiitRollNumber.isNotBlank() && kiitRollNumber.length > 6 && !loading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp)
@@ -456,18 +483,14 @@ private fun UserSetupContent(
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (loading) {
+                            if (manualLoading) {
                                 LoadingIndicator(
                                     color = uiColor.progressAccent
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
                             Text(
-                                text = if (loading) {
-                                    "Loading..."
-                                } else{
-                                    "Get Started"
-                                },
+                                text = if (manualLoading) "Loading..." else "Get Started",
                                 fontFamily = FontFamily.Monospace,
                                 color = if (kiitRollNumber.isNotBlank() && name.isNotBlank() && kiitRollNumber.length > 6) Color.White else Color(
                                     0xFFC2927F
@@ -501,9 +524,8 @@ private fun UserSetupContent(
             item {
                 Spacer(Modifier.height(24.dp))
                 Button(
-                    onClick = {
-
-                    },
+                    onClick = onGoogleSignIn,
+                    enabled = !loading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp)
@@ -519,19 +541,23 @@ private fun UserSetupContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(loginGradient),
+                            .background(if (!loading) loginGradient else disabledGradient),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Image(
-                                painter = painterResource(Res.drawable.google),
-                                contentDescription = "Google",
-                                modifier = Modifier
-                                    .size(24.dp)
-                            )
+                            if (googleLoading) {
+                                LoadingIndicator(color = uiColor.progressAccent)
+                                Spacer(modifier = Modifier.width(8.dp))
+                            } else {
+                                Image(
+                                    painter = painterResource(Res.drawable.google),
+                                    contentDescription = "Google",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                             Text(
                                 text = "@kiit.ac.in",
                                 modifier = Modifier.padding(horizontal = 8.dp),
@@ -554,7 +580,9 @@ private fun UserSetupContent(
 private fun UserSetupContentPreview() {
     UserSetupContent(
         setupState = SetupState.Idle,
-        onSubmit = { _, _, _, _ -> }
+        loadingSource = LoadingSource.None,
+        onSubmit = { _, _, _, _ -> },
+        onGoogleSignIn = {}
     )
 }
 
@@ -563,6 +591,8 @@ private fun UserSetupContentPreview() {
 private fun UserSetupContentErrorPreview() {
     UserSetupContent(
         setupState = SetupState.Error("Invalid roll number"),
-        onSubmit = { _, _, _, _ -> }
+        loadingSource = LoadingSource.None,
+        onSubmit = { _, _, _, _ -> },
+        onGoogleSignIn = {}
     )
 }

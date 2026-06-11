@@ -26,7 +26,8 @@ class SettingsViewModel(
     @Provided private val secureStorage: SecureStorage,
     private val attendanceRepository: AttendanceRepository,
     private val appSyncUseCase: AppSyncUseCase,
-    private val notificationController: NotificationController
+    private val notificationController: NotificationController,
+    @Provided private val authRepository: com.kito.core.auth.AuthRepository,
 ): ViewModel(){
     private val _syncState = MutableStateFlow<SyncUiState>(SyncUiState.Idle)
     val syncState = _syncState.asStateFlow()
@@ -112,6 +113,7 @@ class SettingsViewModel(
                     }
                 delay(1000.milliseconds)
                 prefs.setUserName(formattedName)
+                authRepository.updateDisplayName(formattedName)
                 _syncState.value = SyncUiState.Success
             } catch (e: Exception) {
                 _syncState.value = SyncUiState.Error(e.message ?: "Sync failed")

@@ -25,11 +25,15 @@ import com.kito.feature.schedule.presentation.ScheduleScreenViewModel
 import com.kito.feature.settings.presentation.SettingsViewModel
 import com.kito.sap.SapPortalClient
 import com.kito.sap.SapRepository
+import com.kito.core.auth.AuthRepository
+import com.kito.core.auth.SupabaseAuthRepository
+import com.kito.core.auth.createSupabaseAuthClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.plugin.module.dsl.create
 import org.koin.plugin.module.dsl.single
 
 val commonModule = module {
@@ -50,6 +54,17 @@ val commonModule = module {
         KhaoogullyRepository(
             apiKey     = AppConfig.kgAPIKey,
             baseUrl    = AppConfig.kgBaseURL
+        )
+    }
+
+    // Supabase Auth (SDK) — auth/GoTrue only; separate from the raw REST client.
+    // create(::fn) registers SupabaseClient as a compiler-plugin-tracked provider so that
+    // get<SupabaseClient>() call sites (deep-link handlers) pass compile-time safety.
+    single { create(::createSupabaseAuthClient) }
+    single<AuthRepository> {
+        SupabaseAuthRepository(
+            client = get(),
+            scope = get(named("ApplicationScope"))
         )
     }
 }

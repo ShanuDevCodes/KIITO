@@ -13,14 +13,88 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Provided
+import com.kito.core.auth.AuthEvent
+import com.kito.core.auth.AuthRepository
+import com.kito.core.auth.AuthState
+import com.kito.core.common.util.currentLocalDateTime
+import kotlinx.datetime.number
 
 class UserSetupViewModel(
     private val prefs: PrefsRepository,
     @Provided private val secureStorage: SecureStorage,
     private val appSyncUseCase: AppSyncUseCase,
+    @Provided private val authRepository: AuthRepository,
 ) : ViewModel(){
     private val _setupState = MutableStateFlow<SetupState>(SetupState.Idle)
     val setupState = _setupState.asStateFlow()
+
+    // Tracks which button triggered loading so the UI can show the spinner on the right button.
+    private val _loadingSource = MutableStateFlow<LoadingSource>(LoadingSource.None)
+    val loadingSource = _loadingSource.asStateFlow()
+
+    init {
+        // Replace-and-gate: when Google sign-in succeeds (and passes the @kiit.ac.in / allowlist
+        // gate inside AuthRepository), auto-fill identity and complete setup.
+        viewModelScope.launch {
+            authRepository.authState.collect { state ->
+                if (state is AuthState.Authenticated && _setupState.value != SetupState.Success) {
+                    _loadingSource.value = LoadingSource.None
+                    val (year, term) = deriveYearTerm()
+                    completeSetup(
+                        name = state.user.name,
+                        roll = state.user.rollNumber,
+                        year = year,
+                        term = term
+                    )
+                }
+            }
+        }
+        // Surface sign-in rejections/failures in the existing error UI.
+        viewModelScope.launch {
+            authRepository.events.collect { event ->
+                _loadingSource.value = LoadingSource.None
+                _setupState.value = when (event) {
+                    is AuthEvent.NotAllowed -> SetupState.Error("Only @kiit.ac.in accounts can sign in")
+                    is AuthEvent.Failure -> SetupState.Error(event.message)
+                    AuthEvent.Cancelled -> SetupState.Idle
+                }
+            }
+        }
+    }
+
+    /** Redirect (browser) fallback — used when native Credential Manager isn't available. */
+    fun signInWithGoogle() {
+        _setupState.value = SetupState.Loading
+        viewModelScope.launch { authRepository.signInWithGoogle() }
+    }
+
+    /** Native account-picker flow launched; show loading until result/session arrives. */
+    fun onSignInStarted() {
+        _loadingSource.value = LoadingSource.Google
+        _setupState.value = SetupState.Loading
+    }
+
+    fun onSignInError(message: String) {
+        _loadingSource.value = LoadingSource.None
+        _setupState.value = SetupState.Error(message)
+    }
+
+    fun onSignInCancelled() {
+        _loadingSource.value = LoadingSource.None
+        _setupState.value = SetupState.Idle
+    }
+
+    private fun deriveYearTerm(): Pair<String, String> {
+        val now = currentLocalDateTime()
+        val month = now.month.number
+        val year = if (month < 5) now.year - 1 else now.year
+        val term = when (month) {
+            12, 1, 2, 3, 4 -> "020"
+            in 7..11 -> "010"
+            else -> "020"
+        }
+        return year.toString() to term
+    }
     suspend fun setUserName(name: String) {
         val formattedName = name
             .trim()
@@ -56,6 +130,7 @@ class UserSetupViewModel(
         term: String = "020"
     ) {
         viewModelScope.launch {
+            _loadingSource.value = LoadingSource.Manual
             _setupState.value = SetupState.Loading
             try {
                 setUserName(name)
@@ -64,8 +139,10 @@ class UserSetupViewModel(
                 setTermCode(term)
                 appSyncUseCase.scheduleSync(roll)
                 setUserSetupDone()
+                _loadingSource.value = LoadingSource.None
                 _setupState.value = SetupState.Success
             } catch (e: Exception) {
+                _loadingSource.value = LoadingSource.None
                 _setupState.value = SetupState.Error(
                     e.message ?: "Something went wrong"
                 )
@@ -85,6 +162,8 @@ sealed class SetupState {
     object Success : SetupState()
     data class Error(val message: String) : SetupState()
 }
+
+enum class LoadingSource { None, Manual, Google }
 
 
 

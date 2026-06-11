@@ -64,6 +64,11 @@ android {
             "CDN_URL",
             "\"${localProps.getProperty("CDN_URL")}\""
         )
+        buildConfigField(
+            "String",
+            "GOOGLE_SERVER_CLIENT_ID",
+            "\"${localProps.getProperty("GOOGLE_SERVER_CLIENT_ID")}\""
+        )
     }
 
     buildTypes {

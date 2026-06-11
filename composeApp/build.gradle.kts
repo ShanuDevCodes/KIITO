@@ -54,6 +54,14 @@ kotlin {
             // Compose dependencies (Android specific)
             implementation("androidx.activity:activity-compose:1.8.0")
 
+            // Custom Tabs — used by Supabase OAuth redirect flow on Android
+            implementation("androidx.browser:browser:1.8.0")
+
+            // Credential Manager — native Google account picker (Compose Auth googleNativeLogin)
+            implementation("androidx.credentials:credentials:1.3.0")
+            implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+            implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
             // DataStore (proto - Android only)
             implementation("androidx.datastore:datastore:1.1.2")
             
@@ -130,6 +138,10 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.annotations)
             // implementation(libs.koin.compose.viewmodel)
+
+            // Supabase (auth / GoTrue only — REST stays on raw Ktor + anon key)
+            implementation(libs.supabase.auth)
+            implementation(libs.supabase.compose.auth)
 
 
             // Navigation 3
