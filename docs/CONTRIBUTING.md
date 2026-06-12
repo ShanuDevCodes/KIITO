@@ -6,13 +6,7 @@ Thank you for contributing. This document is **mandatory reading** before openin
 
 ## 1. Before you start
 
-1. **Set up git hooks** (once, after cloning):
-   ```bash
-   git config core.hooksPath .githooks
-   ```
-   This auto-fixes `gradlew` permissions on every commit.
-
-2. **Verify your environment**: Android Studio Meerkat+, JDK 17, Kotlin 2.3+.
+1. **Verify your environment**: Android Studio Meerkat+, JDK 17, Kotlin 2.3+.
 
 ---
 
