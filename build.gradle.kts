@@ -10,12 +10,3 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.57.2" apply false
     alias(libs.plugins.kover) apply false
 }
-
-// Ensure gradlew is executable on all platforms — runs automatically on every Gradle sync
-tasks.register("setGradlewExecutable") {
-    doLast { file("gradlew").setExecutable(true) }
-}
-gradle.projectsEvaluated { tasks.findByName("setGradlewExecutable")?.let { it } }
-rootProject.tasks.matching { it.name == "prepareKotlinBuildScriptModel" }.configureEach {
-    dependsOn("setGradlewExecutable")
-}
