@@ -23,15 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
 
 @Composable
-fun SelectedDayPanel(viewModel: CalendarViewModel, selectedDate: String) {
+fun SelectedDayPanel(selectedDate: String, selEvents: List<CalendarEvent>) {
     val parts     = selectedDate.split("-")
     val day       = parts[2].toInt()
     val month     = parts[1].toInt()
-    val selEvents = viewModel.getEventsForDate(selectedDate)
     var expandedId by remember { mutableStateOf<Long?>(null) }
 
     Column(

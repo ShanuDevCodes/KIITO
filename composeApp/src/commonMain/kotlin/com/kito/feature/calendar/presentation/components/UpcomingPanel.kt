@@ -22,12 +22,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
 
 @Composable
-fun UpcomingPanel(viewModel: CalendarViewModel) {
-    val upcoming = viewModel.getUpcomingEvents()
+fun UpcomingPanel(upcoming: List<CalendarEvent>) {
     if (upcoming.isEmpty()) return
 
     Column(Modifier.padding(horizontal = 12.dp)) {

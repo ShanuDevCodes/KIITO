@@ -61,6 +61,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -105,9 +106,6 @@ fun RestaurantMenuScreen(
     com.kito.SetSystemBarAppearance(isLightForeground = false)
     val state by viewModel.menuState.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
-    var showBrowseMenu by remember { mutableStateOf(false) }
-    val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
 
     // Load menu once when screen enters
     LaunchedEffect(route.restaurantId) {
@@ -131,36 +129,64 @@ fun RestaurantMenuScreen(
         onDispose { viewModel.clearMenuState() }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(ScreenBg)) {
+    RestaurantMenuContent(
+        route           = route,
+        state           = state,
+        onBack          = onBack,
+        onSearchChange  = viewModel::onMenuSearchChange,
+        onToggleCategory = viewModel::toggleCategory,
+        onOrderDish     = { dishId ->
+            val url = viewModel.buildRedirectUrl(route.restaurantId, dishId)
+            uriHandler.openUri(url)
+        },
+        onExpandCategory = viewModel::expandCategory,
+        onRetry         = {
+            viewModel.loadMenu(
+                KgRestaurant(
+                    id             = route.restaurantId,
+                    name           = route.restaurantName,
+                    image          = route.restaurantImage,
+                    cuisine        = emptyList(),
+                    rating         = route.restaurantRating,
+                    campusName     = null,
+                    deliveryWindow = null,
+                    poolId         = null,
+                    browseOnly     = route.browseOnly
+                )
+            )
+        }
+    )
+}
+
+@Composable
+fun RestaurantMenuContent(
+    route: Routes.RestaurantMenu,
+    state: MenuUiState,
+    onBack: () -> Unit,
+    onSearchChange: (String) -> Unit,
+    onToggleCategory: (String) -> Unit,
+    onOrderDish: (dishId: String) -> Unit,
+    onExpandCategory: (String) -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showBrowseMenu by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    Box(modifier = modifier.fillMaxSize().background(ScreenBg)) {
         when {
             state.isLoading -> MenuLoader()
             state.error != null && state.allDishes.isEmpty() ->
-                MenuError(message = state.error!!, onRetry = {
-                    viewModel.loadMenu(
-                        KgRestaurant(
-                            id             = route.restaurantId,
-                            name           = route.restaurantName,
-                            image          = route.restaurantImage,
-                            cuisine        = emptyList(),
-                            rating         = route.restaurantRating,
-                            campusName     = null,
-                            deliveryWindow = null,
-                            poolId         = null,
-                            browseOnly     = route.browseOnly
-                        )
-                    )
-                })
+                MenuError(message = state.error!!, onRetry = onRetry)
             else -> MenuContent(
                 route           = route,
                 state           = state,
                 onBack          = onBack,
-                onSearchChange  = viewModel::onMenuSearchChange,
-                onToggleCategory = viewModel::toggleCategory,
+                onSearchChange  = onSearchChange,
+                onToggleCategory = onToggleCategory,
                 onMenuButtonClick = { showBrowseMenu = true },
-                onOrderDish     = { dishId ->
-                    val url = viewModel.buildRedirectUrl(route.restaurantId, dishId)
-                    uriHandler.openUri(url)
-                },
+                onOrderDish     = onOrderDish,
                 listState       = listState
             )
         }
@@ -171,7 +197,7 @@ fun RestaurantMenuScreen(
                 categories     = state.dishesByCategory.keys.toList(),
                 onCategoryClick = { category ->
                     showBrowseMenu = false
-                    viewModel.expandCategory(category)
+                    onExpandCategory(category)
                     coroutineScope.launch {
                         var index = 4 // Banner, Name, Stats, Search
                         for ((cat, dishes) in state.dishesByCategory) {
@@ -312,42 +338,6 @@ private fun MenuContent(
                 )
                 Spacer(Modifier.height(10.dp))
             }
-
-            // ── Login to add items CTA (browse-only state) ────────────────────
-//            item {
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 16.dp)
-//                        .clip(RoundedCornerShape(12.dp))
-//                        .background(LightGreen)
-//                        .padding(horizontal = 16.dp, vertical = 13.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Icon(
-//                        Icons.AutoMirrored.Default.ArrowForwardIos,
-//                        contentDescription = null,
-//                        tint     = PrimaryGreen,
-//                        modifier = Modifier.size(18.dp)
-//                    )
-//                    Spacer(Modifier.width(10.dp))
-//                    Text(
-//                        "Login to add items to cart",
-//                        color      = TextPrimary,
-//                        fontWeight = FontWeight.Medium,
-//                        fontSize   = 14.sp,
-//                        modifier   = Modifier.weight(1f)
-//                    )
-//                    Icon(
-//                        Icons.AutoMirrored.Default.ArrowForwardIos,
-//                        contentDescription = null,
-//                        tint     = TextSecondary,
-//                        modifier = Modifier.size(14.dp)
-//                    )
-//                }
-//                Spacer(Modifier.height(6.dp))
-//                HorizontalDivider(color = Divider, thickness = 6.dp)
-//            }
 
             // ── Categories with expandable dish lists ─────────────────────────
             state.dishesByCategory.forEach { (category, dishes) ->
@@ -691,7 +681,6 @@ private fun BrowseMenuDialog(
 
                     // Category list
                     categories.forEach { category ->
-                        val dishCount = category  // we just have the key here
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -763,4 +752,65 @@ private fun MenuError(message: String, onRetry: () -> Unit) {
             Text("Retry")
         }
     }
+}
+
+@Preview
+@Composable
+private fun RestaurantMenuContentPreview() {
+    RestaurantMenuContent(
+        route = Routes.RestaurantMenu(
+            restaurantId = "1",
+            restaurantName = "Burger Palace",
+            restaurantImage = null,
+            restaurantRating = 4.5f,
+            browseOnly = false
+        ),
+        state = MenuUiState(
+            isLoading = false,
+            restaurant = KgRestaurant(
+                id = "1",
+                name = "Burger Palace",
+                image = null,
+                cuisine = emptyList(),
+                rating = 4.5f,
+                campusName = "East Campus",
+                deliveryWindow = "30 mins",
+                poolId = null,
+                browseOnly = false
+            ),
+            allDishes = listOf(
+                KgDish(
+                    id = "101",
+                    name = "Classic Burger",
+                    price = 15000,
+                    image = null,
+                    veg = true,
+                    isAvailable = true,
+                    hasCustomizations = false,
+                    promoLabel = null,
+                    category = "STARTER"
+                )
+            ),
+            filteredDishes = listOf(
+                KgDish(
+                    id = "101",
+                    name = "Classic Burger",
+                    price = 15000,
+                    image = null,
+                    veg = true,
+                    isAvailable = true,
+                    hasCustomizations = false,
+                    promoLabel = null,
+                    category = "STARTER"
+                )
+            ),
+            expandedCategories = setOf("STARTER")
+        ),
+        onBack = {},
+        onSearchChange = {},
+        onToggleCategory = {},
+        onOrderDish = {},
+        onExpandCategory = {},
+        onRetry = {}
+    )
 }

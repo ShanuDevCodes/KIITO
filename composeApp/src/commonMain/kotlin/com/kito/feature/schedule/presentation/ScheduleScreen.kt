@@ -55,6 +55,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -64,6 +66,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
@@ -72,6 +75,7 @@ import com.kito.core.designsystem.ExpressiveEasing
 import com.kito.core.designsystem.UIColors
 import com.kito.core.platform.sendEmail
 import com.kito.core.presentation.components.animation.PandaSleepingAnimation
+import com.kito.feature.schedule.domain.model.ScheduleItem
 import com.kito.feature.schedule.presentation.components.ScheduleClassCard
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
@@ -90,13 +94,28 @@ import org.koin.compose.koinInject
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
-@OptIn(ExperimentalHazeApi::class, ExperimentalHazeMaterialsApi::class,
-    ExperimentalMaterial3ExpressiveApi::class
-)
 @Composable
 fun ScheduleScreen(
     viewModel: ScheduleScreenViewModel = koinInject(),
     onBack: () -> Unit
+) {
+    val schedule by viewModel.weeklySchedule.collectAsState()
+
+    ScheduleContent(
+        schedule = schedule,
+        onBack = onBack
+    )
+}
+
+@OptIn(ExperimentalHazeApi::class, ExperimentalHazeMaterialsApi::class,
+    ExperimentalMaterial3ExpressiveApi::class
+)
+@Composable
+fun ScheduleContent(
+    schedule: Map<WeekDay, List<ScheduleItem>>,
+    onBack: () -> Unit,
+    enableAnimations: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     val today = todayKey()
     val currentPage = when (today) {
@@ -118,7 +137,6 @@ fun ScheduleScreen(
             weekDays.size
         }
     )
-    val schedule by viewModel.weeklySchedule.collectAsState()
     val haptics = LocalHapticFeedback.current
 
     val meshColors = listOf(
@@ -146,19 +164,21 @@ fun ScheduleScreen(
         val dt = currentLocalDateTime()
         now = LocalTime(dt.hour, dt.minute, dt.second)
     }
-    LaunchedEffect(Unit) {
-        meshColorAnimators.forEachIndexed { i, anim ->
-            launch {
-                val random = Random(i * 97)
-                while (true) {
-                    val nextColor = meshColors[random.nextInt(meshColors.size)]
-                    anim.animateTo(
-                        targetValue = nextColor,
-                        animationSpec = tween(
-                            durationMillis = random.nextInt(1800, 4200),
-                            easing = LinearOutSlowInEasing
+    if (enableAnimations) {
+        LaunchedEffect(Unit) {
+            meshColorAnimators.forEachIndexed { i, anim ->
+                launch {
+                    val random = Random(i * 97)
+                    while (true) {
+                        val nextColor = meshColors[random.nextInt(meshColors.size)]
+                        anim.animateTo(
+                            targetValue = nextColor,
+                            animationSpec = tween(
+                                durationMillis = random.nextInt(1800, 4200),
+                                easing = LinearOutSlowInEasing
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -184,9 +204,10 @@ fun ScheduleScreen(
         )
     }
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(Color(0xFF121116))
             .hazeSource(hazeState)
+            .semantics { testTag = "schedule_content" }
     ) {
         HorizontalPager(
             contentPadding = PaddingValues(
@@ -235,7 +256,8 @@ fun ScheduleScreen(
                     item {
                         Card(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .semantics { testTag = "schedule_empty" },
                             colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                             shape = RoundedCornerShape(24.dp)
@@ -414,21 +436,6 @@ fun ScheduleScreen(
                         color = uiColors.textPrimary
                     )
                 }
-
-//                ToggleButton(
-//                    checked = pagerState.currentPage == index,
-//                    onCheckedChange = {
-//                        coroutineScope.launch {
-//                            pagerState.animateScrollToPage(index)
-//                        }
-//                    },
-//                    colors = ToggleButtonDefaults.toggleButtonColors(
-//                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-//                        checkedContainerColor = MaterialTheme.colorScheme.primary,
-//                    )
-//                ) {
-//                    Text(label)
-//                }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -513,3 +520,13 @@ fun isClassUpcoming(
         false
     }
 }
+
+@Preview
+@Composable
+private fun ScheduleContentPreview() {
+    ScheduleContent(
+        schedule = emptyMap(),
+        onBack = {}
+    )
+}
+

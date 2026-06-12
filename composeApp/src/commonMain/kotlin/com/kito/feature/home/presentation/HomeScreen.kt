@@ -39,12 +39,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -63,8 +66,11 @@ import com.kito.core.presentation.navigation3.Routes
 import com.kito.core.presentation.navigation3.TabRoutes
 import com.kito.core.presentation.navigation3.isTopAsState
 import com.kito.core.presentation.navigation3.navigateTab
+import com.kito.feature.attendance.domain.model.Attendance
 import com.kito.feature.attendance.presentation.components.AttendanceBarCard
+import com.kito.feature.home.domain.model.EventOrAd
 import com.kito.feature.home.presentation.components.EventAndAdBanner
+import com.kito.feature.schedule.domain.model.ScheduleItem
 import com.kito.feature.schedule.presentation.components.ScheduleCard
 import com.kito.feature.settings.presentation.components.LoginDialogBox
 import dev.chrisbanes.haze.ExperimentalHazeApi
@@ -81,26 +87,18 @@ import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeApi::class,
-    ExperimentalHazeMaterialsApi::class
-)
 @Composable
 fun HomeScreen(
     viewmodel: HomeViewModel = koinInject(),
     rootNavBackStack: NavBackStack<NavKey>,
     tabNavBackStack: NavBackStack<NavKey>,
 ) {
-    var showAboutDialog by remember { mutableStateOf(false) }
-    val uiColors = UIColors()
     val name by viewmodel.name.collectAsState()
     val sapLoggedIn by viewmodel.sapLoggedIn.collectAsState()
     val attendance by viewmodel.attendance.collectAsState()
     val schedule by viewmodel.schedule.collectAsState()
     val nextSchedule by viewmodel.nextSchedule.collectAsState()
     val syncState by viewmodel.syncState.collectAsState()
-    val hazeState = rememberHazeState()
-    val haptic = LocalHapticFeedback.current
-    var isLoginDialogOpen by remember { mutableStateOf(false) }
     val loginState by viewmodel.loginState.collectAsState()
     val isOnline by viewmodel.isOnline.collectAsState()
     val isTabTop by tabNavBackStack.isTopAsState(TabRoutes.Home)
@@ -111,15 +109,7 @@ fun HomeScreen(
     val isScheduleEmpty by viewmodel.isScheduleEmpty.collectAsState()
     val isKhaooGullyEnabled by viewmodel.isKhaooGullyEnabled.collectAsState()
 
-    LaunchedEffect(loginState) {
-        if (loginState is SyncUiState.Success) {
-            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-            isLoginDialogOpen = false
-            viewmodel.setLoginStateIdle()
-        }
-    }
-
-    LaunchedEffect(Unit,isTopScreen,lifecycleOwner) {
+    LaunchedEffect(Unit, isTopScreen, lifecycleOwner) {
         if (isTopScreen) {
             val today = currentLocalDateTime().dayOfWeek
             val dayString = when (today) {
@@ -154,11 +144,12 @@ fun HomeScreen(
         delay(1000)
         if (isOnline) {
             viewmodel.syncOnStartup()
-        }else{
+        } else {
             toast("No Internet Connection")
         }
     }
 
+    val haptic = LocalHapticFeedback.current
     LaunchedEffect(Unit) {
         viewmodel.syncEvents.collect { event ->
             when (event) {
@@ -178,7 +169,91 @@ fun HomeScreen(
         }
     }
 
-    Box() {
+    HomeContent(
+        name = name,
+        sapLoggedIn = sapLoggedIn,
+        attendance = attendance,
+        schedule = schedule,
+        nextSchedule = nextSchedule,
+        syncState = syncState,
+        loginState = loginState,
+        isScheduleEmpty = isScheduleEmpty,
+        isKhaooGullyEnabled = isKhaooGullyEnabled,
+        eventsAndAds = eventsAndAds,
+        onReportClick = {
+            sendEmail(
+                to = "elabs.kiito@gmail.com",
+                subject = "KIITO Schedule Report",
+                body = ""
+            )
+        },
+        onNavigateToSchedule = {
+            rootNavBackStack.add(Routes.Schedule)
+        },
+        onNavigateToAttendance = {
+            tabNavBackStack.navigateTab(TabRoutes.Attendance)
+        },
+        onNavigateToUtility = { navKey ->
+            if (navKey != null) {
+                rootNavBackStack.add(navKey)
+            }
+        },
+        onNavigateToPromotion = { url ->
+            rootNavBackStack.add(Routes.Promotions(url = url))
+        },
+        onOpenUrl = { url ->
+            openUrl(url)
+        },
+        onLoginConfirm = { sapPassword ->
+            viewmodel.login(sapPassword)
+        },
+        onSetLoginStateIdle = {
+            viewmodel.setLoginStateIdle()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeApi::class,
+    ExperimentalHazeMaterialsApi::class
+)
+@Composable
+fun HomeContent(
+    name: String,
+    sapLoggedIn: Boolean,
+    attendance: List<Attendance>,
+    schedule: List<ScheduleItem>,
+    nextSchedule: List<ScheduleItem>,
+    syncState: SyncUiState,
+    loginState: SyncUiState,
+    isScheduleEmpty: Boolean,
+    isKhaooGullyEnabled: Boolean,
+    eventsAndAds: List<EventOrAd>,
+    onReportClick: () -> Unit,
+    onNavigateToSchedule: () -> Unit,
+    onNavigateToAttendance: () -> Unit,
+    onNavigateToUtility: (NavKey?) -> Unit,
+    onNavigateToPromotion: (String) -> Unit,
+    onOpenUrl: (String) -> Unit,
+    onLoginConfirm: (String) -> Unit,
+    onSetLoginStateIdle: () -> Unit,
+    modifier: Modifier = Modifier,
+    enableAnimations: Boolean = true,
+) {
+    var showAboutDialog by remember { mutableStateOf(false) }
+    val uiColors = UIColors()
+    val hazeState = rememberHazeState()
+    val haptic = LocalHapticFeedback.current
+    var isLoginDialogOpen by remember { mutableStateOf(false) }
+
+    LaunchedEffect(loginState) {
+        if (loginState is SyncUiState.Success) {
+            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+            isLoginDialogOpen = false
+            onSetLoginStateIdle()
+        }
+    }
+
+    Box(modifier = modifier.semantics { testTag = "home_content" }) {
         Box(
             modifier = Modifier
                 .hazeSource(hazeState)
@@ -190,7 +265,6 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-//                        .padding(horizontal = 12.dp)
                 ) {
                     LazyColumn() {
                         item {
@@ -204,7 +278,7 @@ fun HomeScreen(
 
                         item {
                             AnimatedVisibility(syncState is SyncUiState.Loading) {
-                                Column {
+                                Column(modifier = Modifier.semantics { testTag = "home_loading" }) {
                                     Spacer(modifier = Modifier.height(8.dp))
                                     LinearWavyProgressIndicator(
                                         color = uiColors.accentOrangeStart,
@@ -216,7 +290,6 @@ fun HomeScreen(
                                 }
                             }
                         }
-
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
@@ -237,33 +310,8 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .weight(1f)
                                 )
-                                if (false) {
-                                    IconButton(
-                                        onClick = {
-
-                                        },
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (false) {
-                                                Icons.Default.NotificationsActive
-                                            } else {
-                                                Icons.Outlined.NotificationsOff
-                                            },
-                                            contentDescription = "notifications",
-                                            modifier = Modifier.size(22.dp)
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                }
                                 IconButton(
-                                    onClick = {
-                                        sendEmail(
-                                            to = "elabs.kiito@gmail.com",
-                                            subject = "KIITO Schedule Report",
-                                            body = ""
-                                        )
-                                    },
+                                    onClick = onReportClick,
                                     colors = IconButtonDefaults.iconButtonColors(
                                         contentColor = Color(0xFFB32727)
                                     ),
@@ -279,9 +327,7 @@ fun HomeScreen(
                                 IconButton(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        rootNavBackStack.add(
-                                            Routes.Schedule
-                                        )
+                                        onNavigateToSchedule()
                                     },
                                     modifier = Modifier.size(28.dp)
                                 ) {
@@ -294,8 +340,6 @@ fun HomeScreen(
                                 }
                             }
                         }
-
-
 
                         item {
                             Spacer(Modifier.height(8.dp))
@@ -313,68 +357,49 @@ fun HomeScreen(
                                     isScheduleEmpty = isScheduleEmpty,
                                     onCLick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        rootNavBackStack.add(Routes.Schedule)
-                                    }
+                                        onNavigateToSchedule()
+                                    },
+                                    enableAnimations = enableAnimations
                                 )
                             }
                         }
                         item {
                             Spacer(Modifier.height(8.dp))
                         }
-                            item {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .padding(horizontal = 12.dp)
-                                ) {
-                                    Text(
-                                        text = "Utilities",
-                                        color = uiColors.textPrimary,
-                                        fontWeight = FontWeight.Bold,
-                                        fontFamily = FontFamily.Monospace,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    if (false) {
-                                        IconButton(
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                                tabNavBackStack.navigateTab(TabRoutes.Attendance)
-                                            },
-                                            modifier = Modifier.size(28.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
-                                                contentDescription = "Back",
-                                                tint = uiColors.textPrimary,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                        }
-                                    }
-                                }
+                        item {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(horizontal = 12.dp)
+                            ) {
+                                Text(
+                                    text = "Utilities",
+                                    color = uiColors.textPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
-                            item {
-                                Spacer(Modifier.height(8.dp))
-                            }
+                        }
+                        item {
+                            Spacer(Modifier.height(8.dp))
+                        }
 
-                            item {
-                                Box(
-                                    modifier = Modifier.padding(horizontal = 12.dp)
-                                ){
-                                    UtilityCard(
-                                        onCLick = { navKey ->
-                                            if (navKey != null) {
-                                                rootNavBackStack.add(navKey)
-                                            }
-                                        },
-                                            isKhaooGullyEnabled = isKhaooGullyEnabled
-                                    )
-                                }
+                        item {
+                            Box(
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            ) {
+                                UtilityCard(
+                                    onCLick = onNavigateToUtility,
+                                    isKhaooGullyEnabled = isKhaooGullyEnabled
+                                )
                             }
+                        }
 
-                            item {
-                                Spacer(Modifier.height(8.dp))
-                            }
+                        item {
+                            Spacer(Modifier.height(8.dp))
+                        }
 
                         if (eventsAndAds.isNotEmpty()) {
                             item {
@@ -402,17 +427,13 @@ fun HomeScreen(
                             item {
                                 EventAndAdBanner(
                                     eventsAndAds = eventsAndAds,
-                                    onClick = {url, isAd ->
+                                    onClick = { url, isAd ->
                                         if (isAd) {
                                             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                            rootNavBackStack.add(
-                                                Routes.Promotions(
-                                                    url = url
-                                                )
-                                            )
-                                        }else{
+                                            onNavigateToPromotion(url)
+                                        } else {
                                             haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                            openUrl(url)
+                                            onOpenUrl(url)
                                         }
                                     }
                                 )
@@ -440,7 +461,7 @@ fun HomeScreen(
                                 IconButton(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        tabNavBackStack.navigateTab(TabRoutes.Attendance)
+                                        onNavigateToAttendance()
                                     },
                                     modifier = Modifier.size(28.dp)
                                 ) {
@@ -467,7 +488,7 @@ fun HomeScreen(
                                     attendance = attendance,
                                     onNavigate = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        tabNavBackStack.navigateTab(TabRoutes.Attendance)
+                                        onNavigateToAttendance()
                                     },
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -551,23 +572,47 @@ fun HomeScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 showAboutDialog = false
             },
-
             hazeState = hazeState
         )
     }
-    if (isLoginDialogOpen){
+    if (isLoginDialogOpen) {
         LoginDialogBox(
             onDismiss = {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 isLoginDialogOpen = false
-                viewmodel.setLoginStateIdle()
+                onSetLoginStateIdle()
             },
-            onConfirm = { sapPassword->
+            onConfirm = { sapPassword ->
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewmodel.login(sapPassword)
+                onLoginConfirm(sapPassword)
             },
             syncState = loginState,
             hazeState = hazeState
         )
     }
+}
+
+@Preview
+@Composable
+private fun HomeContentPreview() {
+    HomeContent(
+        name = "John",
+        sapLoggedIn = true,
+        attendance = emptyList(),
+        schedule = emptyList(),
+        nextSchedule = emptyList(),
+        syncState = SyncUiState.Idle,
+        loginState = SyncUiState.Idle,
+        isScheduleEmpty = false,
+        isKhaooGullyEnabled = true,
+        eventsAndAds = emptyList(),
+        onReportClick = {},
+        onNavigateToSchedule = {},
+        onNavigateToAttendance = {},
+        onNavigateToUtility = {},
+        onNavigateToPromotion = {},
+        onOpenUrl = {},
+        onLoginConfirm = {},
+        onSetLoginStateIdle = {}
+    )
 }

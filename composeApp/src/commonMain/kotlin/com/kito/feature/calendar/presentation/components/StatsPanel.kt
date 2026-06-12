@@ -31,10 +31,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
-
 @Composable
-fun StatsPanel(viewModel: CalendarViewModel) {
+fun StatsPanel(
+    totalEvents: Int,
+    classCount: Int,
+    examCount: Int,
+    labCount: Int
+) {
     Column(
         Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(20.dp))
@@ -47,10 +50,10 @@ fun StatsPanel(viewModel: CalendarViewModel) {
 
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(
-                Triple("📅", "${viewModel.getTotalEvents()}", CalendarColors.orange),
-                Triple("📚", "${viewModel.getCategoryCount("class")}", CalendarColors.teal),
-                Triple("📝", "${viewModel.getCategoryCount("exam")}", CalendarColors.red),
-                Triple("🔬", "${viewModel.getCategoryCount("lab")}", CalendarColors.blue),
+                Triple("📅", "$totalEvents", CalendarColors.orange),
+                Triple("📚", "$classCount", CalendarColors.teal),
+                Triple("📝", "$examCount", CalendarColors.red),
+                Triple("🔬", "$labCount", CalendarColors.blue),
             ).forEachIndexed { i, (icon, value, color) ->
                 Column(
                     Modifier.weight(1f).clip(RoundedCornerShape(12.dp))

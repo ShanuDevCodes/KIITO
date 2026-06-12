@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -31,8 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -56,21 +60,46 @@ import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+@Composable
+fun GPAScreen(
+    viewModel: GPAViewmodel = koinInject(),
+    onBack: () -> Unit
+) {
+    val selectedSemester by viewModel.semester.collectAsState()
+    val selectedBranch by viewModel.branch.collectAsState()
+    val roll by viewModel.roll.collectAsState()
+
+    SharedExpandContainer(
+        routeKey = Routes.GPACalc,
+        backgroundColor = Color(0xFF121116),
+    ) {
+        GPAContent(
+            selectedSemester = selectedSemester,
+            selectedBranch = selectedBranch,
+            roll = roll,
+            onSemesterSelected = viewModel::updateSemester,
+            onBranchSelected = viewModel::updateBranch,
+            onBack = onBack
+        )
+    }
+}
+
 @OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalHazeApi::class,
     ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class
 )
 @Composable
-fun GPAScreen(
-    viewModel: GPAViewmodel = koinInject(),
-    onBack:() -> Unit
+fun GPAContent(
+    selectedSemester: Int,
+    selectedBranch: String,
+    roll: String,
+    onSemesterSelected: (Int) -> Unit,
+    onBranchSelected: (String) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    enableAnimations: Boolean = true
 ) {
-
     val uiColors = UIColors()
-    val student by viewModel.student.collectAsState()
-    val selectedSemester by viewModel.semester.collectAsState()
-    val selectedBranch by viewModel.branch.collectAsState()
     val hazeState = rememberHazeState()
-    val roll by viewModel.roll.collectAsState()
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = {
@@ -79,9 +108,11 @@ fun GPAScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    SharedExpandContainer(
-        routeKey = Routes.GPACalc,
-        backgroundColor = Color(0xFF121116),
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFF121116))
+            .semantics { testTag = "gpa_content" }
     ) {
         Box(
             modifier = Modifier.hazeSource(hazeState)
@@ -183,12 +214,9 @@ fun GPAScreen(
                         isLoading = roll.isEmpty(),
                         selectedSemester = selectedSemester,
                         selectedBranch = selectedBranch,
-                        onSemesterSelected = {
-                            viewModel.updateSemester(it)
-                        },
-                        onBranchSelected = {
-                            viewModel.updateBranch(it)
-                        }
+                        onSemesterSelected = onSemesterSelected,
+                        onBranchSelected = onBranchSelected,
+                        enableAnimations = enableAnimations
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -211,4 +239,17 @@ fun GPAScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun GPAContentPreview() {
+    GPAContent(
+        selectedSemester = 6,
+        selectedBranch = "Computer Science",
+        roll = "123456",
+        onSemesterSelected = {},
+        onBranchSelected = {},
+        onBack = {}
+    )
 }

@@ -158,7 +158,9 @@ fun UtilityCard(
     }
     val colors = UIColors()
     val sharedTransitionScope = LocalSharedTransitionScope.current
-    val animatedContentScope = LocalRootNavAnimatedContentScope.current ?: LocalNavAnimatedContentScope.current
+    val animatedContentScope = if (sharedTransitionScope != null) {
+        LocalRootNavAnimatedContentScope.current ?: LocalNavAnimatedContentScope.current
+    } else null
     Box(
         modifier = Modifier
             .clip(
@@ -181,7 +183,7 @@ fun UtilityCard(
                 }
             ) { index ->
                 val destination = UtilityList[index].destination
-                val sharedModifier = if (sharedTransitionScope != null && destination != null) {
+                val sharedModifier = if (sharedTransitionScope != null && animatedContentScope != null && destination != null) {
                     with(sharedTransitionScope) {
                         Modifier.sharedBounds(
                             sharedContentState = rememberSharedContentState(key = "utility-card-${destination}"),

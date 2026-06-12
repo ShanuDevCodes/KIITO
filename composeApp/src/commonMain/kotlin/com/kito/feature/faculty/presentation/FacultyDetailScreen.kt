@@ -54,6 +54,7 @@ import com.kito.core.designsystem.UIColors
 import com.kito.core.designsystem.meshGradient
 import com.kito.core.designsystem.shimmer
 import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.feature.faculty.domain.model.Faculty
 import com.kito.feature.faculty.domain.model.FacultyScheduleSlot
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.hazeEffect
@@ -63,6 +64,7 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import androidx.compose.ui.tooling.preview.Preview
 
 private val dayPriority = mapOf(
     "Mon" to 1,
@@ -74,12 +76,6 @@ private val dayPriority = mapOf(
     "Sun" to 7
 )
 
-
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalHazeApi::class,
-    ExperimentalHazeMaterialsApi::class, ExperimentalMaterial3ExpressiveApi::class
-)
 @Composable
 fun FacultyDetailScreen(
     viewModel: FacultyDetailViewModel = koinInject(),
@@ -87,20 +83,45 @@ fun FacultyDetailScreen(
     onBack: () -> Unit
 ) {
     val syncState by viewModel.syncState.collectAsState()
+    val faculty by viewModel.faculty.collectAsState()
+    val schedule by viewModel.schedule.collectAsState()
+
+    LaunchedEffect(facultyId) {
+        viewModel.loadFacultyDetail(facultyId)
+    }
+
+    FacultyDetailContent(
+        syncState = syncState,
+        faculty = faculty,
+        schedule = schedule,
+        onBack = onBack
+    )
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalHazeApi::class,
+    ExperimentalHazeMaterialsApi::class, ExperimentalMaterial3ExpressiveApi::class
+)
+@Composable
+fun FacultyDetailContent(
+    syncState: SyncUiState,
+    faculty: Faculty?,
+    schedule: List<FacultyScheduleSlot>,
+    onBack: () -> Unit
+) {
     val uiColors = UIColors()
     val hazeState = rememberHazeState()
     val cardHaze = rememberHazeState()
-    val faculty by viewModel.faculty.collectAsState()
-    val schedule by viewModel.schedule.collectAsState()
+
     val groupedSchedule = schedule
         .sortedWith(
             compareBy<FacultyScheduleSlot>(
                 { dayPriority[it.day] ?: Int.MAX_VALUE },
-                { timeToSortableMinutes(it.startTime?:"") }
+                { timeToSortableMinutes(it.startTime ?: "") }
             )
         )
         .groupBy { it.day }
-
 
     val meshColors = listOf(
         Color(0xFF77280F).copy(alpha = 0.82f), // burnt orange
@@ -137,9 +158,6 @@ fun FacultyDetailScreen(
         }
     }
     LaunchedEffect(Unit) {
-        launch {
-            viewModel.loadFacultyDetail(facultyId)
-        }
         launch {
             while (true) {
                 animatedPointMid.animateTo(
@@ -245,14 +263,14 @@ fun FacultyDetailScreen(
                                 .padding(20.dp)
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                when(syncState){
+                                when (syncState) {
                                     is SyncUiState.Error -> {
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxSize(),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(text = (syncState as SyncUiState.Error).message)
+                                            Text(text = syncState.message)
                                         }
                                     }
                                     SyncUiState.Idle -> {
@@ -304,7 +322,7 @@ fun FacultyDetailScreen(
                         }
                     }
                 }
-                when(syncState){
+                when (syncState) {
                     is SyncUiState.Error -> {
                         item {
                             Box(
@@ -312,7 +330,7 @@ fun FacultyDetailScreen(
                                     .fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = (syncState as SyncUiState.Error).message)
+                                Text(text = syncState.message)
                             }
                         }
                     }
@@ -332,7 +350,7 @@ fun FacultyDetailScreen(
                                 )
                             }
 
-                            items(3) {index ->
+                            items(3) { index ->
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -443,7 +461,6 @@ fun FacultyDetailScreen(
                                     }
                                 }
                             }
-
                         }
                     }
                 }
@@ -475,7 +492,7 @@ fun FacultyDetailScreen(
                             contentColor = uiColors.progressAccent
                         ),
                         modifier = Modifier.size(32.dp)
-                    ){
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Report",
@@ -496,6 +513,7 @@ fun FacultyDetailScreen(
         }
     }
 }
+
 fun formatTime(time: String): String {
     val parts = time.split(":")
     val hour = parts[0].toIntOrNull() ?: return time
@@ -508,6 +526,7 @@ fun formatTime(time: String): String {
         else -> time
     }
 }
+
 fun timeToSortableMinutes(time: String): Int {
     val parts = time.split(":")
     val hour = parts[0].toIntOrNull() ?: return Int.MAX_VALUE
@@ -553,5 +572,35 @@ fun ScheduleShimmerItem() {
     }
 }
 
-
-
+@Preview
+@Composable
+fun FacultyDetailContentPreview() {
+    FacultyDetailContent(
+        syncState = SyncUiState.Success,
+        faculty = Faculty(
+            id = 1L,
+            name = "Dr. Amit Sen",
+            email = "amit.sen@kito.edu",
+            officeRoom = "Lab 302"
+        ),
+        schedule = listOf(
+            FacultyScheduleSlot(
+                day = "Mon",
+                startTime = "09:00",
+                endTime = "10:00",
+                room = "LH-101",
+                subject = "Computer Networks",
+                batch = "CS-A"
+            ),
+            FacultyScheduleSlot(
+                day = "Mon",
+                startTime = "10:00",
+                endTime = "11:00",
+                room = "LH-101",
+                subject = "Database Systems",
+                batch = "CS-A"
+            )
+        ),
+        onBack = {}
+    )
+}

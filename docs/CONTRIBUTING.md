@@ -65,6 +65,34 @@ presentation → domain ← data
 - Expose state via `StateFlow` / `SharedFlow` — no `LiveData`
 - No `toast()` calls inside stateless `*Content` composables — keep them pure
 
+### Screen structure (mandatory)
+Every screen **must** be split into two composables:
+
+```kotlin
+// Stateful wrapper — DI only, no UI logic
+@Composable
+fun FeatureScreen(viewModel: FeatureViewModel = koinInject()) {
+    val state by viewModel.state.collectAsState()
+    FeatureContent(state = state, onEvent = viewModel::onEvent)
+}
+
+// Stateless content — previewable, testable, no DI
+@Composable
+fun FeatureContent(state: ..., onEvent: ...) { ... }
+
+@Preview
+@Composable
+private fun FeatureContentPreview() {
+    FeatureContent(state = ..., onEvent = {})
+}
+```
+
+Rules:
+- `*Screen` — injects ViewModel via Koin, collects state, delegates to `*Content`
+- `*Content` — pure composable, no `koinInject()`, no `collectAsState()`, previewable without DI
+- Navigation-aware components (`SharedExpandContainer`, `LocalNavAnimatedContentScope`) go in `*Screen` only — never in `*Content`
+- If `*Content` has `while(true)` animation loops, add `enableAnimations: Boolean = true` param and guard every loop: `LaunchedEffect(Unit) { if (!enableAnimations) return@LaunchedEffect; while(true) { ... } }`
+
 ### Dependency Injection (Koin)
 - Every feature owns its own `di/<Name>Module.kt`
 - Register using `single<Impl>() bind Interface::class`
@@ -85,6 +113,7 @@ Every PR must include tests covering what was added or changed:
 | Repository implementation | Repository test via fake (all methods) |
 | Use case with real logic | Use case test (all branches) |
 | ViewModel | VM test (initial state, state transitions, all public functions) |
+| New screen `*Content` composable | Compose UI test (content state + empty/error state) |
 | Bug fix | Regression test that would have caught the bug |
 
 ### How to write tests
@@ -94,6 +123,32 @@ Every PR must include tests covering what was added or changed:
 - **Inject `TestDispatcher`** via the `dispatcher` constructor param in VMs
 - **No real I/O** — use `FakeRepository`, `FakeSyncUseCase`, temp DataStore file
 - **Naming**: `methodOrScenario_condition_expectedResult` e.g. `toDomain_nullOfficeRoom_mapsToNull`
+
+### Compose UI tests
+
+Use `runComposeUiTest` v2 (requires CMP 1.11+) in `commonTest`:
+
+```kotlin
+@OptIn(ExperimentalTestApi::class)
+class FeatureUiTest {
+    @Test
+    fun feature_content_rendersList() = runComposeUiTest {
+        setContent {
+            FeatureContent(
+                items = listOf(featureItem()),
+                enableAnimations = false  // always false in tests
+            )
+        }
+        onNodeWithTag("feature_list").assertIsDisplayed()
+    }
+}
+```
+
+Rules:
+- Always pass `enableAnimations = false` to `*Content` composables in tests
+- Use `Modifier.semantics { testTag = "..." }` on key nodes: list container, empty state, loading indicator
+- Test at minimum: content renders, empty state renders
+- Never instantiate a ViewModel or use Koin in a Compose UI test — pass data directly
 
 ### Run before pushing
 ```bash
@@ -112,6 +167,8 @@ All existing tests must still pass. New tests must pass.
 | Add to `CommonModule` | Create a per-feature DI module |
 | Add `viewModelScope.launch {` without dispatcher | `viewModelScope.launch(dispatcher) {` |
 | Put feature-specific UI in `core/` | Put it in `feature/<name>/presentation/components/` |
+| Put DI (`koinInject`) or nav scope in `*Content` composable | Keep those in the stateful `*Screen` wrapper |
+| Leave `while(true)` loops unguarded in `*Content` | Add `enableAnimations: Boolean = true` and guard the loop |
 | Wildcard imports (`import com.kito.*`) | Explicit imports only |
 | Commit generated files (`build/`, `.idea/`) | They're gitignored — don't force-add |
 | Touch `sap/sensitive/` files in PRs | These are gitignored intentionally |
@@ -124,9 +181,12 @@ Before requesting review, verify every item:
 
 - [ ] `./gradlew :composeApp:compileAndroidMain :androidApp:compileDebugKotlin` is green
 - [ ] `./gradlew :composeApp:desktopTest` is green (all existing tests pass)
-- [ ] **New/changed code has tests** — mapper, repository, use case, or ViewModel as applicable (PRs without tests will not be merged)
+- [ ] **New/changed code has tests** — mapper, repository, use case, ViewModel, and Compose UI as applicable (PRs without tests will not be merged)
 - [ ] No `database.entity` or `supabase.model` imports in any `presentation/` file
 - [ ] New feature has: domain model, repository interface, mapper, DI module, mapper test
+- [ ] Screen has stateless `*Content(params, lambdas)` composable + `@Preview`
+- [ ] `*Content` has `testTag` on key nodes (list, empty, loading) and a Compose UI test
+- [ ] `*Content` has `enableAnimations: Boolean = true` if it contains any `while(true)` animation loop
 - [ ] ViewModel has `CoroutineDispatcher` constructor param with default
 - [ ] Feature DI module registered in Android + iOS + Desktop entry points
 - [ ] No new entries added to `CommonModule` for feature-specific types

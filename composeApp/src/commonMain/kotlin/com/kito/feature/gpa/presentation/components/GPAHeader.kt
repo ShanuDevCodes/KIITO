@@ -49,7 +49,8 @@ fun GPAHeader(
     selectedSemester: Int,
     selectedBranch: String,
     onSemesterSelected: (Int) -> Unit,
-    onBranchSelected: (String) -> Unit
+    onBranchSelected: (String) -> Unit,
+    enableAnimations: Boolean = true
 ) {
 
     var semesterExpanded by remember { mutableStateOf(false) }
@@ -74,6 +75,7 @@ fun GPAHeader(
     }
 
     LaunchedEffect(Unit) {
+        if (!enableAnimations) return@LaunchedEffect
         meshColorAnimators.forEachIndexed { i, anim ->
             launch {
                 val random = Random(i * 97)

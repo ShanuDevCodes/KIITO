@@ -47,19 +47,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
+import com.kito.feature.calendar.presentation.CalendarUtils
 
 @Composable
 fun MonthView(
-    viewModel: CalendarViewModel,
+    events: List<CalendarEvent>,
     animKey: Int, heatMode: Boolean, selectedDate: String,
     displayMonth: Int, displayYear: Int,
     onDayClick: (Int) -> Unit,
     onSwipe: (Float) -> Unit
 ) {
-    val firstDay = viewModel.firstDayOfMonth(displayMonth, displayYear)
-    val daysInM  = viewModel.daysInMonth(displayMonth, displayYear)
+    val firstDay = CalendarUtils.firstDayOfMonth(displayMonth, displayYear)
+    val daysInM  = CalendarUtils.daysInMonth(displayMonth, displayYear)
     val cells    = buildList<Int?> {
         repeat(firstDay) { add(null) }
         for (d in 1..daysInM) add(d)
@@ -87,7 +88,7 @@ fun MonthView(
                     week.forEach { day ->
                         if (day == null) Box(Modifier.weight(1f).height(62.dp))
                         else DayCell(
-                            day = day, viewModel = viewModel,
+                            day = day, events = events,
                             heatMode = heatMode, selectedDate = selectedDate,
                             displayMonth = displayMonth, displayYear = displayYear,
                             modifier = Modifier.weight(1f),
@@ -103,18 +104,23 @@ fun MonthView(
 
 @Composable
 fun DayCell(
-    day: Int, viewModel: CalendarViewModel,
+    day: Int, events: List<CalendarEvent>,
     heatMode: Boolean, selectedDate: String,
     displayMonth: Int, displayYear: Int,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val key       = viewModel.formatDateKey(day, displayMonth, displayYear)
-    val isToday   = viewModel.isToday(day)
+    val key       = CalendarUtils.formatDateKey(day, displayMonth, displayYear)
+    val isToday   = CalendarUtils.isToday(day, displayMonth, displayYear)
     val isSel     = key == selectedDate
-    val evs       = viewModel.getEventsForDay(day)
-    val heat      = viewModel.heatLevelForDay(day)
-    val colIdx    = (day + viewModel.firstDayOfMonth(displayMonth, displayYear) - 1) % 7
+    val evs       = events.filter { it.date == key }
+    val heat      = when (evs.size) {
+        0    -> 0
+        1    -> 1
+        2    -> 2
+        else -> 3
+    }
+    val colIdx    = (day + CalendarUtils.firstDayOfMonth(displayMonth, displayYear) - 1) % 7
     val isWeekend = colIdx == 0 || colIdx == 6
 
     val infiniteTransition = rememberInfiniteTransition()

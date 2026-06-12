@@ -55,9 +55,10 @@ fun ScheduleCard(
     isScheduleEmpty: Boolean,
     schedule: List<ScheduleItem>,
     nextSchedule: List<ScheduleItem>,
-    onCLick: () -> Unit
+    onCLick: () -> Unit,
+    enableAnimations: Boolean = true
 ) {
-    val now = rememberCurrentTime()
+    val now = rememberCurrentTime(enableAnimations)
     val (ongoing, upcomingList) = remember(schedule, now) {
         findOngoingAndAllUpcoming(schedule, now)
     }
@@ -88,6 +89,7 @@ fun ScheduleCard(
         }
     }
     LaunchedEffect(Unit) {
+        if (!enableAnimations) return@LaunchedEffect
         meshColorAnimators.forEachIndexed { i, anim ->
             launch {
                 val random = Random(i * 97)
@@ -333,11 +335,12 @@ fun findOngoingAndAllUpcoming(
 }
 
 @Composable
-fun rememberCurrentTime(): LocalTime {
+fun rememberCurrentTime(enableAnimations: Boolean = true): LocalTime {
     val currentDateTime = currentLocalDateTime()
     var now by remember { mutableStateOf(LocalTime(currentDateTime.hour, currentDateTime.minute, currentDateTime.second)) }
 
     LaunchedEffect(Unit) {
+        if (!enableAnimations) return@LaunchedEffect
         while (true) {
             val current = currentLocalDateTime()
             now = LocalTime(current.hour, current.minute, current.second)

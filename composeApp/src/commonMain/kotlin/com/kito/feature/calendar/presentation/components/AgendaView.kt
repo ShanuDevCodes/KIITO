@@ -24,12 +24,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
 
 @Composable
-fun AgendaView(viewModel: CalendarViewModel) {
-    val agendaEvents = viewModel.getAgendaEvents()
+fun AgendaView(
+    agendaEvents: Map<String, List<CalendarEvent>>,
+    isToday: (Int) -> Boolean,
+    getDayOfWeek: (String) -> Int
+) {
 
     if (agendaEvents.isEmpty()) {
         Box(Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
@@ -43,7 +46,7 @@ fun AgendaView(viewModel: CalendarViewModel) {
             val dateParts = date.split("-")
             val day   = dateParts[2].toInt()
             val month = dateParts[1].toInt()
-            val isToday = viewModel.isToday(day)
+            val isToday = isToday(day)
 
             Row(
                 Modifier.padding(top = if (gi == 0) 8.dp else 16.dp, bottom = 8.dp),
@@ -64,7 +67,7 @@ fun AgendaView(viewModel: CalendarViewModel) {
                 }
                 Spacer(Modifier.width(10.dp))
                 Column {
-                    Text(CalendarColors.daysFull[viewModel.getDayOfWeek(date)],
+                    Text(CalendarColors.daysFull[getDayOfWeek(date)],
                         fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White.copy(.6f))
                     Text("${evs.size} event${if (evs.size > 1) "s" else ""}",
                         fontSize = 10.sp, color = Color.White.copy(.25f))

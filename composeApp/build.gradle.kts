@@ -1,3 +1,4 @@
+import java.time.Duration
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -205,6 +206,16 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "MainKt"
+    }
+}
+
+// Force AWT headless mode for desktop Compose UI tests so Skiko
+// doesn't try to open a real window and block indefinitely.
+tasks.named<Test>("desktopTest") {
+    jvmArgs("-Djava.awt.headless=true")
+    timeout.set(Duration.ofMinutes(3))
+    testLogging {
+        events("passed", "skipped", "failed")
     }
 }
 

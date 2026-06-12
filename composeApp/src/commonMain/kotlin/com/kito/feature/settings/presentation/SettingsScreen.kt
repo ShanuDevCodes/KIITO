@@ -59,6 +59,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation3.runtime.NavBackStack
@@ -92,20 +94,14 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import androidx.compose.ui.tooling.preview.Preview
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeApi::class,
-    ExperimentalHazeMaterialsApi::class
-)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinInject(),
     tabNavBackStack: NavBackStack<NavKey>,
     snackbarHostState: SnackbarHostState
 ) {
-    val uiColors = UIColors()
-    val haptic = LocalHapticFeedback.current
-    val hazeState = rememberHazeState()
-    val scope = rememberCoroutineScope()
     val name by viewModel.name.collectAsState()
     val roll by viewModel.rollNumber.collectAsState()
     val year by viewModel.year.collectAsState()
@@ -113,6 +109,66 @@ fun SettingsScreen(
     val notificationState by viewModel.notificationState.collectAsState()
     val requiredAttendance by viewModel.requiredAttendance.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
+    val pendingEnable by viewModel.pendingNotificationEnable.collectAsState()
+
+    SettingsContent(
+        name = name,
+        roll = roll,
+        year = year,
+        term = term,
+        notificationState = notificationState,
+        requiredAttendance = requiredAttendance,
+        isLoggedIn = isLoggedIn,
+        syncState = syncState,
+        pendingEnable = pendingEnable,
+        onNameChange = viewModel::changeName,
+        onRollChange = viewModel::changeRoll,
+        onYearTermChange = viewModel::changeYearTerm,
+        onAttendanceChange = viewModel::changeAttendance,
+        onLogin = viewModel::logIn,
+        onLogout = viewModel::logOut,
+        onSyncSuccess = viewModel::syncStateIdle,
+        onSetNotificationState = viewModel::setNotificationState,
+        onClearPendingNotificationEnable = viewModel::clearPendingNotificationEnable,
+        onRequestEnableNotifications = viewModel::requestEnableNotifications,
+        tabNavBackStack = tabNavBackStack,
+        snackbarHostState = snackbarHostState
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeApi::class,
+    ExperimentalHazeMaterialsApi::class
+)
+@Composable
+fun SettingsContent(
+    name: String,
+    roll: String,
+    year: String,
+    term: String,
+    notificationState: Boolean,
+    requiredAttendance: Int,
+    isLoggedIn: Boolean,
+    syncState: SyncUiState,
+    pendingEnable: Boolean,
+    onNameChange: (String) -> Unit,
+    onRollChange: (String) -> Unit,
+    onYearTermChange: (year: String, term: String) -> Unit,
+    onAttendanceChange: (Int) -> Unit,
+    onLogin: (String) -> Unit,
+    onLogout: () -> Unit,
+    onSyncSuccess: () -> Unit,
+    onSetNotificationState: (Boolean) -> Unit,
+    onClearPendingNotificationEnable: () -> Unit,
+    onRequestEnableNotifications: () -> Unit,
+    tabNavBackStack: NavBackStack<NavKey>?,
+    snackbarHostState: SnackbarHostState
+) {
+    val uiColors = UIColors()
+    val haptic = LocalHapticFeedback.current
+    val hazeState = rememberHazeState()
+    val scope = rememberCoroutineScope()
+
     var isNameChangeDialogOpen by remember { mutableStateOf(false) }
     var isRollChangeDialogOpen by remember { mutableStateOf(false) }
     var isYearTermChangeDialogOpen by remember { mutableStateOf(false) }
@@ -122,12 +178,11 @@ fun SettingsScreen(
     var isTermsOfServiceDialogOpen by remember { mutableStateOf(false) }
     var isAboutAppDialogOpen by remember { mutableStateOf(false) }
     var askPermission by remember { mutableStateOf(false) }
-    val syncState by viewModel.syncState.collectAsState()
 
     if (askPermission) {
         NotificationPermissionEffect { granted ->
             askPermission = false
-            viewModel.requestEnableNotifications()
+            onRequestEnableNotifications()
         }
     }
 
@@ -178,7 +233,7 @@ fun SettingsScreen(
             icon = Icons.Default.Notifications,
             onClick = {
                 if (notificationState) {
-                    viewModel.setNotificationState(false)
+                    onSetNotificationState(false)
                 } else {
                     askPermission = true
                 }
@@ -232,7 +287,7 @@ fun SettingsScreen(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 if (isLoggedIn) {
-                    viewModel.logOut()
+                    onLogout()
                 } else {
                     isLoginDialogOpen = true
                 }
@@ -241,7 +296,7 @@ fun SettingsScreen(
             isLogout = true,
         )
     )
-    val pendingEnable by viewModel.pendingNotificationEnable.collectAsState()
+
     LaunchedEffect(pendingEnable) {
         if (!pendingEnable) return@LaunchedEffect
         if (!canScheduleExactAlarms()) {
@@ -261,24 +316,24 @@ fun SettingsScreen(
                 withDismissAction = true
             )
             if (result == SnackbarResult.ActionPerformed) {
-                if(isAndroid()) {
+                if (isAndroid()) {
                     openAppSettings()
-                }else{
+                } else {
                     openNotificationSettings()
                 }
             }
         } else if (canScheduleExactAlarms()) {
-            viewModel.setNotificationState(true)
+            onSetNotificationState(true)
         }
-        viewModel.clearPendingNotificationEnable()
+        onClearPendingNotificationEnable()
     }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (pendingEnable) {
             scope.launch {
                 if (canScheduleExactAlarms() && areNotificationsEnabled()) {
-                    viewModel.setNotificationState(true)
-                    viewModel.clearPendingNotificationEnable()
+                    onSetNotificationState(true)
+                    onClearPendingNotificationEnable()
                 }
             }
         }
@@ -287,7 +342,7 @@ fun SettingsScreen(
     LaunchedEffect(syncState) {
         if (syncState is SyncUiState.Success) {
             if (isLoginDialogOpen) {
-                tabNavBackStack.navigateTab(TabRoutes.Home)
+                tabNavBackStack?.navigateTab(TabRoutes.Home)
             }
             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
             isNameChangeDialogOpen = false
@@ -295,9 +350,10 @@ fun SettingsScreen(
             isYearTermChangeDialogOpen = false
             isLoginDialogOpen = false
             isAttendanceChangeDialogOpen = false
-            viewModel.syncStateIdle()
+            onSyncSuccess()
         }
     }
+
     Box {
         Box(
             modifier = Modifier
@@ -311,7 +367,8 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(2.5.dp),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .semantics { testTag = "settings_list" },
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -319,7 +376,6 @@ fun SettingsScreen(
 
                 itemsIndexed(settingsItems) { index, item ->
                     Card(
-
                         shape = RoundedCornerShape(
                             topStart = if (index == 0) 24.dp else 4.dp,
                             topEnd = if (index == 0) 24.dp else 4.dp,
@@ -449,9 +505,9 @@ fun SettingsScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 isNameChangeDialogOpen = false
             },
-            onConfirm = { name ->
+            onConfirm = { nameVal ->
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewModel.changeName(name)
+                onNameChange(nameVal)
             },
             syncState = syncState,
             hazeState = hazeState
@@ -463,9 +519,9 @@ fun SettingsScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 isRollChangeDialogOpen = false
             },
-            onConfirm = { roll ->
+            onConfirm = { rollVal ->
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewModel.changeRoll(roll)
+                onRollChange(rollVal)
             },
             syncState = syncState,
             hazeState = hazeState
@@ -477,9 +533,9 @@ fun SettingsScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 isYearTermChangeDialogOpen = false
             },
-            onConfirm = { year, term ->
+            onConfirm = { yearVal, termVal ->
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewModel.changeYearTerm(year = year, term = term)
+                onYearTermChange(yearVal, termVal)
             },
             year = year,
             term = term,
@@ -495,7 +551,7 @@ fun SettingsScreen(
             },
             onConfirm = { attendance ->
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewModel.changeAttendance(attendance.toInt())
+                onAttendanceChange(attendance.toInt())
             },
             syncState = syncState,
             hazeState = hazeState
@@ -506,11 +562,11 @@ fun SettingsScreen(
             onDismiss = {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 isLoginDialogOpen = false
-                viewModel.syncStateIdle()
+                onSyncSuccess()
             },
             onConfirm = { sapPassword ->
                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewModel.logIn(password = sapPassword)
+                onLogin(sapPassword)
             },
             syncState = syncState,
             hazeState = hazeState
@@ -549,8 +605,36 @@ data class SettingsItem(
     val title: String,
     val value: String,
     val icon: ImageVector,
-    val onClick: () -> Unit ={},
+    val onClick: () -> Unit = {},
     val editButton: Boolean = false,
     val isLogout: Boolean = false,
     val toggle: Boolean = false,
 )
+
+@Preview
+@Composable
+fun SettingsContentPreview() {
+    SettingsContent(
+        name = "John Doe",
+        roll = "1234567",
+        year = "3rd Year",
+        term = "Autumn",
+        notificationState = true,
+        requiredAttendance = 75,
+        isLoggedIn = true,
+        syncState = SyncUiState.Idle,
+        pendingEnable = false,
+        onNameChange = {},
+        onRollChange = {},
+        onYearTermChange = { _, _ -> },
+        onAttendanceChange = {},
+        onLogin = {},
+        onLogout = {},
+        onSyncSuccess = {},
+        onSetNotificationState = {},
+        onClearPendingNotificationEnable = {},
+        onRequestEnableNotifications = {},
+        tabNavBackStack = null,
+        snackbarHostState = remember { SnackbarHostState() }
+    )
+}

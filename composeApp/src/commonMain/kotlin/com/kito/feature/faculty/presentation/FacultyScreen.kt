@@ -63,6 +63,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigationevent.NavigationEventInfo
@@ -73,6 +75,7 @@ import com.kito.core.presentation.components.animation.NoInternetAnimation
 import com.kito.core.presentation.components.state.SearchResultState
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.core.presentation.navigation3.Routes
+import com.kito.feature.faculty.domain.model.Faculty
 import com.kito.feature.faculty.presentation.components.FacultyCard
 import com.kito.feature.faculty.presentation.components.FacultyShimmerCard
 import dev.chrisbanes.haze.ExperimentalHazeApi
@@ -85,14 +88,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import androidx.compose.ui.tooling.preview.Preview
 
-
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalHazeApi::class,
-    ExperimentalHazeMaterialsApi::class, ExperimentalMaterial3ExpressiveApi::class,
-    FlowPreview::class, ExperimentalComposeUiApi::class
-)
 @Composable
 fun FacultyScreen(
     rootNavBackStack: NavBackStack<NavKey>,
@@ -101,6 +98,42 @@ fun FacultyScreen(
     val facultyList by viewModel.faculty.collectAsState()
     val searchResultState by viewModel.searchResultState.collectAsState()
     val facultySearchResult by viewModel.facultySearchResult.collectAsState()
+    val isOnline by viewModel.isOnline.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
+
+    FacultyContent(
+        facultyList = facultyList,
+        searchResultState = searchResultState,
+        facultySearchResult = facultySearchResult,
+        isOnline = isOnline,
+        syncState = syncState,
+        onClearSearchResult = viewModel::clearSearchResult,
+        onGetSearchResult = viewModel::getSearchResult,
+        onFacultyClick = { faculty ->
+            rootNavBackStack.add(
+                Routes.FacultyDetail(facultyId = faculty.id)
+            )
+        }
+    )
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalHazeApi::class,
+    ExperimentalHazeMaterialsApi::class, ExperimentalMaterial3ExpressiveApi::class,
+    FlowPreview::class, ExperimentalComposeUiApi::class
+)
+@Composable
+fun FacultyContent(
+    facultyList: List<Faculty>,
+    searchResultState: SearchResultState,
+    facultySearchResult: List<Faculty>,
+    isOnline: Boolean,
+    syncState: SyncUiState,
+    onClearSearchResult: () -> Unit,
+    onGetSearchResult: (String) -> Unit,
+    onFacultyClick: (Faculty) -> Unit
+) {
     val hazeState = rememberHazeState()
     val cardHaze = rememberHazeState()
     val uiColors = UIColors()
@@ -108,19 +141,19 @@ fun FacultyScreen(
     val searchBarState = rememberSearchBarState()
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val isOnline by viewModel.isOnline.collectAsState()
-    val syncState by viewModel.syncState.collectAsState()
+
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
         isBackEnabled = searchBarState.currentValue == SearchBarValue.Expanded,
         onBackCompleted = {
             scope.launch {
                 searchBarState.animateToCollapsed()
-                viewModel.clearSearchResult()
+                onClearSearchResult()
                 textFieldState.clearText()
             }
         }
     )
+
     val inputField =
         @Composable {
             SearchBarDefaults.InputField(
@@ -129,12 +162,6 @@ fun FacultyScreen(
                     unfocusedContainerColor = uiColors.cardBackground,
                 ),
                 modifier = Modifier,
-//                    .width(
-//                        width = when (isPortrait) {
-//                            false -> screenWidthDp * 0.337f
-//                            true -> screenWidthDp
-//                        }
-//                    )
                 searchBarState = searchBarState,
                 textFieldState = textFieldState,
                 onSearch = {
@@ -151,7 +178,7 @@ fun FacultyScreen(
                         onClick = {
                             scope.launch {
                                 searchBarState.animateToCollapsed()
-                                viewModel.clearSearchResult()
+                                onClearSearchResult()
                                 textFieldState.clearText()
                             }
                         }
@@ -183,6 +210,7 @@ fun FacultyScreen(
                 }
             )
         }
+
     var targetPadding by remember { mutableStateOf(0.dp) }
     val animatedPadding by animateDpAsState(
         targetValue = targetPadding,
@@ -192,6 +220,7 @@ fun FacultyScreen(
         ),
         label = "attendance"
     )
+
     LaunchedEffect(searchBarState.currentValue) {
         targetPadding = if (searchBarState.currentValue == SearchBarValue.Expanded) {
             25.dp
@@ -199,17 +228,19 @@ fun FacultyScreen(
             0.dp
         }
     }
+
     LaunchedEffect(textFieldState) {
         launch {
             snapshotFlow { textFieldState.text.toString() }
                 .debounce(300)
                 .collect { query ->
                     if (searchBarState.currentValue == SearchBarValue.Expanded) {
-                        viewModel.getSearchResult(query)
+                        onGetSearchResult(query)
                     }
                 }
         }
     }
+
     Box(
         modifier = Modifier.hazeSource(cardHaze)
     ) {
@@ -223,7 +254,7 @@ fun FacultyScreen(
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = (syncState as SyncUiState.Error).message)
+                        Text(text = syncState.message)
                     }
                 }
 
@@ -247,7 +278,8 @@ fun FacultyScreen(
                                 end = 16.dp
                             )
                             .hazeSource(hazeState)
-                            .fillMaxSize(),
+                            .fillMaxSize()
+                            .semantics { testTag = "faculty_loading" },
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -262,52 +294,71 @@ fun FacultyScreen(
                 }
 
                 SyncUiState.Success -> {
-                    Box {
-                        LazyColumn(
-                            contentPadding = PaddingValues(
-                                top = WindowInsets.statusBars.asPaddingValues()
-                                    .calculateTopPadding() + 46.dp + animatedPadding,
-                                bottom = 86.dp + WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding()
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                    val isSearchMode = searchBarState.currentValue == SearchBarValue.Expanded && searchResultState !is SearchResultState.Idle
+                    val currentList = if (isSearchMode) facultySearchResult else facultyList
+                    if (currentList.isEmpty()) {
+                        Box(
                             modifier = Modifier
-                                .hazeSource(hazeState)
                                 .fillMaxSize()
-                                .padding(horizontal = 16.dp)
+                                .padding(
+                                    top = WindowInsets.statusBars.asPaddingValues()
+                                        .calculateTopPadding() + 46.dp + animatedPadding,
+                                    bottom = 86.dp + WindowInsets.navigationBars.asPaddingValues()
+                                        .calculateBottomPadding()
+                                )
+                                .semantics { testTag = "faculty_empty" },
+                            contentAlignment = Alignment.Center
                         ) {
-                            item {
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
-
-                            if (searchBarState.currentValue != SearchBarValue.Expanded || searchResultState is SearchResultState.Idle) {
-                                itemsIndexed(facultyList) { index, faculty ->
-
-                                    FacultyCard(
-                                        faculty = faculty,
-                                        index = index,
-                                        listSize = facultyList.size,
-                                        uiColors = uiColors,
-                                        onFacultyClick = {
-                                            rootNavBackStack.add(
-                                                Routes.FacultyDetail(facultyId = it.id ?: 0)
-                                            )
-                                        }
-                                    )
+                            Text(
+                                text = "No faculty found",
+                                color = uiColors.textSecondary,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    } else {
+                        Box {
+                            LazyColumn(
+                                contentPadding = PaddingValues(
+                                    top = WindowInsets.statusBars.asPaddingValues()
+                                        .calculateTopPadding() + 46.dp + animatedPadding,
+                                    bottom = 86.dp + WindowInsets.navigationBars.asPaddingValues()
+                                        .calculateBottomPadding()
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                modifier = Modifier
+                                    .hazeSource(hazeState)
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp)
+                                    .semantics { testTag = "faculty_list" }
+                            ) {
+                                item {
+                                    Spacer(modifier = Modifier.height(16.dp))
                                 }
-                            } else {
-                                itemsIndexed(facultySearchResult) { index, faculty ->
-                                    FacultyCard(
-                                        faculty = faculty,
-                                        index = index,
-                                        listSize = facultySearchResult.size,
-                                        uiColors = uiColors,
-                                        onFacultyClick = {
-                                            rootNavBackStack.add(
-                                                Routes.FacultyDetail(facultyId = it.id ?: 0)
-                                            )
-                                        }
-                                    )
+
+                                if (!isSearchMode) {
+                                    itemsIndexed(facultyList) { index, faculty ->
+                                        FacultyCard(
+                                            faculty = faculty,
+                                            index = index,
+                                            listSize = facultyList.size,
+                                            uiColors = uiColors,
+                                            onFacultyClick = {
+                                                onFacultyClick(it)
+                                            }
+                                        )
+                                    }
+                                } else {
+                                    itemsIndexed(facultySearchResult) { index, faculty ->
+                                        FacultyCard(
+                                            faculty = faculty,
+                                            index = index,
+                                            listSize = facultySearchResult.size,
+                                            uiColors = uiColors,
+                                            onFacultyClick = {
+                                                onFacultyClick(it)
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -402,5 +453,20 @@ fun FacultyScreen(
     }
 }
 
-
-
+@Preview
+@Composable
+fun FacultyContentPreview() {
+    FacultyContent(
+        facultyList = listOf(
+            Faculty(id = 1L, name = "Dr. Amit Sen", email = "amit.sen@kito.edu", officeRoom = "Lab 302"),
+            Faculty(id = 2L, name = "Dr. Priya Sharma", email = "priya.sharma@kito.edu", officeRoom = "Lab 105")
+        ),
+        searchResultState = SearchResultState.Idle,
+        facultySearchResult = emptyList(),
+        isOnline = true,
+        syncState = SyncUiState.Success,
+        onClearSearchResult = {},
+        onGetSearchResult = {},
+        onFacultyClick = {}
+    )
+}

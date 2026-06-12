@@ -60,16 +60,33 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import androidx.compose.ui.tooling.preview.Preview
+
+@Composable
+fun OnBoardingScreen(onOnboardingComplete: () -> Unit) {
+    val prefRepository: PrefsRepository = koinInject()
+    val scope = rememberCoroutineScope()
+
+    OnBoardingContent(
+        onOnboardingDone = {
+            scope.launch {
+                prefRepository.setOnboardingDone()
+                onOnboardingComplete()
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
-    val prefRepository: PrefsRepository = koinInject()
+fun OnBoardingContent(
+    onOnboardingDone: () -> Unit
+) {
     val uiColor = UIColors()
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = {3}, initialPage = 0)
+    val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
     val fabScale by animateFloatAsState(
-        targetValue = if(pagerState.currentPage == 0) 0f else 1f
+        targetValue = if (pagerState.currentPage == 0) 0f else 1f
     )
     val pageOneAlpha by animateFloatAsState(
         targetValue = if (pagerState.currentPage == 0) 1f else 0f
@@ -130,7 +147,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
-        ){
+        ) {
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
@@ -165,7 +182,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
                                     .padding(8.dp)
                             )
                         }
-                    }else if (it == 1){
+                    } else if (it == 1) {
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -183,7 +200,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
                                     .padding(8.dp)
                             )
                         }
-                    }else{
+                    } else {
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -238,7 +255,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
                                 fontWeight = FontWeight.SemiBold,
                                 lineHeight = MaterialTheme.typography.headlineLarge.lineHeight * 1.1f
                             ),
-                            color =  uiColor.progressAccent,
+                            color = uiColor.progressAccent,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
@@ -323,8 +340,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
                                 scope.launch {
                                     isLoading = true
                                     delay(500L)
-                                    prefRepository.setOnboardingDone()
-                                    onOnboardingComplete()
+                                    onOnboardingDone()
                                 }
                             }
                         },
@@ -350,7 +366,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
                                     contentDescription = "Get Started",
                                     modifier = Modifier.size(24.dp)
                                 )
-                            }else{
+                            } else {
                                 LoadingIndicator(
                                     modifier = Modifier.size(32.dp),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -367,10 +383,7 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
             }
             TextButton(
                 onClick = {
-                    scope.launch {
-                        prefRepository.setOnboardingDone()
-                        onOnboardingComplete()
-                    }
+                    onOnboardingDone()
                 },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = uiColor.progressAccent
@@ -388,4 +401,10 @@ fun OnBoardingScreen( onOnboardingComplete: () -> Unit) {
     }
 }
 
-
+@Preview
+@Composable
+fun OnBoardingContentPreview() {
+    OnBoardingContent(
+        onOnboardingDone = {}
+    )
+}

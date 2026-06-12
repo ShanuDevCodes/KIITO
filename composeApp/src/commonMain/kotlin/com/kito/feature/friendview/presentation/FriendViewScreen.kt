@@ -67,6 +67,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
@@ -79,6 +81,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp.Companion.Hairline
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -92,6 +95,7 @@ import com.kito.core.platform.sendEmail
 import com.kito.core.presentation.components.animation.PageNotFoundAnimation
 import com.kito.core.presentation.components.animation.PandaSleepingAnimation
 import com.kito.core.presentation.navigation3.Routes
+import com.kito.feature.friendview.domain.model.FriendScheduleItem
 import com.kito.feature.friendview.presentation.component.AddFriendDialog
 import com.kito.feature.schedule.presentation.WeekDay
 import com.kito.feature.schedule.presentation.horizontalCarouselTransition
@@ -113,17 +117,47 @@ import kotlinx.datetime.LocalTime
 import org.koin.compose.koinInject
 import kotlin.random.Random
 
-@OptIn(ExperimentalHazeApi::class, ExperimentalMaterial3ExpressiveApi::class,
-    ExperimentalHazeMaterialsApi::class, ExperimentalSharedTransitionApi::class
-)
 @Composable
 fun FriendView(
     onBack: () -> Unit,
     viewmodel: FriendViewViewmodel = koinInject()
 ) {
-    var showDropdown by remember { mutableStateOf(false) }
     val selectedRoll by viewmodel.selectedFriendRoll.collectAsState()
     val friendRolls by viewmodel.friendRolls.collectAsState()
+    val schedule by viewmodel.weeklySchedule.collectAsState()
+
+    SharedExpandContainer(
+        routeKey = Routes.FriendView,
+        backgroundColor = Color(0xFF121116),
+    ) {
+        FriendViewContent(
+            selectedRoll = selectedRoll,
+            friendRolls = friendRolls,
+            schedule = schedule,
+            onBack = onBack,
+            onSelectFriend = viewmodel::selectFriend,
+            onRemoveFriend = viewmodel::removeFromList,
+            onAddFriend = viewmodel::addFriend
+        )
+    }
+}
+
+@OptIn(ExperimentalHazeApi::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalHazeMaterialsApi::class, ExperimentalSharedTransitionApi::class
+)
+@Composable
+fun FriendViewContent(
+    selectedRoll: String,
+    friendRolls: List<String>,
+    schedule: Map<WeekDay, List<FriendScheduleItem>>,
+    onBack: () -> Unit,
+    onSelectFriend: (String) -> Unit,
+    onRemoveFriend: (String) -> Unit,
+    onAddFriend: (String) -> Unit,
+    enableAnimations: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    var showDropdown by remember { mutableStateOf(false) }
     var showAddFriendDialog by remember { mutableStateOf(false) }
     val hazeState = rememberHazeState()
     val uiColors = UIColors()
@@ -145,7 +179,6 @@ fun FriendView(
         "SAT" -> 5
         else -> 0
     }
-    val schedule by viewmodel.weeklySchedule.collectAsState()
     val haptics = LocalHapticFeedback.current
 
     val meshColors = listOf(
@@ -173,19 +206,21 @@ fun FriendView(
         val dt = currentLocalDateTime()
         now = LocalTime(dt.hour, dt.minute, dt.second)
     }
-    LaunchedEffect(Unit) {
-        meshColorAnimators.forEachIndexed { i, anim ->
-            launch {
-                val random = Random(i * 97)
-                while (true) {
-                    val nextColor = meshColors[random.nextInt(meshColors.size)]
-                    anim.animateTo(
-                        targetValue = nextColor,
-                        animationSpec = tween(
-                            durationMillis = random.nextInt(1800, 4200),
-                            easing = LinearOutSlowInEasing
+    if (enableAnimations) {
+        LaunchedEffect(Unit) {
+            meshColorAnimators.forEachIndexed { i, anim ->
+                launch {
+                    val random = Random(i * 97)
+                    while (true) {
+                        val nextColor = meshColors[random.nextInt(meshColors.size)]
+                        anim.animateTo(
+                            targetValue = nextColor,
+                            animationSpec = tween(
+                                durationMillis = random.nextInt(1800, 4200),
+                                easing = LinearOutSlowInEasing
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -210,9 +245,11 @@ fun FriendView(
             )
         )
     }
-    SharedExpandContainer(
-        routeKey = Routes.FriendView,
-        backgroundColor = Color(0xFF121116),
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFF121116))
+            .semantics { testTag = "friendview_content" }
     ) {
         Box(
             modifier = Modifier
@@ -298,77 +335,26 @@ fun FriendView(
                                             ) {
                                                 Modifier.meshGradient(
                                                     points = listOf(
-
-                                                        // ───── TOP ROW ─────
                                                         listOf(
-                                                            Offset(
-                                                                0f,
-                                                                0f
-                                                            ) to meshColorAnimators[0].value,
-                                                            Offset(
-                                                                0.25f,
-                                                                0f
-                                                            ) to meshColorAnimators[1].value,
-                                                            Offset(
-                                                                0.5f,
-                                                                0f
-                                                            ) to meshColorAnimators[2].value,
-                                                            Offset(
-                                                                0.75f,
-                                                                0f
-                                                            ) to meshColorAnimators[3].value,
-                                                            Offset(
-                                                                1f,
-                                                                0f
-                                                            ) to meshColorAnimators[4].value,
+                                                            Offset(0f, 0f) to meshColorAnimators[0].value,
+                                                            Offset(0.25f, 0f) to meshColorAnimators[1].value,
+                                                            Offset(0.5f, 0f) to meshColorAnimators[2].value,
+                                                            Offset(0.75f, 0f) to meshColorAnimators[3].value,
+                                                            Offset(1f, 0f) to meshColorAnimators[4].value,
                                                         ),
-
-                                                        // ───── MIDDLE ROW (curved glow band) ─────
                                                         listOf(
-                                                            Offset(
-                                                                -0.05f,
-                                                                0.55f
-                                                            ) to meshColorAnimators[5].value,
-                                                            Offset(
-                                                                0.2f,
-                                                                animatedPointTop.value
-                                                            ) to meshColorAnimators[6].value,
-                                                            Offset(
-                                                                0.5f,
-                                                                0.6f
-                                                            ) to meshColorAnimators[7].value,
-                                                            Offset(
-                                                                0.8f,
-                                                                animatedPointMid.value
-                                                            ) to meshColorAnimators[8].value,
-                                                            Offset(
-                                                                1.05f,
-                                                                0.55f
-                                                            ) to meshColorAnimators[9].value,
+                                                            Offset(-0.05f, 0.55f) to meshColorAnimators[5].value,
+                                                            Offset(0.2f, animatedPointTop.value) to meshColorAnimators[6].value,
+                                                            Offset(0.5f, 0.6f) to meshColorAnimators[7].value,
+                                                            Offset(0.8f, animatedPointMid.value) to meshColorAnimators[8].value,
+                                                            Offset(1.05f, 0.55f) to meshColorAnimators[9].value,
                                                         ),
-
-                                                        // ───── BOTTOM ROW (independent animation per point) ─────
                                                         listOf(
-                                                            Offset(
-                                                                0f,
-                                                                1f
-                                                            ) to meshColorAnimators[10].value,
-                                                            Offset(
-                                                                0.25f,
-                                                                1f
-                                                            ) to meshColorAnimators[11].value,
-                                                            Offset(
-                                                                0.5f,
-                                                                1f
-                                                            ) to meshColorAnimators[12].value,
-                                                            Offset(
-                                                                0.75f,
-                                                                1f
-                                                            ) to meshColorAnimators[13].value,
-                                                            Offset(
-                                                                1f,
-                                                                1f
-                                                            ) to meshColorAnimators[14].value,
+                                                            Offset(0f, 1f) to meshColorAnimators[10].value,
+                                                            Offset(0.25f, 1f) to meshColorAnimators[11].value,
+                                                            Offset(0.5f, 1f) to meshColorAnimators[12].value,
+                                                            Offset(0.75f, 1f) to meshColorAnimators[13].value,
+                                                            Offset(1f, 1f) to meshColorAnimators[14].value,
                                                         ),
                                                     ),
                                                     resolutionX = 30
@@ -502,7 +488,8 @@ fun FriendView(
                         noiseFactor = 0.05f
                         inputScale = HazeInputScale.Auto
                         alpha = 0.98f
-                    },
+                    }
+                    .semantics { testTag = "friendview_empty" },
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -561,9 +548,7 @@ fun FriendView(
                         .padding(horizontal = 16.dp)
                 ) {
                     IconButton(
-                        onClick = {
-                            onBack()
-                        },
+                        onClick = onBack,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = Color.White.copy(alpha = 0.08f),
                             contentColor = uiColors.progressAccent
@@ -746,19 +731,18 @@ fun FriendView(
                         RoundedCornerShape(16.dp),
                     )
             ) {
-
                 Column {
                     friendRolls.forEach {
                         DropdownItem(
                             text = it,
                             onClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                viewmodel.selectFriend(it)
+                                onSelectFriend(it)
                                 showDropdown = false
                             },
                             onRemove = {
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                viewmodel.removeFromList(it)
+                                onRemoveFriend(it)
                                 showDropdown = false
                             },
                             isRemove = true
@@ -787,7 +771,7 @@ fun FriendView(
             },
             onConfirm = { rollNumber ->
                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                viewmodel.addFriend(rollNumber)
+                onAddFriend(rollNumber)
                 showAddFriendDialog = false
             },
             hazeState = hazeState
@@ -844,3 +828,18 @@ fun DropdownItem(
         }
     }
 }
+
+@Preview
+@Composable
+private fun FriendViewContentPreview() {
+    FriendViewContent(
+        selectedRoll = "2205001",
+        friendRolls = listOf("2205001", "2205002"),
+        schedule = emptyMap(),
+        onBack = {},
+        onSelectFriend = {},
+        onRemoveFriend = {},
+        onAddFriend = {}
+    )
+}
+

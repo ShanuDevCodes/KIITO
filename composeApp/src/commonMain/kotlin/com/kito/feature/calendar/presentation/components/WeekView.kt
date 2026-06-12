@@ -35,30 +35,35 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
+import com.kito.feature.calendar.presentation.CalendarUtils
 
 @Composable
-fun WeekView(viewModel: CalendarViewModel) {
-    val displayMonth by viewModel.displayMonth.collectAsState()
-    val displayYear  by viewModel.displayYear.collectAsState()
-    val selectedDate by viewModel.selectedDate.collectAsState()
+fun WeekView(
+    displayMonth: Int,
+    displayYear: Int,
+    selectedDate: String,
+    events: List<CalendarEvent>,
+    onSelectDate: (String) -> Unit,
+    onSetView: (String) -> Unit
+) {
     val selDay = selectedDate.split("-")[2].toInt()
-    val selDow = viewModel.getDayOfWeek(selectedDate)
+    val selDow = CalendarUtils.getDayOfWeek(selectedDate)
     val weekStart = (selDay - selDow).coerceAtLeast(1)
 
     val weekDays = (0..6).map { i ->
-        val d = (weekStart + i).coerceIn(1, viewModel.daysInMonth(displayMonth, displayYear))
-        Triple(d, viewModel.formatDateKey(d, displayMonth, displayYear), i)
+        val d = (weekStart + i).coerceIn(1, CalendarUtils.daysInMonth(displayMonth, displayYear))
+        Triple(d, CalendarUtils.formatDateKey(d, displayMonth, displayYear), i)
     }
 
     Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
         Row(Modifier.fillMaxWidth()) {
             Spacer(Modifier.width(36.dp))
             weekDays.forEach { (d, k, dow) ->
-                val isTod = viewModel.isToday(d)
+                val isTod = CalendarUtils.isToday(d, displayMonth, displayYear)
                 val isSel = k == selectedDate
-                val hasEv = viewModel.getEventsForDate(k).isNotEmpty()
+                val hasEv = events.any { it.date == k }
                 Column(
                     modifier = Modifier.weight(1f)
                         .clip(RoundedCornerShape(10.dp))
@@ -68,7 +73,7 @@ fun WeekView(viewModel: CalendarViewModel) {
                             RoundedCornerShape(10.dp))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() }, indication = null
-                        ) { viewModel.selectDate(k); viewModel.setView("day") }
+                        ) { onSelectDate(k); onSetView("day") }
                         .padding(vertical = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -97,8 +102,8 @@ fun WeekView(viewModel: CalendarViewModel) {
                         modifier = Modifier.width(36.dp).padding(top = 3.dp), textAlign = TextAlign.End
                     )
                     weekDays.forEach { (_, k, _) ->
-                        val evs = viewModel.getEventsForDate(k).filter {
-                            it.startTime.split(":").firstOrNull()?.toIntOrNull() == h
+                        val evs = events.filter {
+                            it.date == k && it.startTime.split(":").firstOrNull()?.toIntOrNull() == h
                         }
                         Box(
                             modifier = Modifier.weight(1f).fillMaxHeight()

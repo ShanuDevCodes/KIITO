@@ -27,16 +27,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.presentation.CalendarColors
-import com.kito.feature.calendar.presentation.CalendarViewModel
 
 @Composable
-fun DayView(viewModel: CalendarViewModel) {
-    val selectedDate by viewModel.selectedDate.collectAsState()
+fun DayView(
+    selectedDate: String,
+    selEvents: List<CalendarEvent>,
+    getDayOfWeek: (String) -> Int,
+    onPrevDay: () -> Unit,
+    onNextDay: () -> Unit
+) {
     val parts     = selectedDate.split("-")
     val day       = parts[2].toInt()
     val month     = parts[1].toInt()
-    val selEvents = viewModel.getEventsForDate(selectedDate)
     var expandedId by remember { mutableStateOf<Long?>(null) }
 
     Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp)) {
@@ -47,13 +51,13 @@ fun DayView(viewModel: CalendarViewModel) {
                     color = CalendarColors.orange, lineHeight = 38.sp
                 )
                 Text(
-                    "${CalendarColors.daysFull[viewModel.getDayOfWeek(selectedDate)]} · ${CalendarColors.monthsShort[month - 1]}",
+                    "${CalendarColors.daysFull[getDayOfWeek(selectedDate)]} · ${CalendarColors.monthsShort[month - 1]}",
                     fontSize = 12.sp, color = Color.White.copy(.4f)
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                NavArrow("‹") { viewModel.prevDay() }
-                NavArrow("›") { viewModel.nextDay() }
+                NavArrow("‹") { onPrevDay() }
+                NavArrow("›") { onNextDay() }
             }
         }
 

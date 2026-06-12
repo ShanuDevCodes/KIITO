@@ -49,6 +49,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import com.kito.core.common.util.formatDate
 import com.kito.core.common.util.formatTo12Hour
 import com.kito.core.designsystem.SharedExpandContainer
@@ -56,6 +58,7 @@ import com.kito.core.designsystem.UIColors
 import com.kito.core.designsystem.meshGradient
 import com.kito.core.presentation.components.animation.NoDataFoundAnimation
 import com.kito.core.presentation.navigation3.Routes
+import com.kito.feature.exam.domain.model.ExamSchedule
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.hazeEffect
@@ -67,6 +70,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -78,12 +82,28 @@ import kotlin.time.Clock
 @Composable
 fun UpcomingExamScreen(
     viewmodel: UpcomingExamViewModel = koinInject(),
-    onBack:() -> Unit
+    onBack: () -> Unit
+) {
+    val examModel by viewmodel.exams.collectAsState()
+    SharedExpandContainer(
+        routeKey = Routes.ExamSchedule,
+        backgroundColor = Color(0xFF121116),
+    ) {
+        UpcomingExamContent(examModel = examModel, onBack = onBack)
+    }
+}
+
+@OptIn(ExperimentalHazeMaterialsApi::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalHazeApi::class, ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class
+)
+@Composable
+fun UpcomingExamContent(
+    examModel: List<ExamSchedule>,
+    onBack: () -> Unit,
+    enableAnimations: Boolean = true,
 ) {
     val uiColors = UIColors()
     val hazeState = rememberHazeState()
-    val examModel by viewmodel.exams.collectAsState()
-    val uiState by viewmodel.uiState.collectAsState()
     val meshColors = listOf(
         Color(0xFF77280F).copy(alpha = 0.82f), // burnt orange
         Color(0xFF753107).copy(alpha = 0.82f), // amber-700
@@ -101,26 +121,30 @@ fun UpcomingExamScreen(
             Animatable(meshColors[index % meshColors.size])
         }
     }
-    LaunchedEffect(Unit) {
-        meshColorAnimators.forEachIndexed { i, anim ->
-            launch {
-                val random = Random(i * 97)
-                while (true) {
-                    val nextColor = meshColors[random.nextInt(meshColors.size)]
-                    anim.animateTo(
-                        targetValue = nextColor,
-                        animationSpec = tween(
-                            durationMillis = random.nextInt(1800, 4200),
-                            easing = LinearOutSlowInEasing
+    if (enableAnimations) {
+        LaunchedEffect(Unit) {
+            meshColorAnimators.forEachIndexed { i, anim ->
+                launch {
+                    val random = Random(i * 97)
+                    while (true) {
+                        val nextColor = meshColors[random.nextInt(meshColors.size)]
+                        anim.animateTo(
+                            targetValue = nextColor,
+                            animationSpec = tween(
+                                durationMillis = random.nextInt(1800, 4200),
+                                easing = LinearOutSlowInEasing
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
     }
-    SharedExpandContainer(
-        routeKey = Routes.ExamSchedule,
-        backgroundColor = Color(0xFF121116),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF121116))
+            .semantics { testTag = "exam_list" }
     ) {
         LazyColumn(
             contentPadding = PaddingValues(
@@ -274,18 +298,13 @@ fun UpcomingExamScreen(
                     }
                 }
             }
-//            item {
-//                Spacer(
-//                    modifier = Modifier.height(
-//                        WindowInsets.statusBars.asPaddingValues()
-//                            .calculateTopPadding() + 16.dp
-//                    )
 //                )
 //            }
         }
         if (examModel.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .semantics { testTag = "exam_empty" },
                 contentAlignment = Alignment.Center
             ) {
                 NoDataFoundAnimation()
@@ -340,4 +359,12 @@ fun UpcomingExamScreen(
     }
 }
 
-
+@Preview
+@Composable
+private fun UpcomingExamContentPreview() {
+    val sampleExams = listOf(
+        ExamSchedule("Mathematics", null, "2026-06-20", "Saturday", "09:00:00", "11:00:00", "B1", "CS", 4),
+        ExamSchedule("Physics", null, "2026-06-22", "Monday", "10:00:00", "12:00:00", "B1", "CS", 4),
+    )
+    UpcomingExamContent(examModel = sampleExams, onBack = {})
+}
