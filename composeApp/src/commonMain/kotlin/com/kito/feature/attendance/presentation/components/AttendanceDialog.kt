@@ -62,6 +62,7 @@ import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 internal fun classesRequiredForPercentage(
@@ -79,7 +80,7 @@ internal fun calculateAttendancePercentage1Decimal(
     totalClasses: Int
 ): Double {
     if (totalClasses == 0) return 0.0
-    return kotlin.math.round((attendedClasses.toDouble() / totalClasses) * 100 * 10) / 10
+    return round((attendedClasses.toDouble() / totalClasses) * 100 * 10) / 10
 }
 
 val sampleAttendance = listOf(

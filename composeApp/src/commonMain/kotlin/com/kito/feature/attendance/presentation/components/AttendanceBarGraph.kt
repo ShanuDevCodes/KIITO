@@ -122,7 +122,7 @@ fun AttendanceBarCard(
     LaunchedEffect(Unit) {
         meshColorAnimators.forEachIndexed { i, anim ->
             launch {
-                val random = kotlin.random.Random(i * 97)
+                val random = Random(i * 97)
                 while (true) {
                     val nextColor = meshColors[random.nextInt(meshColors.size)]
                     anim.animateTo(

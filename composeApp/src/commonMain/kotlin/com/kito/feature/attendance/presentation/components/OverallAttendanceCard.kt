@@ -40,6 +40,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeMaterialsApi::class,
     ExperimentalHazeApi::class
@@ -105,7 +106,7 @@ fun OverallAttendanceCard(
         if (!enableAnimations) return@LaunchedEffect
         meshColorAnimators.forEachIndexed { i, anim ->
             launch {
-                val random = kotlin.random.Random(i * 97)
+                val random = Random(i * 97)
                 while (true) {
                     val nextColor = meshColors[random.nextInt(meshColors.size)]
                     anim.animateTo(
