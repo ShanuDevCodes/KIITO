@@ -95,10 +95,10 @@ import com.kito.feature.friendview.domain.model.FriendScheduleItem
 import com.kito.feature.friendview.presentation.components.AddFriendDialog
 import com.kito.feature.friendview.presentation.components.DropdownItem
 import com.kito.feature.schedule.presentation.WeekDay
-import com.kito.feature.schedule.presentation.horizontalCarouselTransition
-import com.kito.feature.schedule.presentation.isClassOngoing
-import com.kito.feature.schedule.presentation.isClassUpcoming
-import com.kito.feature.schedule.presentation.todayKey
+import com.kito.feature.schedule.presentation.components.horizontalCarouselTransition
+import com.kito.feature.schedule.presentation.components.isClassOngoing
+import com.kito.feature.schedule.presentation.components.isClassUpcoming
+import com.kito.feature.schedule.presentation.components.todayKey
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.hazeEffect

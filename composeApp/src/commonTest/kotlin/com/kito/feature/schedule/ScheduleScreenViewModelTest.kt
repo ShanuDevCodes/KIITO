@@ -6,16 +6,20 @@ import com.kito.feature.schedule.presentation.ScheduleScreenViewModel
 import com.kito.feature.schedule.presentation.WeekDay
 import com.kito.testing.FakeScheduleRepository
 import com.kito.testing.scheduleItem
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import okio.Path.Companion.toOkioPath
-import java.io.File
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -25,25 +29,36 @@ import kotlin.test.assertTrue
 class ScheduleScreenViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private lateinit var tempFile: File
+    private val tempPath = "schedule_prefs_test.preferences_pb".toPath()
+    private lateinit var prefsRepository: PrefsRepository
+    private lateinit var datastoreScope: CoroutineScope
 
-    @BeforeTest fun setup() {
+    @BeforeTest
+    fun setup() {
         Dispatchers.setMain(testDispatcher)
-        tempFile = File.createTempFile("schedule_prefs_", ".preferences_pb")
+        datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
+        prefsRepository = PrefsRepository(
+            PreferenceDataStoreFactory.createWithPath(
+                scope = datastoreScope,
+                produceFile = { tempPath }
+            )
+        )
     }
 
-    @AfterTest fun teardown() {
+    @AfterTest
+    fun teardown() {
+        datastoreScope.cancel()
         Dispatchers.resetMain()
-        tempFile.delete()
+        try {
+            FileSystem.SYSTEM.delete(tempPath)
+        } catch (_: Exception) {
+            // ignore
+        }
     }
-
-    private fun makePrefs() = PrefsRepository(
-        PreferenceDataStoreFactory.createWithPath { tempFile.toOkioPath() }
-    )
 
     @Test
     fun weeklySchedule_initiallyEmpty() = runTest(testDispatcher) {
-        val vm = ScheduleScreenViewModel(makePrefs(), FakeScheduleRepository())
+        val vm = ScheduleScreenViewModel(prefsRepository, FakeScheduleRepository())
         val job = launch { vm.weeklySchedule.collect {} }
         advanceUntilIdle()
         assertTrue(vm.weeklySchedule.value.isEmpty() || vm.weeklySchedule.value.values.all { it.isEmpty() })
@@ -53,7 +68,7 @@ class ScheduleScreenViewModelTest {
     @Test
     fun weeklySchedule_containsAllDays_whenSubscribed() = runTest(testDispatcher) {
         val items = listOf(scheduleItem("Maths"), scheduleItem("Physics"))
-        val vm = ScheduleScreenViewModel(makePrefs(), FakeScheduleRepository(items))
+        val vm = ScheduleScreenViewModel(prefsRepository, FakeScheduleRepository(items))
         val job = launch { vm.weeklySchedule.collect {} }
         advanceUntilIdle()
         // With empty roll, the flat-map produces a map (possibly empty values) — just check it doesn't crash

@@ -31,7 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kito.feature.home.domain.model.EventOrAd
-import com.kito.feature.schedule.presentation.horizontalCarouselTransition
+import com.kito.feature.schedule.presentation.components.horizontalCarouselTransition
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
