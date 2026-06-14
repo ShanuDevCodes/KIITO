@@ -67,14 +67,14 @@ class GpaViewModelTest {
 
     @Test
     fun branch_derivedFromSectionWhenProfileAvailable() = runTest(testDispatcher) {
-        // GPA VM needs a roll to call getStudentProfile — with empty roll it skips
-        // Test initialState only (profile null = CSE default)
+        prefsRepository.setUserRollNumber("2205001")
         val vm = GPAViewmodel(prefsRepository, FakeGpaRepository(studentProfile(section = "EE-A")), testDispatcher)
-        val job = launch { vm.branch.collect {} }
+        val job1 = launch { vm.branch.collect {} }
+        val job2 = launch { vm.roll.collect {} }
         advanceUntilIdle()
-        // With no roll set in prefs, collect fires with "" → skips → branch stays "CSE"
-        assertEquals("CSE", vm.branch.value)
-        job.cancel()
+        assertEquals("EE", vm.branch.value)
+        job1.cancel()
+        job2.cancel()
     }
 
     @Test

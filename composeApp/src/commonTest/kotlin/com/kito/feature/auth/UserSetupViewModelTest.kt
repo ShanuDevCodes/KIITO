@@ -1,60 +1,226 @@
 package com.kito.feature.auth
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.kito.core.auth.AuthEvent
+import com.kito.core.auth.AuthRepository
+import com.kito.core.auth.AuthState
+import com.kito.core.auth.AuthUser
 import com.kito.core.datastore.PrefsRepository
 import com.kito.core.platform.SecureStorage
+import com.kito.feature.auth.presentation.usersetup.LoadingSource
 import com.kito.feature.auth.presentation.usersetup.SetupState
 import com.kito.feature.auth.presentation.usersetup.UserSetupViewModel
-import com.kito.testing.FakeAuthRepository
-import com.kito.testing.FakeSyncUseCase
+import com.kito.core.sync.domain.SyncUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import okio.FileSystem
 import okio.Path.Companion.toPath
+import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserSetupViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val tempPath = "auth_prefs_test.preferences_pb".toPath()
+    private lateinit var prefsRepository: PrefsRepository
+    private lateinit var datastoreScope: CoroutineScope
 
-    @BeforeTest fun setup() { Dispatchers.setMain(testDispatcher) }
-    @AfterTest  fun teardown() { 
+    private lateinit var secureStorage: SecureStorage
+    private lateinit var spySyncUseCase: SpySyncUseCase
+    private lateinit var fakeAuthRepository: MutableFakeAuthRepository
+    private lateinit var vm: UserSetupViewModel
+
+    class SpySyncUseCase : SyncUseCase {
+        var scheduleSyncRoll: String? = null
+        override suspend fun scheduleSync(roll: String): Result<Unit> {
+            scheduleSyncRoll = roll
+            return Result.success(Unit)
+        }
+        override suspend fun syncAll(roll: String, sapPassword: String, year: String, term: String): Result<Unit> = Result.success(Unit)
+    }
+
+    class MutableFakeAuthRepository : AuthRepository {
+        private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
+        override val authState = _authState
+
+        private val _events = MutableSharedFlow<AuthEvent>()
+        override val events = _events
+
+        var signInWithGoogleCalled = false
+
+        override suspend fun restoreSession() {}
+        override suspend fun signInWithGoogle() {
+            signInWithGoogleCalled = true
+        }
+        override suspend fun signOut() {}
+        override suspend fun updateDisplayName(name: String) {}
+        override fun currentUser(): AuthUser? = null
+
+        fun emitAuthState(state: AuthState) {
+            _authState.value = state
+        }
+
+        suspend fun emitEvent(event: AuthEvent) {
+            _events.emit(event)
+        }
+    }
+
+    @BeforeTest
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+        datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
+        prefsRepository = PrefsRepository(
+            PreferenceDataStoreFactory.createWithPath(
+                scope = datastoreScope,
+                produceFile = { tempPath }
+            )
+        )
+        secureStorage = SecureStorage()
+        spySyncUseCase = SpySyncUseCase()
+        fakeAuthRepository = MutableFakeAuthRepository()
+        vm = UserSetupViewModel(
+            prefs = prefsRepository,
+            secureStorage = secureStorage,
+            appSyncUseCase = spySyncUseCase,
+            authRepository = fakeAuthRepository,
+            dispatcher = testDispatcher,
+        )
+    }
+
+    @AfterTest
+    fun teardown() {
+        datastoreScope.cancel()
         Dispatchers.resetMain()
         try {
             FileSystem.SYSTEM.delete(tempPath)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // ignore
         }
     }
 
-    private fun prefs() = PrefsRepository(
-        PreferenceDataStoreFactory.createWithPath(
-            scope = CoroutineScope(testDispatcher + SupervisorJob()),
-            produceFile = { tempPath }
-        )
-    )
-
-    private fun vm() = UserSetupViewModel(
-        prefs = prefs(),
-        secureStorage = SecureStorage(),
-        appSyncUseCase = FakeSyncUseCase(),
-        authRepository = FakeAuthRepository(),
-        dispatcher = testDispatcher,
-    )
-
     @Test
     fun setupState_initiallyIdle() = runTest(testDispatcher) {
-        assertIs<SetupState.Idle>(vm().setupState.value)
+        assertIs<SetupState.Idle>(vm.setupState.value)
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+    }
+
+    @Test
+    fun signInWithGoogle_triggersAuthRepository() = runTest(testDispatcher) {
+        vm.signInWithGoogle()
+        advanceUntilIdle()
+        assertTrue(fakeAuthRepository.signInWithGoogleCalled)
+        assertIs<SetupState.Loading>(vm.setupState.value)
+    }
+
+    @Test
+    fun onSignInStarted_updatesLoadingSourceAndState() = runTest(testDispatcher) {
+        vm.onSignInStarted()
+        assertEquals(LoadingSource.Google, vm.loadingSource.value)
+        assertIs<SetupState.Loading>(vm.setupState.value)
+    }
+
+    @Test
+    fun onSignInError_updatesLoadingSourceAndSetsError() = runTest(testDispatcher) {
+        vm.onSignInError("something failed")
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Error>(vm.setupState.value)
+        assertEquals("something failed", (vm.setupState.value as SetupState.Error).message)
+    }
+
+    @Test
+    fun onSignInCancelled_updatesLoadingSourceAndResetsState() = runTest(testDispatcher) {
+        vm.onSignInStarted()
+        vm.onSignInCancelled()
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Idle>(vm.setupState.value)
+    }
+
+    @Test
+    fun completeSetup_success_savesInfoSchedulesSyncAndSetsSuccess() = runTest(testDispatcher) {
+        vm.completeSetup("John Doe", "123456", "2026", "010")
+        advanceUntilIdle()
+
+        assertEquals("John Doe", prefsRepository.userNameFlow.first())
+        assertEquals("123456", prefsRepository.userRollFlow.first())
+        assertEquals("2026", prefsRepository.academicYearFlow.first())
+        assertEquals("010", prefsRepository.termCodeFlow.first())
+        assertEquals("123456", spySyncUseCase.scheduleSyncRoll)
+        assertTrue(prefsRepository.userSetupDoneFlow.first())
+
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Success>(vm.setupState.value)
+    }
+
+    @Test
+    fun authStateAuthenticated_autoCompletesSetup() = runTest(testDispatcher) {
+        fakeAuthRepository.emitAuthState(AuthState.Authenticated(AuthUser("google-id", "jane@kiit.ac.in", "78910", "Jane Doe")))
+        advanceUntilIdle()
+
+        assertEquals("Jane Doe", prefsRepository.userNameFlow.first())
+        assertEquals("78910", prefsRepository.userRollFlow.first())
+        assertEquals("78910", spySyncUseCase.scheduleSyncRoll)
+        assertTrue(prefsRepository.userSetupDoneFlow.first())
+
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Success>(vm.setupState.value)
+    }
+
+    @Test
+    fun authEventNotAllowed_setsSpecificError() = runTest(testDispatcher) {
+        // Must start collection since events is a SharedFlow
+        val job = launch { vm.setupState.collect {} }
+        fakeAuthRepository.emitEvent(AuthEvent.NotAllowed("user@gmail.com"))
+        advanceUntilIdle()
+
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Error>(vm.setupState.value)
+        assertEquals("Only @kiit.ac.in accounts can sign in", (vm.setupState.value as SetupState.Error).message)
+
+        job.cancel()
+    }
+
+    @Test
+    fun authEventFailure_setsErrorMessage() = runTest(testDispatcher) {
+        val job = launch { vm.setupState.collect {} }
+        fakeAuthRepository.emitEvent(AuthEvent.Failure("google signin failed"))
+        advanceUntilIdle()
+
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Error>(vm.setupState.value)
+        assertEquals("google signin failed", (vm.setupState.value as SetupState.Error).message)
+
+        job.cancel()
+    }
+
+    @Test
+    fun authEventCancelled_resetsToIdle() = runTest(testDispatcher) {
+        val job = launch { vm.setupState.collect {} }
+        vm.onSignInStarted()
+        fakeAuthRepository.emitEvent(AuthEvent.Cancelled)
+        advanceUntilIdle()
+
+        assertEquals(LoadingSource.None, vm.loadingSource.value)
+        assertIs<SetupState.Idle>(vm.setupState.value)
+
+        job.cancel()
     }
 }

@@ -23,6 +23,7 @@ import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -67,13 +68,18 @@ class ScheduleScreenViewModelTest {
 
     @Test
     fun weeklySchedule_containsAllDays_whenSubscribed() = runTest(testDispatcher) {
-        val items = listOf(scheduleItem("Maths"), scheduleItem("Physics"))
+        prefsRepository.setUserRollNumber("123456")
+        val items = listOf(scheduleItem(subject = "Maths"), scheduleItem(subject = "Physics"))
         val vm = ScheduleScreenViewModel(prefsRepository, FakeScheduleRepository(items))
         val job = launch { vm.weeklySchedule.collect {} }
         advanceUntilIdle()
-        // With empty roll, the flat-map produces a map (possibly empty values) — just check it doesn't crash
-        // and initial value is emptyMap as declared
-        assertTrue(vm.weeklySchedule.value is Map<*, *>)
+        
+        val map = vm.weeklySchedule.value
+        assertEquals(WeekDay.entries.size, map.size)
+        assertTrue(map.containsKey(WeekDay.MON))
+        assertEquals(2, map[WeekDay.MON]?.size)
+        assertEquals("Maths", map[WeekDay.MON]?.get(0)?.subject)
+        
         job.cancel()
     }
 }

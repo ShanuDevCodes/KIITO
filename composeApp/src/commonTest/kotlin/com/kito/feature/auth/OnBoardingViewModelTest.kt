@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -31,13 +32,15 @@ class OnBoardingViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val tempPath = "onboarding_prefs_test.preferences_pb".toPath()
     private lateinit var prefsRepository: PrefsRepository
+    private lateinit var datastoreScope: CoroutineScope
 
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
         prefsRepository = PrefsRepository(
             PreferenceDataStoreFactory.createWithPath(
-                scope = CoroutineScope(testDispatcher + SupervisorJob()),
+                scope = datastoreScope,
                 produceFile = { tempPath }
             )
         )
@@ -45,10 +48,11 @@ class OnBoardingViewModelTest {
 
     @AfterTest
     fun teardown() {
+        datastoreScope.cancel()
         Dispatchers.resetMain()
         try {
             FileSystem.SYSTEM.delete(tempPath)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // ignore
         }
     }
