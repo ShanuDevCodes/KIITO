@@ -4,6 +4,7 @@ import com.kito.core.platform.ConnectivityObserver
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.feature.faculty.domain.model.FacultyScheduleSlot
 import com.kito.feature.faculty.presentation.FacultyDetailViewModel
+import com.kito.feature.faculty.presentation.FacultyDetailEvent
 import com.kito.feature.faculty.presentation.FacultyScreenViewModel
 import com.kito.testing.FakeFacultyRepository
 import com.kito.testing.faculty
@@ -83,7 +84,7 @@ class FacultyViewModelTest {
         val vm = FacultyDetailViewModel(FakeFacultyRepository(all = facultyList, schedule = schedule), testDispatcher)
         val job1 = launch { vm.faculty.collect {} }
         val job2 = launch { vm.schedule.collect {} }
-        vm.loadFacultyDetail(1L)
+        vm.onEvent(FacultyDetailEvent.LoadDetail(1L))
         advanceUntilIdle()
         assertEquals("Dr. A", vm.faculty.value?.name)
         assertEquals(1, vm.schedule.value.size)
@@ -95,7 +96,7 @@ class FacultyViewModelTest {
     fun detail_unknownId_facultyNull() = runTest(testDispatcher) {
         val vm = FacultyDetailViewModel(FakeFacultyRepository(all = facultyList), testDispatcher)
         val job = launch { vm.faculty.collect {} }
-        vm.loadFacultyDetail(999L)
+        vm.onEvent(FacultyDetailEvent.LoadDetail(999L))
         advanceUntilIdle()
         assertNull(vm.faculty.value)
         job.cancel()

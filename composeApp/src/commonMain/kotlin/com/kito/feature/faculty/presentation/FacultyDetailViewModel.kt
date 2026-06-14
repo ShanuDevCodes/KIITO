@@ -24,7 +24,13 @@ class FacultyDetailViewModel(
     private val _syncState = MutableStateFlow<SyncUiState>(SyncUiState.Idle)
     val syncState = _syncState.asStateFlow()
 
-    fun loadFacultyDetail(facultyId: Long) {
+    fun onEvent(event: FacultyDetailEvent) {
+        when (event) {
+            is FacultyDetailEvent.LoadDetail -> loadFacultyDetail(event.facultyId)
+        }
+    }
+
+    private fun loadFacultyDetail(facultyId: Long) {
         viewModelScope.launch(dispatcher) {
             _syncState.value = SyncUiState.Loading
             try {
