@@ -37,8 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -46,6 +44,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,7 +57,7 @@ import com.kito.feature.attendance.presentation.components.AttendanceCard
 import com.kito.feature.attendance.presentation.components.AttendanceDialog
 import com.kito.feature.attendance.presentation.components.InstagramPullIndicator
 import com.kito.feature.attendance.presentation.components.OverallAttendanceCard
-import com.kito.feature.attendance.presentation.components.sampleAttendance
+import com.kito.feature.attendance.presentation.components.sampleAttendanceEntities
 import com.kito.feature.settings.presentation.components.LoginDialogBox
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInputScale
@@ -132,7 +132,7 @@ fun AttendanceListContent(
 
                     item { Spacer(modifier = Modifier.height(4.dp)) }
 
-                    val list = if (state.sapLoggedIn) state.attendance else sampleAttendance
+                    val list = if (state.sapLoggedIn) state.attendance else sampleAttendanceEntities
                     itemsIndexed(list) { index, item ->
                         val transparent = state.sapLoggedIn
                         Card(
@@ -291,7 +291,7 @@ fun AttendanceListContent(
 private fun AttendanceListContentPreview() {
     AttendanceListContent(
         state = AttendanceListUiState(
-            attendance = sampleAttendance,
+            attendance = sampleAttendanceEntities,
             sapLoggedIn = true,
             requiredAttendance = 75,
             averageAttendancePercentage = 62.5,
