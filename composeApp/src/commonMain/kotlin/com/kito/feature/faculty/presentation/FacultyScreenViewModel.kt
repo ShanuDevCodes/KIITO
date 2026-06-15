@@ -2,7 +2,7 @@ package com.kito.feature.faculty.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.platform.ConnectivityObserver
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
 import com.kito.core.presentation.components.state.SearchResultState
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.feature.faculty.domain.model.Faculty
@@ -16,11 +16,11 @@ import org.koin.core.annotation.Provided
 
 class FacultyScreenViewModel(
     private val repository: FacultyRepository,
-    @Provided private val connectivityObserver: ConnectivityObserver,
+    @Provided private val connectivityRepository: ConnectivityRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
 
-    val isOnline = connectivityObserver.isOnline
+    val isOnline = connectivityRepository.isOnline
 
     private val _faculty = MutableStateFlow<List<Faculty>>(emptyList())
     val faculty = _faculty.asStateFlow()

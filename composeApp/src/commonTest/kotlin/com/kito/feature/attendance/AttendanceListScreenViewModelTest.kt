@@ -2,7 +2,7 @@ package com.kito.feature.attendance
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kito.core.datastore.PrefsRepository
-import com.kito.core.platform.ConnectivityObserver
+import com.kito.testing.FakeConnectivityRepository
 import com.kito.core.platform.SecureStorage
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.feature.attendance.domain.usecase.GetAttendanceSummaryUseCase
@@ -96,7 +96,7 @@ class AttendanceListScreenViewModelTest {
             isSapLoggedIn = IsSapLoggedInUseCase(secureStorage),
             saveSapPassword = SaveSapPasswordUseCase(secureStorage),
             appSyncUseCase = spySyncUseCase,
-            connectivityObserver = ConnectivityObserver(),
+            connectivityRepository = FakeConnectivityRepository(),
             dispatcher = testDispatcher,
         )
     }

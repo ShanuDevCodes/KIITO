@@ -8,6 +8,7 @@ import com.kito.core.platform.SecureStorage
 import com.kito.feature.home.presentation.HomeViewModel
 import com.kito.feature.home.presentation.HomeEvent
 import com.kito.testing.FakeAttendanceRepository
+import com.kito.testing.FakeConnectivityRepository
 import com.kito.testing.FakeHomeRepository
 import com.kito.testing.FakeScheduleRepository
 import com.kito.testing.FakeSyncUseCase
@@ -72,7 +73,7 @@ class HomeViewModelTest {
         homeRepository = homeRepo,
         appSyncUseCase = FakeSyncUseCase(),
         syncGuard = StartupSyncGuard(),
-        connectivityObserver = ConnectivityObserver(),
+        connectivityRepository = FakeConnectivityRepository(),
         dispatcher = testDispatcher,
     )
 

@@ -8,6 +8,8 @@ import com.kito.core.database.repository.StudentRepository
 import com.kito.core.database.repository.StudentSectionRepository
 import com.kito.core.datastore.PrefsRepository
 import com.kito.core.designsystem.StartupSyncGuard
+import com.kito.core.connectivity.data.ConnectivityRepositoryImpl
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
 import com.kito.core.sync.data.SyncRemoteDataSource
 import com.kito.core.sync.domain.AppSyncUseCase
 import com.kito.core.sync.domain.SyncUseCase
@@ -36,6 +38,7 @@ val commonModule = module {
     single<PrefsRepository>()
     single<StartupSyncGuard>()
     single<AppSyncUseCase>() bind SyncUseCase::class
+    single<ConnectivityRepository> { ConnectivityRepositoryImpl(get()) }
 
     // Supabase Auth (SDK) — auth/GoTrue only; separate from the raw REST client.
     // create(::fn) registers SupabaseClient as a compiler-plugin-tracked provider so that

@@ -2,7 +2,7 @@ package com.kito.feature.attendance.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.platform.ConnectivityObserver
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.core.sync.domain.SyncUseCase
 import com.kito.feature.attendance.domain.model.Attendance
@@ -34,11 +34,11 @@ class AttendanceListScreenViewModel(
     private val isSapLoggedIn: IsSapLoggedInUseCase,
     private val saveSapPassword: SaveSapPasswordUseCase,
     private val appSyncUseCase: SyncUseCase,
-    @Provided private val connectivityObserver: ConnectivityObserver,
+    @Provided private val connectivityRepository: ConnectivityRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): ViewModel(){
 
-    val isOnline = connectivityObserver.isOnline
+    val isOnline = connectivityRepository.isOnline
     private val _syncState = MutableStateFlow<SyncUiState>(SyncUiState.Idle)
     val syncState = _syncState.asStateFlow()
 

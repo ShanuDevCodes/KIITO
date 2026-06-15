@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kito.core.datastore.PrefsRepository
 import com.kito.core.designsystem.StartupSyncGuard
-import com.kito.core.platform.ConnectivityObserver
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
 import com.kito.core.platform.SecureStorage
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.core.sync.domain.SyncUseCase
@@ -39,10 +39,10 @@ class HomeViewModel(
     private val homeRepository: HomeRepository,
     private val appSyncUseCase: SyncUseCase,
     private val syncGuard: StartupSyncGuard,
-    @Provided private val connectivityObserver: ConnectivityObserver,
+    @Provided private val connectivityRepository: ConnectivityRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
-    val isOnline = connectivityObserver.isOnline
+    val isOnline = connectivityRepository.isOnline
     val name = prefs.userNameFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
