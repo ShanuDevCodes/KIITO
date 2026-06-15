@@ -3,6 +3,11 @@ package com.kito.feature.attendance.di
 import com.kito.feature.attendance.data.AttendanceRepositoryImpl
 import com.kito.feature.attendance.domain.repository.AttendanceRepository
 import com.kito.feature.attendance.domain.usecase.GetAttendanceSummaryUseCase
+import com.kito.feature.attendance.domain.usecase.GetRequiredAttendanceUseCase
+import com.kito.feature.attendance.domain.usecase.GetSapPasswordUseCase
+import com.kito.feature.attendance.domain.usecase.GetUserSyncPreferencesUseCase
+import com.kito.feature.attendance.domain.usecase.IsSapLoggedInUseCase
+import com.kito.feature.attendance.domain.usecase.SaveSapPasswordUseCase
 import com.kito.feature.attendance.presentation.AttendanceListScreenViewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -15,5 +20,10 @@ import org.koin.plugin.module.dsl.single
 val attendanceModule = module {
     single<AttendanceRepositoryImpl>() bind AttendanceRepository::class
     single<GetAttendanceSummaryUseCase>()
+    single<GetRequiredAttendanceUseCase>()
+    single<GetUserSyncPreferencesUseCase>()
+    single<GetSapPasswordUseCase>()
+    single<IsSapLoggedInUseCase>()
+    single<SaveSapPasswordUseCase>()
     single<AttendanceListScreenViewModel>()
 }

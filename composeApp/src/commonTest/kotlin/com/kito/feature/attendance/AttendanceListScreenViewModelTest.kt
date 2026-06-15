@@ -6,6 +6,8 @@ import com.kito.core.platform.ConnectivityObserver
 import com.kito.core.platform.SecureStorage
 import com.kito.core.presentation.components.state.SyncUiState
 import com.kito.feature.attendance.domain.usecase.GetAttendanceSummaryUseCase
+import com.kito.feature.attendance.domain.usecase.GetRequiredAttendanceUseCase
+import com.kito.feature.attendance.domain.usecase.GetUserSyncPreferencesUseCase
 import com.kito.feature.attendance.presentation.AttendanceListScreenViewModel
 import com.kito.testing.FakeAttendanceRepository
 import com.kito.core.sync.domain.SyncUseCase
@@ -32,6 +34,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+
+import com.kito.feature.attendance.domain.usecase.GetSapPasswordUseCase
+import com.kito.feature.attendance.domain.usecase.IsSapLoggedInUseCase
+import com.kito.feature.attendance.domain.usecase.SaveSapPasswordUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AttendanceListScreenViewModelTest {
@@ -84,8 +90,11 @@ class AttendanceListScreenViewModelTest {
         spySyncUseCase = SpySyncUseCase()
         vm = AttendanceListScreenViewModel(
             getAttendanceSummary = GetAttendanceSummaryUseCase(repo),
-            prefs = prefsRepository,
-            secureStorage = secureStorage,
+            getRequiredAttendance = GetRequiredAttendanceUseCase(prefsRepository),
+            getUserSyncPreferences = GetUserSyncPreferencesUseCase(prefsRepository),
+            getSapPassword = GetSapPasswordUseCase(secureStorage),
+            isSapLoggedIn = IsSapLoggedInUseCase(secureStorage),
+            saveSapPassword = SaveSapPasswordUseCase(secureStorage),
             appSyncUseCase = spySyncUseCase,
             connectivityObserver = ConnectivityObserver(),
             dispatcher = testDispatcher,
