@@ -16,6 +16,7 @@ import com.kito.feature.home.domain.repository.HomeRepository
 import com.kito.feature.calendar.domain.model.CalendarEvent
 import com.kito.feature.calendar.domain.repository.CalendarRepository
 import com.kito.core.auth.AuthEvent
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
 import com.kito.core.auth.AuthRepository
 import com.kito.core.auth.AuthState
 import com.kito.core.auth.AuthUser
@@ -57,10 +58,16 @@ class FakeFacultyRepository(
 class FakeScheduleRepository(
     private val items: List<ScheduleItem> = emptyList(),
 ) : ScheduleRepository {
+    var deleteAllSectionsCalled = false
+        private set
+
     override fun getAllSchedule(rollNo: String): Flow<List<ScheduleItem>> =
         MutableStateFlow(items)
     override fun getScheduleForDay(rollNo: String, day: String): Flow<List<ScheduleItem>> =
         MutableStateFlow(items.filter { it.subject.isNotEmpty() })
+    override suspend fun deleteAllSections() {
+        deleteAllSectionsCalled = true
+    }
 }
 
 class FakeSyncUseCase : SyncUseCase {
@@ -87,6 +94,14 @@ class FakeHomeRepository(
 
 class FakeCalendarRepository(private val events: List<CalendarEvent> = emptyList()) : CalendarRepository {
     override suspend fun getEventsByMonth(year: Int, month: Int): List<CalendarEvent> = events
+}
+
+class FakeConnectivityRepository(
+    initialOnline: Boolean = true
+) : ConnectivityRepository {
+    private val flow = MutableStateFlow(initialOnline)
+    override val isOnline = flow
+    fun setOnline(online: Boolean) { flow.value = online }
 }
 
 class FakeAuthRepository : AuthRepository {

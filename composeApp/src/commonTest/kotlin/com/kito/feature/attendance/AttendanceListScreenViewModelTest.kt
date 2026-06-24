@@ -1,11 +1,16 @@
 package com.kito.feature.attendance
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import com.kito.core.datastore.PrefsRepository
-import com.kito.core.platform.ConnectivityObserver
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
+import com.kito.testing.FakeConnectivityRepository
 import com.kito.core.platform.SecureStorage
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.attendance.domain.usecase.GetAttendanceSummaryUseCase
+import com.kito.core.datastore.domain.usecase.GetRequiredAttendanceUseCase
+import com.kito.core.auth.domain.usecase.GetSapPasswordUseCase
+import com.kito.core.auth.domain.usecase.IsSapLoggedInUseCase
+import com.kito.core.auth.domain.usecase.SaveSapPasswordUseCase
 import com.kito.feature.attendance.presentation.AttendanceListScreenViewModel
 import com.kito.testing.FakeAttendanceRepository
 import com.kito.core.sync.domain.SyncUseCase
@@ -73,7 +78,7 @@ class AttendanceListScreenViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }
@@ -84,10 +89,13 @@ class AttendanceListScreenViewModelTest {
         spySyncUseCase = SpySyncUseCase()
         vm = AttendanceListScreenViewModel(
             getAttendanceSummary = GetAttendanceSummaryUseCase(repo),
+            getRequiredAttendance = GetRequiredAttendanceUseCase(prefsRepository),
             prefs = prefsRepository,
-            secureStorage = secureStorage,
+            getSapPassword = GetSapPasswordUseCase(secureStorage),
+            isSapLoggedIn = IsSapLoggedInUseCase(secureStorage),
+            saveSapPassword = SaveSapPasswordUseCase(secureStorage),
             appSyncUseCase = spySyncUseCase,
-            connectivityObserver = ConnectivityObserver(),
+            connectivityRepository = FakeConnectivityRepository(),
             dispatcher = testDispatcher,
         )
     }
@@ -105,47 +113,51 @@ class AttendanceListScreenViewModelTest {
 
     @Test
     fun attendance_initiallyEmpty() = runTest(testDispatcher) {
+        val job = launch { vm.uiState.collect {} }
         advanceUntilIdle()
-        assertEquals(emptyList(), vm.attendance.value)
+        assertEquals(emptyList(), vm.uiState.value.attendance)
+        job.cancel()
     }
 
     @Test
     fun attendance_updatesWhenRepoEmits() = runTest(testDispatcher) {
-        val job = launch { vm.attendance.collect {} }
+        val job = launch { vm.uiState.collect {} }
         repo.emit(listOf(attendance(subjectCode = "CS101"), attendance(subjectCode = "CS102")))
         advanceUntilIdle()
-        assertEquals(2, vm.attendance.value.size)
-        assertEquals("CS101", vm.attendance.value[0].subjectCode)
+        assertEquals(2, vm.uiState.value.attendance.size)
+        assertEquals("CS101", vm.uiState.value.attendance[0].subjectCode)
         job.cancel()
     }
 
     @Test
     fun averagePercentage_derivedCorrectly() = runTest(testDispatcher) {
-        val job = launch { vm.averageAttendancePercentage.collect {} }
+        val job = launch { vm.uiState.collect {} }
         repo.emit(listOf(attendance(percentage = 60.0), attendance(percentage = 80.0)))
         advanceUntilIdle()
-        assertEquals(70.0, vm.averageAttendancePercentage.value)
+        assertEquals(70.0, vm.uiState.value.averageAttendancePercentage)
         job.cancel()
     }
 
     @Test
     fun highestAndLowest_correct() = runTest(testDispatcher) {
-        val job1 = launch { vm.highestAttendancePercentage.collect {} }
-        val job2 = launch { vm.lowestAttendancePercentage.collect {} }
+        val job = launch { vm.uiState.collect {} }
         repo.emit(listOf(
             attendance(percentage = 50.0),
             attendance(percentage = 90.0),
             attendance(percentage = 70.0),
         ))
         advanceUntilIdle()
-        assertEquals(90.0, vm.highestAttendancePercentage.value)
-        assertEquals(50.0, vm.lowestAttendancePercentage.value)
-        job1.cancel(); job2.cancel()
+        assertEquals(90.0, vm.uiState.value.highestAttendancePercentage)
+        assertEquals(50.0, vm.uiState.value.lowestAttendancePercentage)
+        job.cancel()
     }
 
     @Test
     fun syncState_initiallyIdle() = runTest(testDispatcher) {
-        assertIs<SyncUiState.Idle>(vm.syncState.value)
+        val job = launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        assertIs<SyncUiState.Idle>(vm.uiState.value.syncState)
+        job.cancel()
     }
 
     @Test
@@ -156,7 +168,8 @@ class AttendanceListScreenViewModelTest {
         secureStorage.saveSapPassword("pwd")
 
         val events = mutableListOf<SyncUiState>()
-        val job = launch { vm.syncEvents.collect { events.add(it) } }
+        val jobEvents = launch { vm.syncEvents.collect { events.add(it) } }
+        val jobState = launch { vm.uiState.collect {} }
 
         vm.refresh()
         advanceUntilIdle()
@@ -166,33 +179,40 @@ class AttendanceListScreenViewModelTest {
         assertEquals("2026", spySyncUseCase.syncAllYear)
         assertEquals("010", spySyncUseCase.syncAllTerm)
 
-        assertIs<SyncUiState.Success>(vm.syncState.value)
+        assertIs<SyncUiState.Success>(vm.uiState.value.syncState)
         assertEquals(1, events.size)
         assertIs<SyncUiState.Success>(events[0])
 
-        job.cancel()
+        jobEvents.cancel()
+        jobState.cancel()
     }
 
     @Test
     fun refresh_failure_updatesSyncStateWithError() = runTest(testDispatcher) {
         spySyncUseCase.result = Result.failure(Exception("network error"))
+        val job = launch { vm.uiState.collect {} }
 
         vm.refresh()
         advanceUntilIdle()
 
-        assertIs<SyncUiState.Error>(vm.syncState.value)
-        assertEquals("network error", (vm.syncState.value as SyncUiState.Error).message)
+        assertIs<SyncUiState.Error>(vm.uiState.value.syncState)
+        assertEquals("network error", (vm.uiState.value.syncState as SyncUiState.Error).message)
+        job.cancel()
     }
 
     @Test
     fun setSyncStateIdle_resetsState() = runTest(testDispatcher) {
         spySyncUseCase.result = Result.failure(Exception("network error"))
+        val job = launch { vm.uiState.collect {} }
+        
         vm.refresh()
         advanceUntilIdle()
-        assertIs<SyncUiState.Error>(vm.syncState.value)
+        assertIs<SyncUiState.Error>(vm.uiState.value.syncState)
 
         vm.setSyncStateIdle()
-        assertIs<SyncUiState.Idle>(vm.syncState.value)
+        advanceUntilIdle()
+        assertIs<SyncUiState.Idle>(vm.uiState.value.syncState)
+        job.cancel()
     }
 
     @Test
@@ -200,6 +220,7 @@ class AttendanceListScreenViewModelTest {
         prefsRepository.setUserRollNumber("123456")
         prefsRepository.setAcademicYear("2026")
         prefsRepository.setTermCode("010")
+        val job = launch { vm.uiState.collect {} }
 
         vm.login("new_password")
         advanceUntilIdle()
@@ -207,38 +228,45 @@ class AttendanceListScreenViewModelTest {
         assertEquals("123456", spySyncUseCase.syncAllRoll)
         assertEquals("new_password", spySyncUseCase.syncAllPassword)
         assertEquals("new_password", secureStorage.getSapPassword())
-        assertIs<SyncUiState.Success>(vm.loginState.value)
+        assertIs<SyncUiState.Success>(vm.uiState.value.loginState)
+        job.cancel()
     }
 
     @Test
     fun login_failure_doesNotSavePasswordAndSetsError() = runTest(testDispatcher) {
         spySyncUseCase.result = Result.failure(Exception("auth failed"))
+        val job = launch { vm.uiState.collect {} }
 
         vm.login("new_password")
         advanceUntilIdle()
 
         assertEquals("", secureStorage.getSapPassword())
-        assertIs<SyncUiState.Error>(vm.loginState.value)
-        assertEquals("auth failed", (vm.loginState.value as SyncUiState.Error).message)
+        assertIs<SyncUiState.Error>(vm.uiState.value.loginState)
+        assertEquals("auth failed", (vm.uiState.value.loginState as SyncUiState.Error).message)
+        job.cancel()
     }
 
     @Test
     fun setLoginStateIdle_resetsState() = runTest(testDispatcher) {
         spySyncUseCase.result = Result.failure(Exception("auth failed"))
+        val job = launch { vm.uiState.collect {} }
+        
         vm.login("pwd")
         advanceUntilIdle()
-        assertIs<SyncUiState.Error>(vm.loginState.value)
+        assertIs<SyncUiState.Error>(vm.uiState.value.loginState)
 
         vm.setLoginStateIdle()
-        assertIs<SyncUiState.Idle>(vm.loginState.value)
+        advanceUntilIdle()
+        assertIs<SyncUiState.Idle>(vm.uiState.value.loginState)
+        job.cancel()
     }
 
     @Test
     fun requiredAttendance_updatesCorrectly() = runTest(testDispatcher) {
-        val job = launch { vm.requiredAttendance.collect {} }
+        val job = launch { vm.uiState.collect {} }
         prefsRepository.setRequiredAttendance(85)
         advanceUntilIdle()
-        assertEquals(85, vm.requiredAttendance.value)
+        assertEquals(85, vm.uiState.value.requiredAttendance)
         job.cancel()
     }
 }

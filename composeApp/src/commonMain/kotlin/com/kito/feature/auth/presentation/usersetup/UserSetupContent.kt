@@ -254,70 +254,72 @@ fun UserSetupContent(
                     }
                 }
             }
-            item {
-                Spacer(Modifier.height(24.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "OR",
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        fontFamily = FontFamily.Monospace,
-                        style = MaterialTheme.typography.titleMediumEmphasized
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-            item {
-                Spacer(Modifier.height(24.dp))
-                Button(
-                    onClick = onGoogleSignIn,
-                    enabled = !loading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .shadow(
-                            elevation = 15.dp,
-                            shape = RoundedCornerShape(25.dp),
-                            spotColor = Color(0xFFFF6A00)
-                        ),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    contentPadding = PaddingValues()
-                ){
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(if (!loading) loginGradient else disabledGradient),
-                        contentAlignment = Alignment.Center
+            if(false) {
+                item {
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "OR",
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.titleMediumEmphasized
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                item {
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = onGoogleSignIn,
+                        enabled = !loading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .shadow(
+                                elevation = 15.dp,
+                                shape = RoundedCornerShape(25.dp),
+                                spotColor = Color(0xFFFF6A00)
+                            ),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                        contentPadding = PaddingValues()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(if (!loading) loginGradient else disabledGradient),
+                            contentAlignment = Alignment.Center
                         ) {
-                            if (googleLoading) {
-                                LoadingIndicator(color = uiColor.progressAccent)
-                                Spacer(modifier = Modifier.width(8.dp))
-                            } else {
-                                Image(
-                                    painter = painterResource(Res.drawable.google),
-                                    contentDescription = "Google",
-                                    modifier = Modifier.size(24.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                if (googleLoading) {
+                                    LoadingIndicator(color = uiColor.progressAccent)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                } else {
+                                    Image(
+                                        painter = painterResource(Res.drawable.google),
+                                        contentDescription = "Google",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Text(
+                                    text = "@kiit.ac.in",
+                                    modifier = Modifier.padding(horizontal = 8.dp),
+                                    fontFamily = FontFamily.Monospace,
+                                    style = MaterialTheme.typography.titleMediumEmphasized,
+                                    color = Color.White
                                 )
                             }
-                            Text(
-                                text = "@kiit.ac.in",
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                fontFamily = FontFamily.Monospace,
-                                style = MaterialTheme.typography.titleMediumEmphasized,
-                                color = Color.White
-                            )
                         }
                     }
                 }

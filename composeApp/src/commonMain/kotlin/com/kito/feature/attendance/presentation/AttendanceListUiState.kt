@@ -1,6 +1,6 @@
 package com.kito.feature.attendance.presentation
 
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.attendance.domain.model.Attendance
 
 data class AttendanceListUiState(

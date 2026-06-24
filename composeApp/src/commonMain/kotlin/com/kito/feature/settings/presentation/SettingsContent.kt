@@ -72,7 +72,7 @@ import com.kito.core.platform.openAlarmSettings
 import com.kito.core.platform.openAppSettings
 import com.kito.core.platform.openNotificationSettings
 import com.kito.core.platform.sendEmail
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.core.presentation.navigation3.TabRoutes
 import com.kito.core.presentation.navigation3.navigateTab
 import com.kito.feature.app.presentation.isAndroid

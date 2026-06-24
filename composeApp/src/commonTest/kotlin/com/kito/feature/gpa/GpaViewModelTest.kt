@@ -1,7 +1,8 @@
 package com.kito.feature.gpa
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.feature.gpa.presentation.GPAViewmodel
 import com.kito.feature.gpa.presentation.GPAEvent
 import com.kito.testing.FakeGpaRepository
@@ -37,7 +38,7 @@ class GpaViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }

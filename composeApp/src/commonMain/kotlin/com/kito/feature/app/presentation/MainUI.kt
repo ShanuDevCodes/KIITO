@@ -56,7 +56,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.core.presentation.navigation.BottomBarTabs
 import com.kito.core.presentation.navigation3.NavigationItems
 import com.kito.core.presentation.navigation3.RootNavGraph

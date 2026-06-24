@@ -2,7 +2,7 @@ package com.kito.feature.auth.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -2,10 +2,15 @@ package com.kito.feature.settings
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kito.core.auth.AuthRepository
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.core.platform.SecureStorage
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.attendance.domain.model.Attendance
+import com.kito.core.auth.domain.usecase.ClearSapPasswordUseCase
+import com.kito.core.auth.domain.usecase.GetSapPasswordUseCase
+import com.kito.core.auth.domain.usecase.IsSapLoggedInUseCase
+import com.kito.core.auth.domain.usecase.SaveSapPasswordUseCase
 import com.kito.feature.schedule.notification.NotificationController
 import com.kito.feature.settings.presentation.SettingsViewModel
 import com.kito.feature.settings.presentation.SettingsEvent
@@ -44,6 +49,10 @@ class SettingsViewModelTest {
     private lateinit var datastoreScope: CoroutineScope
 
     private lateinit var secureStorage: SecureStorage
+    private lateinit var getSapPasswordUseCase: GetSapPasswordUseCase
+    private lateinit var saveSapPasswordUseCase: SaveSapPasswordUseCase
+    private lateinit var clearSapPasswordUseCase: ClearSapPasswordUseCase
+    private lateinit var isSapLoggedInUseCase: IsSapLoggedInUseCase
     private lateinit var fakeAttendanceRepository: FakeAttendanceRepository
     private lateinit var spySyncUseCase: SpySyncUseCase
     private lateinit var fakeNotificationController: FakeNotificationController
@@ -94,13 +103,17 @@ class SettingsViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }
             )
         )
         secureStorage = SecureStorage()
+        getSapPasswordUseCase = GetSapPasswordUseCase(secureStorage)
+        saveSapPasswordUseCase = SaveSapPasswordUseCase(secureStorage)
+        clearSapPasswordUseCase = ClearSapPasswordUseCase(secureStorage)
+        isSapLoggedInUseCase = IsSapLoggedInUseCase(secureStorage)
         fakeAttendanceRepository = FakeAttendanceRepository()
         spySyncUseCase = SpySyncUseCase()
         fakeNotificationController = FakeNotificationController()
@@ -120,7 +133,10 @@ class SettingsViewModelTest {
 
     private fun vm() = SettingsViewModel(
         prefs = prefsRepository,
-        secureStorage = secureStorage,
+        getSapPasswordUseCase = getSapPasswordUseCase,
+        saveSapPasswordUseCase = saveSapPasswordUseCase,
+        clearSapPasswordUseCase = clearSapPasswordUseCase,
+        isSapLoggedInUseCase = isSapLoggedInUseCase,
         attendanceRepository = fakeAttendanceRepository,
         appSyncUseCase = spySyncUseCase,
         notificationController = fakeNotificationController,

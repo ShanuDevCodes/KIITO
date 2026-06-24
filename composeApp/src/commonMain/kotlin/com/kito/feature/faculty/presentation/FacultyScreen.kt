@@ -72,8 +72,8 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kito.core.designsystem.UIColors
 import com.kito.core.presentation.components.animation.NoInternetAnimation
-import com.kito.core.presentation.components.state.SearchResultState
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SearchResultState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.core.presentation.navigation3.Routes
 import com.kito.feature.faculty.domain.model.Faculty
 import com.kito.feature.faculty.presentation.components.FacultyCard

@@ -1,8 +1,8 @@
 package com.kito.sap.sensitive
 
 object SapPortalTokenExtractor {
-    fun extractSapExtSid(arg: String): String? = null
-    fun extractContextId(arg1: String?, arg2: String?): String = ""
-    fun extractSecureId(arg: String?): String = ""
-    fun extractTokensFromFormAction(arg: String?): Pair<String?, String?> = Pair(null, null)
+    fun extractSapExtSid(formAction: String): String? = null
+    fun extractContextId(wdResponseHtml: String?, responseUrl: String?): String = ""
+    fun extractSecureId(wdResponseHtml: String?): String = ""
+    fun extractTokensFromFormAction(formAction: String?): Pair<String?, String?> = Pair(null, null)
 }

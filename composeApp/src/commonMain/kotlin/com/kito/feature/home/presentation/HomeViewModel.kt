@@ -2,14 +2,16 @@ package com.kito.feature.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.core.designsystem.StartupSyncGuard
-import com.kito.core.platform.ConnectivityObserver
-import com.kito.core.platform.SecureStorage
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
+import com.kito.core.ui.state.SyncUiState
 import com.kito.core.sync.domain.SyncUseCase
 import com.kito.feature.attendance.domain.model.Attendance
 import com.kito.feature.attendance.domain.repository.AttendanceRepository
+import com.kito.core.auth.domain.usecase.GetSapPasswordUseCase
+import com.kito.core.auth.domain.usecase.IsSapLoggedInUseCase
+import com.kito.core.auth.domain.usecase.SaveSapPasswordUseCase
 import com.kito.feature.home.domain.model.EventOrAd
 import com.kito.feature.home.domain.repository.HomeRepository
 import com.kito.feature.schedule.domain.model.ScheduleItem
@@ -33,16 +35,18 @@ import org.koin.core.annotation.Provided
 
 class HomeViewModel(
     private val prefs: PrefsRepository,
-    @Provided private val secureStorage: SecureStorage,
+    private val isSapLoggedInUseCase: IsSapLoggedInUseCase,
+    private val getSapPasswordUseCase: GetSapPasswordUseCase,
+    private val saveSapPasswordUseCase: SaveSapPasswordUseCase,
     private val attendanceRepository: AttendanceRepository,
     private val scheduleRepository: ScheduleRepository,
     private val homeRepository: HomeRepository,
     private val appSyncUseCase: SyncUseCase,
     private val syncGuard: StartupSyncGuard,
-    @Provided private val connectivityObserver: ConnectivityObserver,
+    @Provided private val connectivityRepository: ConnectivityRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
-    val isOnline = connectivityObserver.isOnline
+    val isOnline = connectivityRepository.isOnline
     val name = prefs.userNameFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -58,7 +62,7 @@ class HomeViewModel(
         fetchFeatureFlag()
     }
 
-    val sapLoggedIn = secureStorage.isLoggedInFlow.stateIn(
+    val sapLoggedIn = isSapLoggedInUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = false
@@ -137,7 +141,7 @@ class HomeViewModel(
             _syncEvents.emit(SyncUiState.Loading)
             _syncState.value = SyncUiState.Loading
             val roll = prefs.userRollFlow.first()
-            val sapPassword = secureStorage.getSapPassword()
+            val sapPassword = getSapPasswordUseCase()
             val year = prefs.academicYearFlow.first()
             val term = prefs.termCodeFlow.first()
 
@@ -227,7 +231,7 @@ class HomeViewModel(
 
             _loginState.value = result.fold(
                 onSuccess = {
-                    secureStorage.saveSapPassword(password)
+                    saveSapPasswordUseCase(password)
                     SyncUiState.Success
                 },
                 onFailure = {

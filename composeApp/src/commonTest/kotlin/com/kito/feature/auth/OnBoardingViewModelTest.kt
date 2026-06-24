@@ -1,7 +1,8 @@
 package com.kito.feature.auth
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.feature.auth.presentation.onboarding.OnBoardingViewModel
 import com.kito.feature.auth.presentation.onboarding.OnboardingUiEvent
 import com.kito.feature.auth.presentation.onboarding.OnboardingEvent
@@ -38,7 +39,7 @@ class OnBoardingViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }

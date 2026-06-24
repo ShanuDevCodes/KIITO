@@ -15,7 +15,7 @@ import com.kito.core.common.util.currentLocalDateTime
 import com.kito.core.platform.openUrl
 import com.kito.core.platform.sendEmail
 import com.kito.core.platform.toast
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.core.presentation.navigation3.Routes
 import com.kito.core.presentation.navigation3.TabRoutes
 import com.kito.core.presentation.navigation3.isTopAsState

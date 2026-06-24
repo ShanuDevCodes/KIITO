@@ -28,7 +28,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.kito.core.auth.AndroidAuthDeepLink
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.core.platform.AppConfig
 import com.kito.core.platform.ESP
 import com.kito.core.platform.SecureStorage

@@ -3,8 +3,8 @@ package com.kito.feature.exam.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kito.core.common.util.currentLocalDateTime
-import com.kito.core.datastore.PrefsRepository
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.feature.exam.domain.model.ExamSchedule
 import com.kito.feature.exam.domain.repository.ExamRepository
 import kotlinx.coroutines.CoroutineDispatcher

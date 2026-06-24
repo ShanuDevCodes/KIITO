@@ -2,7 +2,7 @@ package com.kito.feature.gpa.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.feature.gpa.domain.model.StudentProfile
 import com.kito.feature.gpa.domain.repository.GpaRepository
 import kotlinx.coroutines.CoroutineDispatcher

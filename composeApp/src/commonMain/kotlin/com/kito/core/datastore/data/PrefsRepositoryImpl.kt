@@ -1,4 +1,4 @@
-package com.kito.core.datastore
+package com.kito.core.datastore.data
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -6,12 +6,17 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Provided
 
-class PrefsRepository(
+/**
+ * Concrete implementation of PrefsRepository using AndroidX DataStore Preferences.
+ */
+class PrefsRepositoryImpl(
     @Provided private val dataStore: DataStore<Preferences>
-) {
+) : PrefsRepository {
     companion object {
         private val KEY_ACADEMIC_YEAR = stringPreferencesKey("academic_year")
         private val KEY_TERM_CODE = stringPreferencesKey("term_code")
@@ -26,32 +31,34 @@ class PrefsRepository(
         private val KEY_SELECTED_FRIEND_ROLL = stringPreferencesKey("selected_friend_roll")
     }
 
-    val notificationStateFlow = dataStore.data
+    override val notificationStateFlow: Flow<Boolean> = dataStore.data
         .map { it[KEY_NOTIFICATIONS_ENABLED] ?: false }
-    val resetFixFlow = dataStore.data
+
+    override val resetFixFlow: Flow<Boolean> = dataStore.data
         .map { it[KEY_RESET_FIX] ?: false }
 
-    val requiredAttendanceFlow = dataStore.data
+    override val requiredAttendanceFlow: Flow<Int> = dataStore.data
         .map { it[KEY_REQUIRED_ATTENDANCE] ?: 75 }
-    val userNameFlow = dataStore.data
+
+    override val userNameFlow: Flow<String> = dataStore.data
         .map { it[KEY_USER_NAME] ?: "" }
 
-    val userRollFlow = dataStore.data
+    override val userRollFlow: Flow<String> = dataStore.data
         .map { it[KEY_USER_ROLLNUMBER] ?: "" }
 
-    val academicYearFlow = dataStore.data
+    override val academicYearFlow: Flow<String> = dataStore.data
         .map { it[KEY_ACADEMIC_YEAR] ?: "" }
 
-    val termCodeFlow = dataStore.data
+    override val termCodeFlow: Flow<String> = dataStore.data
         .map { it[KEY_TERM_CODE] ?: "" }
 
-    val onBoardingFlow = dataStore.data
+    override val onBoardingFlow: Flow<Boolean> = dataStore.data
         .map { it[KEY_ONBOARDING_DONE] ?: false }
 
-    val userSetupDoneFlow = dataStore.data
+    override val userSetupDoneFlow: Flow<Boolean> = dataStore.data
         .map { it[KEY_USER_SETUP_DONE] ?: false }
 
-    val friendRollsFlow = dataStore.data
+    override val friendRollsFlow: Flow<List<String>> = dataStore.data
         .map { prefs ->
             prefs[KEY_FRIEND_ROLLS]
                 ?.let { json ->
@@ -63,52 +70,52 @@ class PrefsRepository(
                 ?: emptyList()
         }
 
-    val selectedFriendRollFlow = dataStore.data
+    override val selectedFriendRollFlow: Flow<String> = dataStore.data
         .map { it[KEY_SELECTED_FRIEND_ROLL] ?: "" }
 
-    suspend fun setUserName(username: String) {
+    override suspend fun setUserName(username: String) {
         dataStore.edit { it[KEY_USER_NAME] = username }
     }
 
-    suspend fun setUserRollNumber(rollNumber: String) {
+    override suspend fun setUserRollNumber(rollNumber: String) {
         dataStore.edit { it[KEY_USER_ROLLNUMBER] = rollNumber }
     }
 
-    suspend fun setUserSetupDone() {
+    override suspend fun setUserSetupDone() {
         dataStore.edit { it[KEY_USER_SETUP_DONE] = true }
     }
 
-    suspend fun setOnboardingDone() {
+    override suspend fun setOnboardingDone() {
         dataStore.edit { it[KEY_ONBOARDING_DONE] = true }
     }
 
-    suspend fun setAcademicYear(year: String) {
+    override suspend fun setAcademicYear(year: String) {
         dataStore.edit { it[KEY_ACADEMIC_YEAR] = year }
     }
 
-    suspend fun setTermCode(term: String) {
+    override suspend fun setTermCode(term: String) {
         dataStore.edit { it[KEY_TERM_CODE] = term }
     }
 
-    suspend fun setRequiredAttendance(attendance: Int) {
+    override suspend fun setRequiredAttendance(attendance: Int) {
         dataStore.edit {
             it[KEY_REQUIRED_ATTENDANCE] = attendance
         }
     }
 
-    suspend fun setResetDone(){
+    override suspend fun setResetDone() {
         dataStore.edit {
             it[KEY_RESET_FIX] = true
         }
     }
 
-    suspend fun setNotificationState(state: Boolean) {
+    override suspend fun setNotificationState(state: Boolean) {
         dataStore.edit {
             it[KEY_NOTIFICATIONS_ENABLED] = state
         }
     }
 
-    suspend fun addFriendRoll(roll: String) {
+    override suspend fun addFriendRoll(roll: String) {
         dataStore.edit { prefs ->
             val current = prefs[KEY_FRIEND_ROLLS]
                 ?.let {
@@ -130,7 +137,7 @@ class PrefsRepository(
         }
     }
 
-    suspend fun removeFriendRoll(roll: String) {
+    override suspend fun removeFriendRoll(roll: String) {
         dataStore.edit { prefs ->
             val current = prefs[KEY_FRIEND_ROLLS]
                 ?.let {
@@ -152,11 +159,11 @@ class PrefsRepository(
         }
     }
 
-    suspend fun setSelectedFriendRoll(roll: String) {
+    override suspend fun setSelectedFriendRoll(roll: String) {
         dataStore.edit { it[KEY_SELECTED_FRIEND_ROLL] = roll }
     }
 
-    suspend fun clearSelectedFriend() {
+    override suspend fun clearSelectedFriend() {
         dataStore.edit { it.remove(KEY_SELECTED_FRIEND_ROLL) }
     }
 }

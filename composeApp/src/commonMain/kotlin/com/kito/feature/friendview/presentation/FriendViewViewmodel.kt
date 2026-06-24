@@ -2,7 +2,7 @@ package com.kito.feature.friendview.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.feature.friendview.domain.model.FriendScheduleItem
 import com.kito.feature.friendview.domain.repository.FriendViewRepository
 import com.kito.feature.schedule.presentation.WeekDay

@@ -1,7 +1,7 @@
 package com.kito.feature.faculty
 
-import com.kito.core.platform.ConnectivityObserver
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.testing.FakeConnectivityRepository
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.faculty.domain.model.FacultyScheduleSlot
 import com.kito.feature.faculty.presentation.FacultyDetailViewModel
 import com.kito.feature.faculty.presentation.FacultyDetailEvent
@@ -37,15 +37,15 @@ class FacultyViewModelTest {
 
     @Test
     fun screen_faculty_initiallyEmpty() = runTest(testDispatcher) {
-        val vm = FacultyScreenViewModel(FakeFacultyRepository(), ConnectivityObserver(), testDispatcher)
+        val vm = FacultyScreenViewModel(FakeFacultyRepository(), FakeConnectivityRepository(), testDispatcher)
         advanceUntilIdle()
-        // isOnline = true (desktop actual), so fetchFaculty runs → empty list from fake
+        // isOnline = true, so fetchFaculty runs → empty list from fake
         assertEquals(emptyList(), vm.faculty.value)
     }
 
     @Test
     fun screen_faculty_loadsFromRepo() = runTest(testDispatcher) {
-        val vm = FacultyScreenViewModel(FakeFacultyRepository(all = facultyList), ConnectivityObserver(), testDispatcher)
+        val vm = FacultyScreenViewModel(FakeFacultyRepository(all = facultyList), FakeConnectivityRepository(), testDispatcher)
         advanceUntilIdle()
         assertEquals(2, vm.faculty.value.size)
         assertEquals("Dr. A", vm.faculty.value[0].name)
@@ -53,7 +53,7 @@ class FacultyViewModelTest {
 
     @Test
     fun screen_search_filtersResults() = runTest(testDispatcher) {
-        val vm = FacultyScreenViewModel(FakeFacultyRepository(all = facultyList), ConnectivityObserver(), testDispatcher)
+        val vm = FacultyScreenViewModel(FakeFacultyRepository(all = facultyList), FakeConnectivityRepository(), testDispatcher)
         val job = launch { vm.facultySearchResult.collect {} }
         vm.getSearchResult("Dr. A")
         advanceUntilIdle()
@@ -64,7 +64,7 @@ class FacultyViewModelTest {
 
     @Test
     fun screen_search_emptyQuery_clearsResults() = runTest(testDispatcher) {
-        val vm = FacultyScreenViewModel(FakeFacultyRepository(all = facultyList), ConnectivityObserver(), testDispatcher)
+        val vm = FacultyScreenViewModel(FakeFacultyRepository(all = facultyList), FakeConnectivityRepository(), testDispatcher)
         vm.getSearchResult("")
         advanceUntilIdle()
         assertEquals(emptyList(), vm.facultySearchResult.value)

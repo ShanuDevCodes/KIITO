@@ -9,7 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.kito.core.platform.toast
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import org.koin.compose.koinInject
@@ -21,15 +21,7 @@ import org.koin.compose.koinInject
 fun AttendanceListScreen(
     viewModel: AttendanceListScreenViewModel = koinInject(),
 ) {
-    val attendance by viewModel.attendance.collectAsState()
-    val sapLoggedIn by viewModel.sapLoggedIn.collectAsState()
-    val syncState by viewModel.syncState.collectAsState()
-    val requiredAttendance by viewModel.requiredAttendance.collectAsState()
-    val loginState by viewModel.loginState.collectAsState()
-    val isOnline by viewModel.isOnline.collectAsState()
-    val averageAttendancePercentage by viewModel.averageAttendancePercentage.collectAsState()
-    val highestAttendancePercentage by viewModel.highestAttendancePercentage.collectAsState()
-    val lowestAttendancePercentage by viewModel.lowestAttendancePercentage.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     val haptic = LocalHapticFeedback.current
 
@@ -48,21 +40,11 @@ fun AttendanceListScreen(
     }
 
     AttendanceListContent(
-        state = AttendanceListUiState(
-            attendance = attendance,
-            sapLoggedIn = sapLoggedIn,
-            syncState = syncState,
-            loginState = loginState,
-            requiredAttendance = requiredAttendance,
-            isOnline = isOnline,
-            averageAttendancePercentage = averageAttendancePercentage,
-            highestAttendancePercentage = highestAttendancePercentage,
-            lowestAttendancePercentage = lowestAttendancePercentage
-        ),
+        state = uiState,
         onEvent = { event ->
             when (event) {
                 is AttendanceListEvent.Refresh -> {
-                    if (isOnline) {
+                    if (uiState.isOnline) {
                         viewModel.refresh()
                     } else {
                         toast("No Internet Connection")

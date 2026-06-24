@@ -1,7 +1,8 @@
 package com.kito.feature.schedule
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.feature.schedule.presentation.ScheduleScreenViewModel
 import com.kito.feature.schedule.presentation.WeekDay
 import com.kito.testing.FakeScheduleRepository
@@ -38,7 +39,7 @@ class ScheduleScreenViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }

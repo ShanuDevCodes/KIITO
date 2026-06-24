@@ -1,7 +1,7 @@
 package com.kito.feature.schedule.notification
 
 import com.kito.core.database.repository.StudentSectionRepository
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.core.platform.areNotificationsEnabled
 import kotlinx.coroutines.flow.first
 

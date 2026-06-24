@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import com.kito.core.designsystem.UIColors
 import com.kito.core.designsystem.meshGradient
 import com.kito.core.designsystem.shimmer
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.faculty.domain.model.Faculty
 import com.kito.feature.faculty.domain.model.FacultyScheduleSlot
 import com.kito.feature.faculty.presentation.components.ScheduleShimmerItem

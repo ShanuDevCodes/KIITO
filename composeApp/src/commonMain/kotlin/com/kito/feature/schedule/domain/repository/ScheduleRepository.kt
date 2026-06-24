@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface ScheduleRepository {
     fun getScheduleForDay(rollNo: String, day: String): Flow<List<ScheduleItem>>
     fun getAllSchedule(rollNo: String): Flow<List<ScheduleItem>>
+    suspend fun deleteAllSections()
 }

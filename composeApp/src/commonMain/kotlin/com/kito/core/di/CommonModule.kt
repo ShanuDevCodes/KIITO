@@ -6,11 +6,19 @@ import com.kito.core.auth.createSupabaseAuthClient
 import com.kito.core.database.repository.SectionRepository
 import com.kito.core.database.repository.StudentRepository
 import com.kito.core.database.repository.StudentSectionRepository
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.core.designsystem.StartupSyncGuard
+import com.kito.core.connectivity.data.ConnectivityRepositoryImpl
+import com.kito.core.connectivity.domain.repository.ConnectivityRepository
 import com.kito.core.sync.data.SyncRemoteDataSource
 import com.kito.core.sync.domain.AppSyncUseCase
 import com.kito.core.sync.domain.SyncUseCase
+import com.kito.core.auth.domain.usecase.ClearSapPasswordUseCase
+import com.kito.core.auth.domain.usecase.GetSapPasswordUseCase
+import com.kito.core.auth.domain.usecase.IsSapLoggedInUseCase
+import com.kito.core.auth.domain.usecase.SaveSapPasswordUseCase
+import com.kito.core.datastore.domain.usecase.GetRequiredAttendanceUseCase
 import com.kito.feature.app.presentation.AppViewModel
 import com.kito.sap.SapPortalClient
 import com.kito.sap.SapRepository
@@ -33,9 +41,16 @@ val commonModule = module {
     single<SectionRepository>()
     single<StudentRepository>()
     single<StudentSectionRepository>()
-    single<PrefsRepository>()
+    single<PrefsRepositoryImpl>() bind PrefsRepository::class
     single<StartupSyncGuard>()
     single<AppSyncUseCase>() bind SyncUseCase::class
+    single<ConnectivityRepository> { ConnectivityRepositoryImpl(get()) }
+
+    single<GetRequiredAttendanceUseCase>()
+    single<GetSapPasswordUseCase>()
+    single<IsSapLoggedInUseCase>()
+    single<SaveSapPasswordUseCase>()
+    single<ClearSapPasswordUseCase>()
 
     // Supabase Auth (SDK) — auth/GoTrue only; separate from the raw REST client.
     // create(::fn) registers SupabaseClient as a compiler-plugin-tracked provider so that

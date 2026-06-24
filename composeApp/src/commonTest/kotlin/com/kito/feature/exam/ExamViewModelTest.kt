@@ -2,8 +2,9 @@ package com.kito.feature.exam
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.kito.core.common.util.currentLocalDateTime
-import com.kito.core.datastore.PrefsRepository
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.exam.domain.model.ExamSchedule
 import com.kito.feature.exam.presentation.UpcomingExamViewModel
 import com.kito.testing.FakeExamRepository
@@ -42,7 +43,7 @@ class ExamViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }

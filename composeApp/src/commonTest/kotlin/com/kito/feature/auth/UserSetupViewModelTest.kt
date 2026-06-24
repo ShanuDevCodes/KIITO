@@ -5,11 +5,13 @@ import com.kito.core.auth.AuthEvent
 import com.kito.core.auth.AuthRepository
 import com.kito.core.auth.AuthState
 import com.kito.core.auth.AuthUser
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.core.platform.SecureStorage
 import com.kito.feature.auth.presentation.usersetup.LoadingSource
 import com.kito.feature.auth.presentation.usersetup.SetupState
 import com.kito.feature.auth.presentation.usersetup.UserSetupViewModel
+import com.kito.core.auth.domain.usecase.SaveSapPasswordUseCase
 import com.kito.core.sync.domain.SyncUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +47,7 @@ class UserSetupViewModelTest {
     private lateinit var datastoreScope: CoroutineScope
 
     private lateinit var secureStorage: SecureStorage
+    private lateinit var saveSapPasswordUseCase: SaveSapPasswordUseCase
     private lateinit var spySyncUseCase: SpySyncUseCase
     private lateinit var fakeAuthRepository: MutableFakeAuthRepository
     private lateinit var vm: UserSetupViewModel
@@ -88,18 +91,19 @@ class UserSetupViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         datastoreScope = CoroutineScope(testDispatcher + SupervisorJob())
-        prefsRepository = PrefsRepository(
+        prefsRepository = PrefsRepositoryImpl(
             PreferenceDataStoreFactory.createWithPath(
                 scope = datastoreScope,
                 produceFile = { tempPath }
             )
         )
         secureStorage = SecureStorage()
+        saveSapPasswordUseCase = SaveSapPasswordUseCase(secureStorage)
         spySyncUseCase = SpySyncUseCase()
         fakeAuthRepository = MutableFakeAuthRepository()
         vm = UserSetupViewModel(
             prefs = prefsRepository,
-            secureStorage = secureStorage,
+            saveSapPasswordUseCase = saveSapPasswordUseCase,
             appSyncUseCase = spySyncUseCase,
             authRepository = fakeAuthRepository,
             dispatcher = testDispatcher,

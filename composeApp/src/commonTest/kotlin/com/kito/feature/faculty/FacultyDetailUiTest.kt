@@ -4,7 +4,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.v2.runComposeUiTest
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.faculty.domain.model.Faculty
 import com.kito.feature.faculty.domain.model.FacultyScheduleSlot
 import com.kito.feature.faculty.presentation.FacultyDetailContent

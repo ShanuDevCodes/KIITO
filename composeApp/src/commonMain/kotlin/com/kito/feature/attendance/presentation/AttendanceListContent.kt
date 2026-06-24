@@ -15,16 +15,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -48,10 +55,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kito.core.designsystem.UIColors
-import com.kito.core.presentation.components.state.SyncUiState
+import com.kito.core.ui.state.SyncUiState
 import com.kito.feature.attendance.domain.model.Attendance
 import com.kito.feature.attendance.presentation.components.AttendanceCard
 import com.kito.feature.attendance.presentation.components.AttendanceDialog
@@ -178,6 +187,25 @@ fun AttendanceListContent(
                         )
                     }
                 }
+                if(state.sapLoggedIn &&  state.attendance.isEmpty()){
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Please Set Correct Year and Term in settings",
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.bodyLargeEmphasized,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 40.dp),
+                            color = Color.White
+                        )
+                    }
+                }
                 InstagramPullIndicator(
                     pullState = pullToRefreshState,
                     isRefreshing = state.syncState is SyncUiState.Loading
@@ -206,7 +234,25 @@ fun AttendanceListContent(
                         fontWeight = FontWeight.SemiBold,
                         color = uiColors.textPrimary,
                         style = MaterialTheme.typography.titleLargeEmphasized,
+                        modifier = Modifier.weight(1f)
                     )
+                    if(false)
+                    IconButton(
+                        onClick = {
+
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            contentColor = uiColors.progressAccent
+                        ),
+                        modifier = Modifier.size(32.dp)
+                    ){
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Set Sem",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -292,6 +338,21 @@ private fun AttendanceListContentPreview() {
     AttendanceListContent(
         state = AttendanceListUiState(
             attendance = sampleAttendanceEntities,
+            sapLoggedIn = true,
+            requiredAttendance = 75,
+            averageAttendancePercentage = 62.5,
+            highestAttendancePercentage = 85.0,
+            lowestAttendancePercentage = 9.8,
+        ),
+        onEvent = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AttendanceListContentPreviewEmpty() {
+    AttendanceListContent(
+        state = AttendanceListUiState(
             sapLoggedIn = true,
             requiredAttendance = 75,
             averageAttendancePercentage = 62.5,

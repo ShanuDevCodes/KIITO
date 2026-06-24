@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -278,6 +279,21 @@ fun AttendanceBarCard(
                             style = MaterialTheme.typography.bodyLargeEmphasized,
                             modifier = Modifier.width(36.dp),
                             textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                if(sapLoggedIn && attendance.isEmpty()){
+                    item {
+                        Text(
+                            text = "Please Set Correct Year and Term in settings",
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.bodyLargeEmphasized,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .padding(horizontal = 40.dp)
                         )
                     }
                 }

@@ -7,7 +7,7 @@ sealed class SapError(
 ) {
     // ── Auth ────────────────────────────────────────────────────────────────
 
-    class LoginPageFailed(val status: Int) : SapError(
+    class LoginPageFailed(status: Int) : SapError(
         internalMessage = "Failed to fetch page ($status)",
         userMessage = "Could not reach the portal. Please check your connection.",
         code = "SAP_001"
@@ -19,7 +19,7 @@ sealed class SapError(
         code = "SAP_002"
     )
 
-    class LoginFailed(val status: Int, val preview: String) : SapError(
+    class LoginFailed(status: Int, preview: String) : SapError(
         internalMessage = "Authentication request failed ($status)",
         userMessage = "Login failed. Please try again.",
         code = "SAP_003"
@@ -33,7 +33,7 @@ sealed class SapError(
 
     // ── Navigation ──────────────────────────────────────────────────────────
 
-    class NavigationFailed(val step: Int, val status: Int) : SapError(
+    class NavigationFailed(step: Int, status: Int) : SapError(
         internalMessage = "Transition $step failed ($status)",
         userMessage = "Portal navigation failed. Please try again.",
         code = NAV_CODES.getOrElse(step) { "SAP_005" }
@@ -55,7 +55,7 @@ sealed class SapError(
         code = "SAP_008"
     )
 
-    class ExtSidExtractionFailed(arg: String) : SapError(
+    class ExtSidExtractionFailed(formAction: String) : SapError(
         internalMessage = "Failed to process session context",
         userMessage = "Portal session could not be established. Please try again.",
         code = "SAP_009"
@@ -67,21 +67,21 @@ sealed class SapError(
         code = "SAP_010"
     )
 
-    class TokenExtractionFailed(arg: List<String>) : SapError(
-        internalMessage = "Required parameters are missing: $arg",
+    class TokenExtractionFailed(missing: List<String>) : SapError(
+        internalMessage = "Required parameters are missing: $missing",
         userMessage = "Session setup failed. Please try again.",
         code = "SAP_011"
     )
 
     // ── Attendance ──────────────────────────────────────────────────────────
 
-    class AttendanceInitFailed(val status: Int, val preview: String) : SapError(
+    class AttendanceInitFailed(status: Int, preview: String) : SapError(
         internalMessage = "Failed to initialize query ($status)",
         userMessage = "Could not load attendance data. Please try again.",
         code = "SAP_012"
     )
 
-    class AttendanceFetchFailed(val status: Int, val preview: String) : SapError(
+    class AttendanceFetchFailed(status: Int, preview: String) : SapError(
         internalMessage = "Failed to execute query ($status)",
         userMessage = "Could not load attendance data. Try again later.",
         code = "SAP_013"
@@ -95,14 +95,14 @@ sealed class SapError(
 
     // ── Network / Unknown ───────────────────────────────────────────────────
 
-    class NetworkError(arg: String) : SapError(
-        internalMessage = "Network failure: $arg",
+    class NetworkError(cause: String) : SapError(
+        internalMessage = "Network failure: $cause",
         userMessage = "Network error. Please check your connection and try again.",
         code = "SAP_015"
     )
 
-    class UnknownError(arg: String) : SapError(
-        internalMessage = "Unknown error: $arg",
+    class UnknownError(cause: String) : SapError(
+        internalMessage = "Unknown error: $cause",
         userMessage = "Something went wrong. Please try again.",
         code = "SAP_016"
     )

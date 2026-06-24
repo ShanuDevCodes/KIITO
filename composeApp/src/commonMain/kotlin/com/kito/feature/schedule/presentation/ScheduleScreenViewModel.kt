@@ -2,7 +2,7 @@ package com.kito.feature.schedule.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kito.core.datastore.PrefsRepository
+import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.feature.schedule.domain.model.ScheduleItem
 import com.kito.feature.schedule.domain.repository.ScheduleRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,15 +38,6 @@ class ScheduleScreenViewModel(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyMap()
             )
-}
-
-enum class WeekDay(val apiValue: String) {
-    MON("MON"),
-    TUE("TUE"),
-    WED("WED"),
-    THU("THU"),
-    FRI("FRI"),
-    SAT("SAT"),
 }
 
 
