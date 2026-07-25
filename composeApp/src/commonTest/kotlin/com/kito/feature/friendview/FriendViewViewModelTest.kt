@@ -5,6 +5,8 @@ import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.core.datastore.data.PrefsRepositoryImpl
 import com.kito.feature.friendview.presentation.FriendViewViewmodel
 import com.kito.feature.friendview.presentation.FriendViewEvent
+import com.kito.feature.friendview.domain.model.FriendScheduleItem
+import com.kito.feature.schedule.presentation.WeekDay
 import com.kito.testing.FakeFriendViewRepository
 import com.kito.testing.friendScheduleItem
 import kotlinx.coroutines.CoroutineScope
@@ -125,5 +127,35 @@ class FriendViewViewModelTest {
 
         rollsJob.cancel()
         selectedJob.cancel()
+    }
+
+    @Test
+    fun weeklySchedule_sortsChronologically() = runTest(testDispatcher) {
+        val earlyClass = FriendScheduleItem("Maths", "08:00:00", "09:00:00", "101", "MON", "CS-A", "B1")
+        val lateClass = FriendScheduleItem("Physics", "13:00:00", "14:00:00", "101", "MON", "CS-A", "B1")
+        val middleClass = FriendScheduleItem("Chemistry", "12:00:00", "13:00:00", "101", "MON", "CS-A", "B1")
+        
+        // Supplying them in a non-chronological order
+        val unsortedList = listOf(lateClass, earlyClass, middleClass)
+        
+        val vm = FriendViewViewmodel(FakeFriendViewRepository(unsortedList), prefsRepository, testDispatcher)
+        val rollsJob = launch { vm.friendRolls.collect {} }
+        val selectedJob = launch { vm.selectedFriendRoll.collect {} }
+        val scheduleJob = launch { vm.weeklySchedule.collect {} }
+        
+        // Select a friend to trigger the fetch
+        vm.onEvent(FriendViewEvent.AddFriend("2205001"))
+        advanceUntilIdle()
+        
+        val monSchedule = vm.weeklySchedule.value[WeekDay.MON].orEmpty()
+        assertEquals(3, monSchedule.size)
+        // Check sorted order: 08:00:00 -> 12:00:00 -> 13:00:00
+        assertEquals("Maths", monSchedule[0].subject)
+        assertEquals("Chemistry", monSchedule[1].subject)
+        assertEquals("Physics", monSchedule[2].subject)
+        
+        rollsJob.cancel()
+        selectedJob.cancel()
+        scheduleJob.cancel()
     }
 }
