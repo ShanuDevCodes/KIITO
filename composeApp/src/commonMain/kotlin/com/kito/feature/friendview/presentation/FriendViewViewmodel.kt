@@ -6,6 +6,7 @@ import com.kito.core.datastore.domain.repository.PrefsRepository
 import com.kito.feature.friendview.domain.model.FriendScheduleItem
 import com.kito.feature.friendview.domain.repository.FriendViewRepository
 import com.kito.feature.schedule.presentation.WeekDay
+import com.kito.feature.friendview.presentation.components.sortedChronologically
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -66,6 +67,7 @@ class FriendViewViewmodel(
                             val items = friendViewRepository.getFriendSchedule(roll)
                             val grouped = WeekDay.entries.associateWith { day ->
                                 items.filter { it.day == day.apiValue }
+                                    .sortedChronologically()
                             }
                             emit(grouped)
                         } catch (e: Exception) {
