@@ -19,12 +19,12 @@ val localProps = Properties().apply {
 
 android {
     namespace = "com.kito"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.kito"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 46
         versionName = "5.3.1"
 
