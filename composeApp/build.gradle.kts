@@ -28,7 +28,7 @@ kotlin {
     // Android Library Configuration
     androidLibrary {
         namespace = "com.kito.shared"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 26
         
         // Enable Android resources in KMP
