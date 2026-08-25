@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -40,7 +39,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import com.kito.core.datastore.domain.repository.PrefsRepository
-import com.kito.core.presentation.navigation.HomeBottomNav
+import com.kito.core.presentation.navigation.LegacyBottomNav
 import com.kito.core.presentation.navigation3.NavigationItems
 import com.kito.core.presentation.navigation3.RootNavGraph
 import com.kito.core.presentation.navigation3.Routes
@@ -179,18 +178,13 @@ fun MainUI(
                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
                         )
                     ) {
-                        HomeBottomNav(
+                        LegacyBottomNav(
                             tabs = NavigationItems,
-                            selectedIndex = selectedTabIndex,
-                            onTabClick = {
-                                tabBackStack.navigateTab(it.destination)
+                            selectedTabIndex = selectedTabIndex,
+                            onTabSelected = { item ->
+                                tabBackStack.navigateTab(item.destination)
                             },
-                            hazeState = hazeState,
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp,
-                                vertical = WindowInsets().asPaddingValues()
-                                    .calculateBottomPadding() + 16.dp
-                            )
+                            hazeState = hazeState
                         )
                     }
                 }
