@@ -18,6 +18,10 @@ interface PrefsRepository {
     val userSetupDoneFlow: Flow<Boolean>
     val friendRollsFlow: Flow<List<String>>
     val selectedFriendRollFlow: Flow<String>
+    /** False until the user has seen the "connect to KAYA" intro on the Schedule screen. */
+    val kayaIntroSeenFlow: Flow<Boolean>
+    /** True once the user has connected their KAYA account (credentials verified). */
+    val kayaConnectedFlow: Flow<Boolean>
 
     suspend fun setUserName(username: String)
     suspend fun setUserRollNumber(rollNumber: String)
@@ -32,4 +36,6 @@ interface PrefsRepository {
     suspend fun removeFriendRoll(roll: String)
     suspend fun setSelectedFriendRoll(roll: String)
     suspend fun clearSelectedFriend()
+    suspend fun setKayaIntroSeen()
+    suspend fun setKayaConnected(connected: Boolean)
 }

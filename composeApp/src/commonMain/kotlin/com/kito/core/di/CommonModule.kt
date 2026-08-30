@@ -18,6 +18,8 @@ import com.kito.core.sync.domain.AppSyncUseCase
 import com.kito.core.sync.domain.SyncUseCase
 import com.kito.core.sync.domain.usecase.ChangeYearTermUseCase
 import com.kito.feature.app.presentation.AppViewModel
+import com.kito.kaya.KayaRepository
+import com.kito.kaya.sensitive.KayaPortalClient
 import com.kito.sap.SapPortalClient
 import com.kito.sap.SapRepository
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +37,8 @@ val commonModule = module {
 
     single<SapPortalClient>()
     single<SapRepository>()
+    single<KayaPortalClient>()
+    single<KayaRepository>()
     single<SyncRemoteDataSource>()
     single<SectionRepository>()
     single<StudentRepository>()

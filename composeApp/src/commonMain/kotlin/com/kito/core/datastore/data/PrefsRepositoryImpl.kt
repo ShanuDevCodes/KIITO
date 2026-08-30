@@ -23,6 +23,8 @@ class PrefsRepositoryImpl(
         private val KEY_USER_ROLLNUMBER = stringPreferencesKey("User_Password")
         private val KEY_REQUIRED_ATTENDANCE = intPreferencesKey("required_attendance")
         private val KEY_RESET_FIX_V3 = booleanPreferencesKey("reset_fix_V3")
+        private val KEY_KAYA_INTRO_SEEN = booleanPreferencesKey("kaya_intro_seen")
+        private val KEY_KAYA_CONNECTED = booleanPreferencesKey("kaya_connected")
         private val KEY_NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         private val KEY_FRIEND_ROLLS = stringPreferencesKey("friend_rolls")
         private val KEY_SELECTED_FRIEND_ROLL = stringPreferencesKey("selected_friend_roll")
@@ -33,6 +35,12 @@ class PrefsRepositoryImpl(
 
     override val resetFixFlow: Flow<Boolean> = dataStore.data
         .map { it[KEY_RESET_FIX_V3] ?: false }
+
+    override val kayaIntroSeenFlow: Flow<Boolean> = dataStore.data
+        .map { it[KEY_KAYA_INTRO_SEEN] ?: false }
+
+    override val kayaConnectedFlow: Flow<Boolean> = dataStore.data
+        .map { it[KEY_KAYA_CONNECTED] ?: false }
 
     override val requiredAttendanceFlow: Flow<Int> = dataStore.data
         .map { it[KEY_REQUIRED_ATTENDANCE] ?: 75 }
@@ -84,6 +92,14 @@ class PrefsRepositoryImpl(
 
     override suspend fun setOnboardingDone() {
         dataStore.edit { it[KEY_ONBOARDING_DONE] = true }
+    }
+
+    override suspend fun setKayaIntroSeen() {
+        dataStore.edit { it[KEY_KAYA_INTRO_SEEN] = true }
+    }
+
+    override suspend fun setKayaConnected(connected: Boolean) {
+        dataStore.edit { it[KEY_KAYA_CONNECTED] = connected }
     }
 
     override suspend fun setAcademicYear(year: String) {

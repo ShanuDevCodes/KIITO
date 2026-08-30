@@ -22,9 +22,12 @@ docs/google-auth-setup.md
 docs/kmp-modernization-notes.md
 docs/architecture-migration
 
-# SAP Portal sensitive files
+# Portal sensitive files
 composeApp/src/androidMain/kotlin/kito/sap/
 composeApp/src/commonMain/kotlin/com/kito/sap/sensitive/
+composeApp/src/commonMain/kotlin/com/kito/kaya/sensitive/
+kiit_login.main.kts
+kiit_login_test.py
 composeApp/src/androidMain/res/xml/network_security_config.xml
 composeApp/src/androidUnitTest/kotlin/kito/sap
 composeApp/src/iosSimulatorArm64Test/kotlin/com/kito/SapLoginIntegrationTest.kt

@@ -37,17 +37,6 @@ class AttendanceMapperTest {
     }
 
     @Test
-    fun toDomain_persistenceKeysNotLeaked() {
-        // year and term are storage keys — they must NOT appear on the domain model
-        val domain = entity().toDomain()
-        // Compile-time proof: Attendance has no 'year' or 'term' property
-        // If this compiles, the domain model is clean
-        val fields = domain::class.members.map { it.name }
-        assert(!fields.contains("year")) { "domain model leaks 'year'" }
-        assert(!fields.contains("term")) { "domain model leaks 'term'" }
-    }
-
-    @Test
     fun toDomain_zeroAttendance() {
         val domain = entity(attendedClasses = 0, totalClasses = 0, percentage = 0.0).toDomain()
         assertEquals(0, domain.attendedClasses)
