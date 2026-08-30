@@ -4,6 +4,7 @@ import com.kito.core.sync.domain.SyncError
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class SyncErrorTest {
 
@@ -63,6 +64,6 @@ class SyncErrorTest {
     fun internalMessage_containsCause() {
         // Internal message IS verbose — that's the point
         val e = SyncError.StudentFetchFailed("connection refused")
-        assert(e.internalMessage.contains("connection refused"))
+        assertTrue(e.internalMessage.contains("connection refused"))
     }
 }

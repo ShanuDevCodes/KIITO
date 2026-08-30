@@ -62,7 +62,10 @@ fun LoginDialogBox(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
     syncState: SyncUiState,
-    hazeState: HazeState
+    hazeState: HazeState,
+    title: String = "Login To Sap",
+    passwordLabel: String = "SAP Password",
+    confirmText: String = "Login",
 ) {
     val uiColors = UIColors()
     var sapPassword by remember { mutableStateOf("") }
@@ -81,7 +84,7 @@ fun LoginDialogBox(
                     LockAnimation()
                 }
                 Text(
-                    text = "Login To Sap",
+                    text = title,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -103,7 +106,7 @@ fun LoginDialogBox(
                         Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFFB8B2BC))
                     },
                     label = { Text(
-                        text = "SAP Password",
+                        text = passwordLabel,
                         fontFamily = FontFamily.Monospace,
                         style = MaterialTheme.typography.titleMediumEmphasized
                     ) },
@@ -179,7 +182,7 @@ fun LoginDialogBox(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text("Login")
+                Text(confirmText)
             }
         },
         dismissButton = {
