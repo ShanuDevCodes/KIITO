@@ -325,9 +325,8 @@ fun HomeContent(
                                     .padding(horizontal = 12.dp)
                             ) {
                                 KhaooGullyBanner(
-                                    onClick = { url ->
+                                    onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        onOpenUrl(url)
                                     }
                                 )
                             }

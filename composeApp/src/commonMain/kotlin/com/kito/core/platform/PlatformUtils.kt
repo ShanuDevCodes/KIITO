@@ -5,6 +5,8 @@ import io.ktor.client.engine.HttpClientEngine
 
 expect fun openUrl(url: String)
 
+expect fun openDeepLinkOrFallback(deepLink: String, fallbackUrl: String)
+
 expect fun createHttpEngine(): HttpClientEngine
 
 expect fun toast(message: String)

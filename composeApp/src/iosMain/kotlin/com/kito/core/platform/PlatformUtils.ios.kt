@@ -52,6 +52,24 @@ actual fun openUrl(url: String) {
     )
 }
 
+actual fun openDeepLinkOrFallback(deepLink: String, fallbackUrl: String) {
+    val nsUrl = NSURL.URLWithString(deepLink)
+    // canOpenURL only reports true for a custom scheme if it's also listed under
+    // LSApplicationQueriesSchemes in Info.plist — otherwise this always reads as
+    // "not installed" and silently falls back, even when the app is present.
+    if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+        UIApplication.sharedApplication.openURL(
+            nsUrl,
+            options = emptyMap<Any?, Any>(),
+            completionHandler = { success ->
+                if (!success) openUrl(fallbackUrl)
+            }
+        )
+    } else {
+        openUrl(fallbackUrl)
+    }
+}
+
 actual fun createHttpEngine(): HttpClientEngine = Darwin.create {
     configureSession {
         // Disable native cookie handling to let Ktor's HttpCookies plugin handle it exclusively

@@ -26,7 +26,7 @@ import kito.composeapp.generated.resources.Res
 @Composable
 fun KhaooGullyBanner(
     modifier: Modifier = Modifier,
-    onClick: (url: String) -> Unit
+    onClick: () -> Unit
 ) {
     val uiColors = UIColors()
     var json by remember { mutableStateOf("") }
@@ -57,7 +57,10 @@ fun KhaooGullyBanner(
             .aspectRatio(6f),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = uiColors.cardBackground),
-        onClick = { onClick(getKhaooGullyLink()) }
+        onClick = {
+            onClick()
+            openKhaooGully()
+        }
     ) {
         if (composition != null) {
             Image(

@@ -32,6 +32,20 @@ actual fun openUrl(url: String) {
     }
 }
 
+actual fun openDeepLinkOrFallback(deepLink: String, fallbackUrl: String) {
+    val context = PlatformContext.applicationContext
+        ?: throw IllegalStateException("PlatformContext not initialized")
+    val intent = Intent(Intent.ACTION_VIEW, deepLink.toUri()).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    try {
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        // No app registered for this scheme — fall back to the store listing.
+        openUrl(fallbackUrl)
+    }
+}
+
 actual fun createHttpEngine(): HttpClientEngine = OkHttp.create()
 
 actual fun toast(message: String) {
