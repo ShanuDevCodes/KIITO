@@ -3,6 +3,7 @@ package com.kito.feature.home.presentation
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,9 +34,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.graphics.Color
@@ -68,6 +71,8 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import kito.composeapp.generated.resources.Res
 import kito.composeapp.generated.resources.e_labs_logo
+import kito.composeapp.generated.resources.kaya_logo
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeApi::class,
@@ -85,7 +90,8 @@ fun HomeContent(
     isScheduleEmpty: Boolean,
     isKhaooGullyEnabled: Boolean,
     eventsAndAds: List<EventOrAd>,
-    onReportClick: () -> Unit,
+    kayaConnected: Boolean = false,
+    onKayaConnect: suspend (String) -> String? = { null },
     onNavigateToSchedule: () -> Unit,
     onNavigateToAttendance: () -> Unit,
     onNavigateToUtility: (NavKey?) -> Unit,
@@ -101,6 +107,36 @@ fun HomeContent(
     val hazeState = rememberHazeState()
     val haptic = LocalHapticFeedback.current
     var isLoginDialogOpen by remember { mutableStateOf(false) }
+
+    // KAYA connect: opens only when the user taps the KAYA logo beside "Schedule"
+    // (no auto-popup). Reuses the SAP login dialog — password-only, since the
+    // username is the user's roll number, which the app already knows.
+    var showKayaDialog by remember { mutableStateOf(false) }
+    var kayaState by remember { mutableStateOf<SyncUiState>(SyncUiState.Idle) }
+    val kayaScope = rememberCoroutineScope()
+    LaunchedEffect(kayaState) {
+        if (kayaState is SyncUiState.Success) {
+            showKayaDialog = false
+            kayaState = SyncUiState.Idle
+        }
+    }
+    if (showKayaDialog) {
+        LoginDialogBox(
+            onDismiss = { showKayaDialog = false; kayaState = SyncUiState.Idle },
+            onConfirm = { pass ->
+                kayaScope.launch {
+                    kayaState = SyncUiState.Loading
+                    val err = onKayaConnect(pass)
+                    kayaState = if (err == null) SyncUiState.Success else SyncUiState.Error(err)
+                }
+            },
+            syncState = kayaState,
+            hazeState = hazeState,
+            title = "Connect to KAYA",
+            passwordLabel = "KAYA Password",
+            confirmText = "Connect",
+        )
+    }
 
     LaunchedEffect(loginState) {
         if (loginState is SyncUiState.Success) {
@@ -167,32 +203,35 @@ fun HomeContent(
                                     modifier = Modifier
                                         .weight(1f)
                                 )
-                                IconButton(
-                                    onClick = onReportClick,
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        contentColor = Color(0xFFB32727)
-                                    ),
-                                    modifier = Modifier.size(28.dp)
+                                // Single KAYA pill: connected → open the timetable;
+                                // otherwise start the connect flow.
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(50))
+                                        .background(
+                                            if (kayaConnected) uiColors.progressAccent.copy(alpha = 0.22f)
+                                            else Color.White.copy(alpha = 0.08f)
+                                        )
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                            if (kayaConnected) onNavigateToSchedule()
+                                            else showKayaDialog = true
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 5.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Report,
-                                        contentDescription = "Report",
-                                        modifier = Modifier.size(22.dp)
+                                    Text(
+                                        text = "KAYA",
+                                        color = uiColors.textPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace,
+                                        style = MaterialTheme.typography.labelMedium
                                     )
-                                }
-                                Spacer(modifier = Modifier.width(4.dp))
-                                IconButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        onNavigateToSchedule()
-                                    },
-                                    modifier = Modifier.size(28.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
-                                        contentDescription = "Notifications",
-                                        tint = uiColors.textPrimary,
-                                        modifier = Modifier.size(18.dp)
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Image(
+                                        painter = painterResource(Res.drawable.kaya_logo),
+                                        contentDescription = if (kayaConnected) "KAYA connected, open timetable" else "Connect KAYA",
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
@@ -503,7 +542,6 @@ private fun HomeContentPreview() {
         isScheduleEmpty = false,
         isKhaooGullyEnabled = true,
         eventsAndAds = emptyList(),
-        onReportClick = {},
         onNavigateToSchedule = {},
         onNavigateToAttendance = {},
         onNavigateToUtility = {},
