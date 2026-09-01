@@ -296,7 +296,7 @@ fun HomeContent(
                         item {
                             Spacer(Modifier.height(8.dp))
                         }
-                        
+
                         item {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
