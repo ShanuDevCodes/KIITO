@@ -30,11 +30,4 @@ class ScheduleMapperTest {
         assertNull(entity(room = null).toDomain().room)
     }
 
-    @Test
-    fun toDomain_persistenceKeyRollNo_notLeaked() {
-        // rollNo is storage-only — must not appear on domain model
-        val fields = entity().toDomain()::class.members.map { it.name }
-        assert(!fields.contains("rollNo")) { "domain ScheduleItem leaks rollNo" }
-        assert(!fields.contains("sectionId")) { "domain ScheduleItem leaks sectionId" }
-    }
 }

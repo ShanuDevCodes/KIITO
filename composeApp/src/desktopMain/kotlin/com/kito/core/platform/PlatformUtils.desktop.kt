@@ -10,6 +10,11 @@ actual fun openUrl(url: String) {
     if (Desktop.isDesktopSupported()) Desktop.getDesktop().browse(URI(url))
 }
 
+actual fun openDeepLinkOrFallback(deepLink: String, fallbackUrl: String) {
+    // No custom URL scheme handling on desktop — always use the fallback link.
+    openUrl(fallbackUrl)
+}
+
 actual fun createHttpEngine(): HttpClientEngine = OkHttp.create()
 
 actual fun toast(message: String) = println("[Toast] $message")

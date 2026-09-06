@@ -110,7 +110,10 @@ fun SettingsContent(
     pendingEnable: Boolean,
     onEvent: (SettingsEvent) -> Unit,
     tabNavBackStack: NavBackStack<NavKey>?,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    kayaConnected: Boolean = false,
+    onKayaConnect: suspend (String) -> String? = { null },
+    onKayaDisconnect: () -> Unit = {},
 ) {
     val uiColors = UIColors()
     val haptic = LocalHapticFeedback.current
@@ -122,6 +125,8 @@ fun SettingsContent(
     var isYearTermChangeDialogOpen by remember { mutableStateOf(false) }
     var isAttendanceChangeDialogOpen by remember { mutableStateOf(false) }
     var isLoginDialogOpen by remember { mutableStateOf(false) }
+    var isKayaLoginDialogOpen by remember { mutableStateOf(false) }
+    var kayaState by remember { mutableStateOf<SyncUiState>(SyncUiState.Idle) }
     var isPrivacyPolicyDialogOpen by remember { mutableStateOf(false) }
     var isTermsOfServiceDialogOpen by remember { mutableStateOf(false) }
     var isAboutAppDialogOpen by remember { mutableStateOf(false) }
@@ -242,6 +247,21 @@ fun SettingsContent(
             },
             editButton = false,
             isLogout = true,
+        ),
+        SettingsItem(
+            title = if (!kayaConnected) "Login" else "Logout",
+            value = if (!kayaConnected) "Login to KAYA" else "Logout of KAYA",
+            icon = if (!kayaConnected) Icons.Default.Person else Icons.Default.Lock,
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                if (kayaConnected) {
+                    onKayaDisconnect()
+                } else {
+                    isKayaLoginDialogOpen = true
+                }
+            },
+            editButton = false,
+            isLogout = true,
         )
     )
 
@@ -299,6 +319,14 @@ fun SettingsContent(
             isLoginDialogOpen = false
             isAttendanceChangeDialogOpen = false
             onEvent(SettingsEvent.SyncStateIdle)
+        }
+    }
+
+    LaunchedEffect(kayaState) {
+        if (kayaState is SyncUiState.Success) {
+            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+            isKayaLoginDialogOpen = false
+            kayaState = SyncUiState.Idle
         }
     }
 
@@ -518,6 +546,28 @@ fun SettingsContent(
             },
             syncState = syncState,
             hazeState = hazeState
+        )
+    }
+    if (isKayaLoginDialogOpen) {
+        LoginDialogBox(
+            onDismiss = {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                isKayaLoginDialogOpen = false
+                kayaState = SyncUiState.Idle
+            },
+            onConfirm = { kayaPassword ->
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                scope.launch {
+                    kayaState = SyncUiState.Loading
+                    val err = onKayaConnect(kayaPassword)
+                    kayaState = if (err == null) SyncUiState.Success else SyncUiState.Error(err)
+                }
+            },
+            syncState = kayaState,
+            hazeState = hazeState,
+            title = "Login To KAYA",
+            passwordLabel = "KAYA Password",
+            confirmText = "Login",
         )
     }
     if (isPrivacyPolicyDialogOpen) {

@@ -7,22 +7,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -41,10 +36,6 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
-import kito.composeapp.generated.resources.Res
-import kito.composeapp.generated.resources.github
-import kito.composeapp.generated.resources.linkedin
-import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalHazeMaterialsApi::class,
     ExperimentalHazeApi::class
@@ -160,126 +151,6 @@ fun AboutAppDialogBox(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Devs",
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Shanu",
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.LinkedIn,
-                            "https://www.linkedin.com/in/shanudevcodes/"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.Github,
-                            "https://github.com/ShanuDevCodes"
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Subham Shah",
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMediumEmphasized
-
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.LinkedIn,
-                            "https://www.linkedin.com/in/subham-shah-51b29a343/"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.Github,
-                            "https://github.com/milkandvodka"
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Pratyusha Mohanty",
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.LinkedIn,
-                            "https://www.linkedin.com/in/pratyusha12792/"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.Github,
-                            "https://github.com/pratyusha12792"
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Abinash Mohanty",
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.LinkedIn,
-                            "https://www.linkedin.com/in/abinash-mohanty-/"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.Github,
-                            "https://github.com/abinashmohanty8059"
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Yogisha Rani",
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.LinkedIn,
-                            "https://www.linkedin.com/in/yogisha-rani-1382a7381/"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.Github,
-                            "https://github.com/LostRunes"
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Harsh Singh",
-                            fontFamily = FontFamily.Monospace,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMediumEmphasized
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.LinkedIn,
-                            "https://www.linkedin.com/in/harsh-singh-60a7b432b"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        DeveloperLink(
-                            SocialMedia.Github,
-                            "https://github.com/harshkumarsingh12"
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
                         text = "Disclaimer",
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
@@ -309,7 +180,7 @@ fun AboutAppDialogBox(
                         TextButton(
                             onClick = {
                                 sendEmail(
-                                    to = "elabs.kiito@gmail.com",
+                                    to = "kiito.admin@gmail.com",
                                     subject = "KIITO App Feedback",
                                     body = ""
                                 )
@@ -326,50 +197,26 @@ fun AboutAppDialogBox(
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        TextButton(
-                            onClick = {
-                                openUrl("https://elabskiit.in/")
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = Color.White,
-                                containerColor = Color.White.copy(alpha = 0.08f)
-                            )
-                        ) {
-                            Text(
-                                text = "Website",
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        }
+//                        Spacer(modifier = Modifier.width(12.dp))
+//
+//                        TextButton(
+//                            onClick = {
+//                                openUrl("https://elabskiit.in/")
+//                            },
+//                            colors = ButtonDefaults.textButtonColors(
+//                                contentColor = Color.White,
+//                                containerColor = Color.White.copy(alpha = 0.08f)
+//                            )
+//                        ) {
+//                            Text(
+//                                text = "Website",
+//                                fontWeight = FontWeight.Medium,
+//                                fontFamily = FontFamily.Monospace
+//                            )
+//                        }
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun DeveloperLink(
-    socialMedia: SocialMedia,
-    url: String
-) {
-    IconButton(
-        onClick = { openUrl(url) },
-        colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.White.copy(alpha = 0.08f)
-        ),
-    ) {
-        Icon(
-            painter = painterResource(if (socialMedia == SocialMedia.LinkedIn) Res.drawable.linkedin else Res.drawable.github),
-            contentDescription = "Logo",
-            modifier = Modifier.size(24.dp),
-            tint = if (socialMedia == SocialMedia.LinkedIn) Color.Unspecified else Color.White
-        )
-    }
-}
-enum class SocialMedia{
-    LinkedIn,
-    Github
 }

@@ -12,8 +12,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.kito.core.common.util.currentLocalDateTime
+import com.kito.core.datastore.domain.repository.PrefsRepository
+import com.kito.kaya.KayaRepository
+import com.kito.kaya.KayaResult
 import com.kito.core.platform.openUrl
-import com.kito.core.platform.sendEmail
 import com.kito.core.platform.toast
 import com.kito.core.ui.state.SyncUiState
 import com.kito.core.presentation.navigation3.Routes
@@ -28,9 +30,13 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun HomeScreen(
     viewmodel: HomeViewModel = koinInject(),
+    prefs: PrefsRepository = koinInject(),
+    kaya: KayaRepository = koinInject(),
     rootNavBackStack: NavBackStack<NavKey>,
     tabNavBackStack: NavBackStack<NavKey>,
 ) {
+    val kayaConnected by prefs.kayaConnectedFlow.collectAsState(initial = false)
+    val userRoll by prefs.userRollFlow.collectAsState(initial = "")
     val name by viewmodel.name.collectAsState()
     val sapLoggedIn by viewmodel.sapLoggedIn.collectAsState()
     val attendance by viewmodel.attendance.collectAsState()
@@ -118,12 +124,14 @@ fun HomeScreen(
         isScheduleEmpty = isScheduleEmpty,
         isKhaooGullyEnabled = isKhaooGullyEnabled,
         eventsAndAds = eventsAndAds,
-        onReportClick = {
-            sendEmail(
-                to = "elabs.kiito@gmail.com",
-                subject = "KIITO Schedule Report",
-                body = ""
-            )
+        kayaConnected = kayaConnected,
+        // Verify the KAYA login works, then remember the connection. Username is
+        // the user's roll number; returns an error message, or null on success.
+        onKayaConnect = { pass ->
+            when (val result = kaya.fetchTimetable(userRoll, pass)) {
+                is KayaResult.Success -> { prefs.setKayaConnected(true); null }
+                is KayaResult.Error -> result.message
+            }
         },
         onNavigateToSchedule = {
             rootNavBackStack.add(Routes.Schedule)
