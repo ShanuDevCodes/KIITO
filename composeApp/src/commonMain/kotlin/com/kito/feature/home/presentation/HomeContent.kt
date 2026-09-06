@@ -297,44 +297,44 @@ fun HomeContent(
                             Spacer(Modifier.height(8.dp))
                         }
 
-                        item {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .padding(horizontal = 12.dp)
-                            ) {
-                                Text(
-                                    text = "KhaooGully",
-                                    color = uiColors.textPrimary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-
-                        item {
-                            Spacer(Modifier.height(8.dp))
-                        }
-
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp)
-                            ) {
-                                KhaooGullyBanner(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                    }
-                                )
-                            }
-                        }
-
-                        item {
-                            Spacer(Modifier.height(8.dp))
-                        }
+//                        item {
+//                            Row(
+//                                verticalAlignment = Alignment.CenterVertically,
+//                                modifier = Modifier
+//                                    .padding(horizontal = 12.dp)
+//                            ) {
+//                                Text(
+//                                    text = "KhaooGully",
+//                                    color = uiColors.textPrimary,
+//                                    fontWeight = FontWeight.Bold,
+//                                    fontFamily = FontFamily.Monospace,
+//                                    style = MaterialTheme.typography.titleMedium,
+//                                    modifier = Modifier.weight(1f)
+//                                )
+//                            }
+//                        }
+//
+//                        item {
+//                            Spacer(Modifier.height(8.dp))
+//                        }
+//
+//                        item {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(horizontal = 12.dp)
+//                            ) {
+//                                KhaooGullyBanner(
+//                                    onClick = {
+//                                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+//                                    }
+//                                )
+//                            }
+//                        }
+//
+//                        item {
+//                            Spacer(Modifier.height(8.dp))
+//                        }
 
                         if (eventsAndAds.isNotEmpty()) {
                             item {
@@ -485,18 +485,18 @@ fun HomeContent(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        showAboutDialog = !showAboutDialog
-                    },
-                    modifier = Modifier.size(60.dp)
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.e_labs_logo),
-                        contentDescription = "Logo",
-                    )
-                }
+//                IconButton(
+//                    onClick = {
+//                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+//                        showAboutDialog = !showAboutDialog
+//                    },
+//                    modifier = Modifier.size(60.dp)
+//                ) {
+//                    Image(
+//                        painter = painterResource(Res.drawable.e_labs_logo),
+//                        contentDescription = "Logo",
+//                    )
+//                }
             }
             Spacer(modifier = Modifier.height(6.dp))
         }
